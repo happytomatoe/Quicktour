@@ -1,8 +1,0 @@
-<component name="ArtifactManager">
-  <artifact type="war" name="quiktour:war">
-    <output-path>$PROJECT_DIR$/target</output-path>
-    <root id="archive" name="quicktour.war">
-      <element id="artifact" artifact-name="quiktour:war exploded" />
-    </root>
-  </artifact>
-</component>
