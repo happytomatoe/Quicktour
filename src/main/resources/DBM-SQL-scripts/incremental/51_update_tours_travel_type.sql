@@ -1,0 +1,1 @@
+update tours set travel_type='bycicling' where toursid=3;

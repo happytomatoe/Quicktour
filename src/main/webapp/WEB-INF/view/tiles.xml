@@ -1,0 +1,188 @@
+<?xml version="1.0" encoding="ISO-8859-1" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+        "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+        "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+<tiles-definitions>
+    <definition name="admin-tile" template="/WEB-INF/view/layouts/classic.jsp">
+        <put-attribute name="title" value="Tiles tutorial homepage"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <put-attribute name="menu" value="/WEB-INF/view/tiles/menu-page.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
+        <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
+    </definition>
+
+    <definition name="admin-extended" extends="admin-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/admin.jsp"/>
+    </definition>
+
+    <!--Index tile without side menu-->
+    <definition name="classic-tile" template="/WEB-INF/view/layouts/classic.jsp">
+        <put-attribute name="title" value=""/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
+        <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
+    </definition>
+
+    <definition name="index-tile" template="/WEB-INF/view/layouts/classic.jsp">
+        <put-attribute name="title" value="TourServe Travel Company"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <!--<put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp" />-->
+        <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
+        <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
+    </definition>
+
+    <definition name="mainPage-tile" template="/WEB-INF/view/layouts/mainPage.jsp">
+        <put-attribute name="title" value="TourServe Travel Company"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <!--<put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp" />-->
+        <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
+        <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
+    </definition>
+
+    <definition name="index-extended" extends="mainPage-tile">
+        <put-attribute name="carousel" value="/WEB-INF/view/tiles/carousel.jsp" />
+        <put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/index.jsp"/>
+    </definition>
+
+    <definition name="manage-tours" extends="index-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/manageTours.jsp"/>
+    </definition>
+
+    <definition name="place-extended" template="/WEB-INF/view/layouts/noSideBar.jsp">
+        <put-attribute name="title" value="Tour"/>
+        <put-attribute name="meta-info" value="/WEB-INF/view/tiles/orders-css-js.jsp"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/place.jsp" />
+    </definition>
+
+
+    <definition name="create-order" template="/WEB-INF/view/layouts/noSideBar.jsp">
+        <put-attribute name="title" value="Tour Serve Travel Company :: New Order"/>
+        <put-attribute name="meta-info" value="/WEB-INF/view/tiles/orders-css-js.jsp"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/createOrder.jsp"/>
+    </definition>
+
+    <definition name="manage-order" extends="create-order">
+        <put-attribute name="title" value="Tour Serve Travel Company :: Manage Order"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/manageOrder.jsp"/>
+    </definition>
+
+    <definition name="list-orders" extends="create-order">
+        <put-attribute name="title" value="Tour Serve Travel Company :: Orders"/>
+        <put-attribute name="meta-info" value="/WEB-INF/view/tiles/orders-list-js.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/listOrders.jsp"/>
+    </definition>
+
+    <!--Pages for discount-->
+    <definition name="discountPolicy" extends="classic-tile">
+        <put-attribute name="title" value="Discount policies"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/discountPolicy.jsp"/>
+    </definition>
+    <definition name="discountPolicyAdd" extends="classic-tile">
+        <put-attribute name="title" value="Add discount policy" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/discountPolicyAdd.jsp"/>
+        <put-attribute name="submit-button" value="Add" cascade="true"/>
+    </definition>
+    <definition name="discountPolicyEdit" extends="classic-tile">
+        <put-attribute name="title" value="Edit discount policy" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discountPolicyAdd.jsp"/>
+        <put-attribute name="submit-button" value="Edit" cascade="true"/>
+    </definition>
+
+    <definition name="discountDependency" extends="classic-tile">
+        <put-attribute name="title" value="Discount dependencies" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/discountDependency.jsp"/>
+    </definition>
+    <definition name="discountDependencyAdd" extends="classic-tile">
+        <put-attribute name="title" value="Add discount dependency" cascade="true"/>
+        <put-attribute name="submit-button" value="Add" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/discountDependencyAdd.jsp"/>
+    </definition>
+
+    <definition name="discountDependencyEdit" extends="classic-tile">
+        <put-attribute name="title" value="Edit discount dependency" cascade="true"/>
+        <put-attribute name="submit-button" value="Edit" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/discountDependencyAdd.jsp"/>
+    </definition>
+    <definition name="applyDiscount" extends="classic-tile">
+        <put-attribute name="title" value="Apply discount"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/discount/applyDiscount.jsp"/>
+    </definition>
+    <!---->
+
+    <definition name="404" extends="classic-tile">
+        <put-attribute name="title" value="Page not found!" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/error/404.jsp"/>
+    </definition>
+
+    <definition name="403" extends="classic-tile">
+        <put-attribute name="title" value="Access denied" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/error/403.jsp"/>
+    </definition>
+
+    <definition name="registration" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/registration.jsp"/>
+    </definition>
+
+    <definition name="viewusers" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/viewusers.jsp"/>
+    </definition>
+
+    <definition name="login" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/login.jsp"/>
+    </definition>
+
+    <definition name="myprofile" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/myprofile.jsp"/>
+    </definition>
+
+    <definition name="companyregistration" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/addcompany.jsp"/>
+	</definition>
+
+    <definition name="edituser-tile" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/edituser.jsp"/>
+    </definition>
+
+    <definition name="error" extends="classic-tile">
+        <put-attribute name="title" value="Error" cascade="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/error/error.jsp"/>
+    </definition>
+
+    <definition name="registrationsuccess-tile" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/registrationsuccess.jsp"/>
+    </definition>
+
+    <definition name="passwordrecovery" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/passwordrecovery.jsp"/>
+    </definition>
+
+    <definition name="agentTours" extends="classic-tile">
+        <put-attribute name="title" value="My tours" cascade="true" />
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp" />
+        <put-attribute name="body" value="/WEB-INF/view/pages/agentTours.jsp" />
+    </definition>
+
+    <definition name="viewcompanies" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/viewcompanies.jsp"/>
+    </definition>
+
+    <definition name="editcompany" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/editcompany.jsp"/>
+    </definition>
+
+    <definition name="mycompany" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/mycompany.jsp"/>
+    </definition>
+
+    <definition name="ordersuccess" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/ordersuccess.jsp"/>
+    </definition>
+
+    <definition name="ordererror" extends="classic-tile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/ordererror.jsp"/>
+    </definition>
+
+</tiles-definitions>

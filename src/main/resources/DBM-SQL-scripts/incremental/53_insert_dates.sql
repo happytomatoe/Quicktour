@@ -1,0 +1,13 @@
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '4', '2014-01-05', '2014-01-25', '3');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '4', '2014-02-05', '2014-02-25', '8');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '5', '2014-01-05', '2014-01-25', '6');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '5', '2014-02-05', '2014-02-25', '10');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '6', '2014-01-10', '2014-01-31', '2');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '7', '2014-01-01', '2014-01-15', '3');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '7', '2014-01-25', '2014-02-10', '5');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '7', '2014-05-10', '2014-05-26', '15');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '8', '2014-03-15', '2014-03-25', '6');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '8', '2014-07-15', '2014-07-25', '3');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '9', '2014-02-10', '2014-02-23', '5');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '9', '2014-05-15', '2014-05-28', '5');
+INSERT INTO `quicktour`.`tour` (`TourId`, `ToursId`, `StartDate`, `EndDate`, `Discount`) VALUES ('0', '10', '2014-01-30', '2014-02-20', '2');

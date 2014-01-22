@@ -1,0 +1,14 @@
+.icon {
+    z-index: 10;
+    position: absolute;
+    left: 40px;
+    top: 60px;
+}
+
+.discount {
+    z-index: 20;
+    position: absolute;
+    left: 50px;
+    top: 85px;
+    color: white;
+}

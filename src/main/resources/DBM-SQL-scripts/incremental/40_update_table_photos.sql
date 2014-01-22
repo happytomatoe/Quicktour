@@ -1,0 +1,1 @@
+update photos set photourl="http://www.templatesbox.com/data/premium.templates/images/logo/full.preview/11897522410FI.jpg" where id=3;

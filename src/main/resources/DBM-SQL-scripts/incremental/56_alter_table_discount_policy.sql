@@ -1,0 +1,1 @@
+ALTER TABLE discount_policy DROP INDEX name;

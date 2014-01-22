@@ -1,0 +1,1 @@
+ALTER TABLE `users` ADD `active` VARCHAR(10) AFTER `Photos_ID`;
