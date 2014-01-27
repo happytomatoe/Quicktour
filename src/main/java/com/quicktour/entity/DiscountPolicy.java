@@ -1,6 +1,5 @@
 package com.quicktour.entity;
 
-import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -8,7 +7,6 @@ import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
 import java.sql.Date;
-import java.util.List;
 
 /**
  * @author Roman Lukash
@@ -28,7 +26,6 @@ public class DiscountPolicy {
     private Date startDate;
     private Date endDate;
     private boolean active;
-    private List<Tour> tours;
     private Company company;
 
 
@@ -101,7 +98,7 @@ public class DiscountPolicy {
 
     @ManyToOne()
     @JsonIgnore
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.TRUE)
     @JoinColumn(name = "Companies_id")
     public Company getCompany() {
         return company;
@@ -111,16 +108,6 @@ public class DiscountPolicy {
         this.company = companyId;
     }
 
-    @ManyToMany(mappedBy = "discountPolicies")
-    @JsonBackReference
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public List<Tour> getTours() {
-        return tours;
-    }
-
-    public void setTours(List<Tour> tours) {
-        this.tours = tours;
-    }
 
     @Transient
     public boolean isActive() {

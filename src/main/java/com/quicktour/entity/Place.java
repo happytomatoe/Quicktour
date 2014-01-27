@@ -1,5 +1,6 @@
 package com.quicktour.entity;
 
+import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -11,27 +12,29 @@ import java.util.List;
 @Table(name = "places", schema = "", catalog = "quicktour")
 public class Place {
 
-    private int placeId;
+    private int id;
     private String country;
     private String name;
     private Boolean isOptional;
     private String price;
     private Double geoWidth;
     private Double geoHeight;
-    @JsonIgnore private String description;
-    @JsonIgnore private List<Excursion> excursions;
-    @JsonIgnore private List<Tour> tours;
-    @JsonIgnore private List<Photo> placePhotos;
+    @JsonIgnore
+    private String description;
+    @JsonIgnore
+    private List<Excursion> excursions;
+    @JsonBackReference
+    private List<Tour> tours;
 
     @Column(name = "PlaceId")
     @GeneratedValue
     @Id
-    public int getPlaceId() {
-        return placeId;
+    public int getId() {
+        return id;
     }
 
-    public void setPlaceId(int placeId) {
-        this.placeId = placeId;
+    public void setId(int placeId) {
+        this.id = placeId;
     }
 
     @Column(name = "Country")
@@ -97,9 +100,8 @@ public class Place {
         this.geoWidth = geoWidth;
     }
 
-
     @OneToMany(mappedBy = "place")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.TRUE)
     public List<Excursion> getExcursions() {
         return excursions;
     }
@@ -108,25 +110,13 @@ public class Place {
         this.excursions = excursions;
     }
 
-    @ManyToMany(mappedBy = "toursPlaces", fetch = FetchType.EAGER)
+    @ManyToMany(mappedBy = "toursPlaces")
+    @LazyCollection(LazyCollectionOption.TRUE)
     public List<Tour> getTours() {
         return tours;
     }
 
     public void setTours(List<Tour> tours) {
         this.tours = tours;
-    }
-
-    @ManyToMany
-    @LazyCollection(LazyCollectionOption.FALSE)
-    @JoinTable(name = "places_has_photos",
-            joinColumns = @JoinColumn(name = "Places_PlaceId"),
-            inverseJoinColumns = @JoinColumn(name = "Photos_ID"))
-    public List<Photo> getPlacePhotos() {
-        return placePhotos;
-    }
-
-    public void setPlacePhotos(List<Photo> placePhotos) {
-        this.placePhotos = placePhotos;
     }
 }

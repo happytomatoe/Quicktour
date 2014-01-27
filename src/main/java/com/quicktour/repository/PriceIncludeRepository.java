@@ -11,5 +11,5 @@ import org.springframework.data.jpa.repository.JpaRepository;
  * To change this template use File | Settings | File Templates.
  */
 public interface PriceIncludeRepository extends JpaRepository<PriceDescription, Integer> {
-    PriceDescription findByIncludeDescription(String description);
+    PriceDescription findByDescription(String description);
 }

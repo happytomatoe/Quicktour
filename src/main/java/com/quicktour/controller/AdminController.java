@@ -17,10 +17,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.validation.Valid;
-import java.lang.annotation.Documented;
-import java.lang.annotation.Retention;
-import java.lang.annotation.Target;
-import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -45,6 +41,7 @@ public class AdminController {
     /**
      * Method gets the List<User> with  all users that exist in the system and
      * adds it to viewusers tile model.
+     *
      * @param model - Model that will be mapped to the viewuser tile
      * @return
      */
@@ -58,21 +55,23 @@ public class AdminController {
 
     /**
      * Method gets user by id that was set in url and maps him to the edituser-tile model
-     * @param id  - identificator of the user whose profile admin wants to edit
+     *
+     * @param id    - identificator of the user whose profile admin wants to edit
      * @param model - model that will be mapped to th edituser tile
      * @return name of the tile where controller will redirect user after this method will end its work
      */
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = "/edituser/{id}", method = RequestMethod.GET)
     public String myProfileForm(@PathVariable("id") int id, Model model) {
-        User user = usersService.findById(id);
+        User user = usersService.findOne(id);
         model.addAttribute("user", user);
         return "edituser-tile";
     }
 
     /**
      * Method updates user profile that will come from ui to the database
-     * @param user - object of User class which comes from ui
+     *
+     * @param user          - object of User class which comes from ui
      * @param bindingResult - contains information of correctness of the user which will come from ui
      *                      due to entity restrictions
      * @return - redirects user to the main page if the update was successful and back
@@ -84,19 +83,20 @@ public class AdminController {
         if (bindingResult.hasErrors()) {
             return "edituser-tile";
         }
-        usersService.updateUser(user);
+        usersService.save(user);
         return "redirect:/";
     }
 
     /**
      * Method gets the List<Company> with  all companies that exist in the system and
      * adds it to viewcompanies tile model.
+     *
      * @param model - Model that will be mapped to the viewcompanies tile
      * @return
      */
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = "/viewcompanies", method = RequestMethod.GET)
-    public String viewAllCompanies(Model model){
+    public String viewAllCompanies(Model model) {
         List<Company> companies = companyService.findAll();
         model.addAttribute("companies", companies);
         return "viewcompanies";
@@ -104,7 +104,8 @@ public class AdminController {
 
     /**
      * Method gets company by id that was set in url and maps him to the editcompany tile model
-     * @param id  - identificator of the company whose details admin wants to edit
+     *
+     * @param id    - identificator of the company whose details admin wants to edit
      * @param model - model that will be mapped to th edituser tile
      * @return name of the tile where controller will redirect admin after this method will end its work
      */
@@ -119,11 +120,12 @@ public class AdminController {
 
     /**
      * Method updates company details which will come from ui to database.
-     * @param company - object of Company class that will come from ui
+     *
+     * @param company       - object of Company class that will come from ui
      * @param bindingResult - contains information of correctness of company that will come from ui
      *                      due to entity restrictions
-     * @param image - contains file that admin uploads with new company details(optional).
-     *              It will be set as company avatar. If null, avatar change won't happen.
+     * @param image         - contains file that admin uploads with new company details(optional).
+     *                      It will be set as company avatar. If null, avatar change won't happen.
      * @return
      */
     @PreAuthorize("hasRole('admin')")
@@ -132,15 +134,16 @@ public class AdminController {
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
         String newAvatarName;
-        if(companyService.findByName(company.getName()).getPhotosId() != null)                            /** check if current company already has avatar*/
-            newAvatarName = "@"+companyService.findByName(company.getName()).getPhotosId().getPhotoUrl(); /** if true, we need to create new avatars url for correct inserting to database */
-        else newAvatarName = company.getName() + "comp.jpg";                                              /** else use standart filename creation algorithm*/
+        if (companyService.findByName(company.getName()).getPhotosId() != null)                            /** check if current company already has avatar*/
+            newAvatarName = "@" + companyService.findByName(company.getName()).getPhotosId().getUrl(); /** if true, we need to create new avatars url for correct inserting to database */
+        else
+            newAvatarName = company.getName() + "comp.jpg";                                              /** else use standart filename creation algorithm*/
         if (bindingResult.hasErrors()) {
             return "editcompany";
         }
-            company.setPhotosId(photoService.saveLogo(newAvatarName, image));
-            if (!companyService.updateCompany(company)) {
-                return "editcompany";
-            } else return "redirect:/";
+        company.setPhotosId(photoService.saveLogo(newAvatarName, image));
+        if (!companyService.updateCompany(company)) {
+            return "editcompany";
+        } else return "redirect:/";
     }
 }

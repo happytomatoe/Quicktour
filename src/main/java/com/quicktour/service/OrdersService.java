@@ -21,7 +21,6 @@ import org.springframework.web.context.request.ServletRequestAttributes;
 
 import javax.servlet.http.HttpServletRequest;
 import java.math.BigDecimal;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.util.Arrays;
 import java.util.Calendar;
@@ -32,7 +31,6 @@ import java.util.List;
 public class OrdersService {
 
     private static final int NUMBER_OF_RECORDS_PER_PAGE = 10;
-    private static final String ID = "id";
     private static final List<String> SORT_VALUES = Arrays.asList("tourInfoId", "orderDate", "price", "status",
             "nextPaymentDate");
     final Logger logger = LoggerFactory.getLogger(OrdersService.class);
@@ -73,12 +71,12 @@ public class OrdersService {
 
     public Order findById(User activeUser, int id) {
 
-        switch (activeUser.getRoleId().getRoleId()) {
-            case Role.ADMIN_ROLE:
+        switch (activeUser.getRole()) {
+            case admin:
                 return orderRepository.findById(id);
-            case Role.AGENT_ROLE:
+            case agent:
                 return orderRepository.findByCompanyId(getCompanyForUser(activeUser).getId(), id);
-            case Role.USER_ROLE:
+            case user:
                 return orderRepository.findByUserId(activeUser.getId(), id);
         }
 
@@ -152,7 +150,7 @@ public class OrdersService {
      */
     public Sort.Order sortByValue(String value, String direction) {
 
-        String sortValue = SORT_VALUES.contains(value) ? value : ID;
+        String sortValue = SORT_VALUES.contains(value) ? value : "id";
         Sort.Order sortOrder = direction.equalsIgnoreCase("desc") ? new Sort.Order(Sort.Direction.DESC, sortValue) :
                 new Sort.Order(Sort.Direction.ASC, sortValue);
 
@@ -165,15 +163,15 @@ public class OrdersService {
     public Page<Order> listOrdersPaginated(User activeUser, int pageNumber, Sort.Order sortOrder) {
         Page<Order> orders = null;
 
-        switch (activeUser.getRoleId().getRoleId()) {
-            case Role.ADMIN_ROLE:
+        switch (activeUser.getRole()) {
+            case admin:
                 orders = findAll(pageNumber, sortOrder);
                 break;
-            case Role.AGENT_ROLE:
+            case agent:
                 Company company = getCompanyForUser(activeUser);
                 orders = findByCompanyId(company.getId(), pageNumber, sortOrder);
                 break;
-            case Role.USER_ROLE:
+            case user:
                 orders = findByUserId(activeUser.getId(), pageNumber, sortOrder);
                 break;
         }
@@ -187,17 +185,17 @@ public class OrdersService {
     public Page<Order> listOrdersByStatusPaginated(User activeUser, String status, int pageNumber, Sort.Order sortOrder) {
         Page<Order> orders = null;
 
-        switch (activeUser.getRoleId().getRoleId()) {
-            case Role.ADMIN_ROLE:
+        switch (activeUser.getRole()) {
+            case admin:
                 orders = status.equals("Active") ? findActiveOrders(pageNumber, sortOrder) :
                         findByStatus(status, pageNumber, sortOrder);
                 break;
-            case Role.AGENT_ROLE:
+            case agent:
                 Company company = getCompanyForUser(activeUser);
                 orders = status.equals("Active") ? findActiveOrdersByCompanyId(company, pageNumber, sortOrder) :
                         findByStatusAndCompanyId(status, company, pageNumber, sortOrder);
                 break;
-            case Role.USER_ROLE:
+            case user:
                 orders = status.equals("Active") ? findActiveOrdersByUserId(activeUser, pageNumber, sortOrder) :
                         findByStatusAndUserId(status, activeUser, pageNumber, sortOrder);
                 break;
@@ -212,14 +210,14 @@ public class OrdersService {
     public Long allOrdersCount(User activeUser) {
         Long allCount = null;
 
-        switch (activeUser.getRoleId().getRoleId()) {
-            case Role.ADMIN_ROLE:
+        switch (activeUser.getRole()) {
+            case admin:
                 allCount = orderRepository.count();
                 break;
-            case Role.AGENT_ROLE:
+            case agent:
                 allCount = countByCompanyId(getCompanyForUser(activeUser));
                 break;
-            case Role.USER_ROLE:
+            case user:
                 allCount = countByUserId(activeUser);
                 break;
         }
@@ -233,14 +231,14 @@ public class OrdersService {
     public Long ordersByStatusCount(User activeUser, String status) {
         Long byStatusCount = null;
 
-        switch (activeUser.getRoleId().getRoleId()) {
-            case Role.ADMIN_ROLE:
+        switch (activeUser.getRole()) {
+            case admin:
                 byStatusCount = orderRepository.countByStatus(status);
                 break;
-            case Role.AGENT_ROLE:
+            case agent:
                 byStatusCount = countByCompanyIdAndStatus(getCompanyForUser(activeUser), status);
                 break;
-            case Role.USER_ROLE:
+            case user:
                 byStatusCount = countByUserIdAndStatus(activeUser, status);
                 break;
         }
@@ -382,7 +380,7 @@ public class OrdersService {
                 calculateDiscount(tour.getDiscountPolicies()).getDiscount();
         BigDecimal totalDiscount = tourInfoDiscount.add(discountPoliciesDiscount);
         BigDecimal companyDiscount = companyService.getCompanyDiscount(activeUser);
-        if(companyDiscount.doubleValue()>0){
+        if (companyDiscount.doubleValue() > 0) {
             totalDiscount = totalDiscount.add(companyDiscount);
         }
         order.setDiscount(totalDiscount);
@@ -394,33 +392,11 @@ public class OrdersService {
     public void addVote(int order, int score) {
 
         Order existingOrder = this.findById(usersService.getCurrentUser(), order);
-        existingOrder.setTourVote(score);
+        existingOrder.setVote(score);
 
         orderRepository.saveAndFlush(existingOrder);
     }
 
-    public BigDecimal getRatio(int tourId) {
-
-        return orderRepository.getRatio(tourId) == null ? new BigDecimal(0) : orderRepository.getRatio(tourId);
-    }
-
-    public BigInteger getRatioCount(int tourId) {
-
-        return orderRepository.getRatioCount(tourId) == null ? new BigInteger("0") :
-                orderRepository.getRatioCount(tourId);
-    }
-
-    public BigDecimal getRatio(int tourId, int userId) {
-
-        return orderRepository.getRatio(tourId, userId) == null ? new BigDecimal(0) :
-                orderRepository.getRatio(tourId, userId);
-    }
-
-    public BigInteger getRatioCount(int tourId, int userId) {
-
-        return orderRepository.getRatioCount(tourId, userId) == null ? new BigInteger("0") :
-                orderRepository.getRatioCount(tourId, userId);
-    }
 
     public void createValidationLink(User user) {
 

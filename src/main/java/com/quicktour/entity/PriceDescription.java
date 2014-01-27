@@ -8,26 +8,26 @@ import javax.persistence.Table;
 @Table(name = "priceincludes", schema = "", catalog = "quicktour")
 @Entity
 public class PriceDescription {
-    private int priceIncludesId;
-    private String includeDescription;
+    private int id;
+    private String description;
 
     @Column(name = "PriceIncludesId")
     @Id
-    public int getPriceIncludesId() {
-        return priceIncludesId;
+    public int getId() {
+        return id;
     }
 
-    public void setPriceIncludesId(int priceIncludesId) {
-        this.priceIncludesId = priceIncludesId;
+    public void setId(int priceIncludesId) {
+        this.id = priceIncludesId;
     }
 
-    @Column(name = "IncludeDescription")
-    public String getIncludeDescription() {
-        return includeDescription;
+    @Column(name = "description")
+    public String getDescription() {
+        return description;
     }
 
-    public void setIncludeDescription(String includeDescription) {
-        this.includeDescription = includeDescription;
+    public void setDescription(String includeDescription) {
+        this.description = includeDescription;
     }
 
     @Override
@@ -37,8 +37,8 @@ public class PriceDescription {
 
         PriceDescription that = (PriceDescription) o;
 
-        if (priceIncludesId != that.priceIncludesId) return false;
-        if (includeDescription != null ? !includeDescription.equals(that.includeDescription) : that.includeDescription != null)
+        if (id != that.id) return false;
+        if (description != null ? !description.equals(that.description) : that.description != null)
             return false;
 
         return true;
@@ -46,13 +46,13 @@ public class PriceDescription {
 
     @Override
     public int hashCode() {
-        int result = priceIncludesId;
-        result = 31 * result + (includeDescription != null ? includeDescription.hashCode() : 0);
+        int result = id;
+        result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
 
     @Override
     public String toString() {
-        return this.includeDescription;
+        return this.description;
     }
 }

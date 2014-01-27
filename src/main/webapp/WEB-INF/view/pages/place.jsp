@@ -3,31 +3,37 @@
 <%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <script type="text/javascript"
         src="http://maps.googleapis.com/maps/api/js?key=AIzaSyChyZ_aPtSiHgv2lsfTyvWYAccwmDXUYPE&sensor=true&libraries=panoramio">
 </script>
 <script src="https://ssl.panoramio.com/wapi/wapi.js?v=1"></script>
-<script src="<c:url value="/resources/js/bootstrap-select.js"/>" ></script>
+<script src="<c:url value="/resources/js/bootstrap-select.js"/>"></script>
 <link href="<c:url value="/resources/css/bootstrap-select.css"/>" rel="stylesheet">
-<script src="<c:url value="/resources/js/places.js"/>" ></script>
+<script src="<c:url value="/resources/js/places.js"/>"></script>
+<script src="<c:url value="/resources/ckeditor/ckeditor.js"/>"></script>
 
 <div class="row">
     <div class="breadcrumb row">
         <div class="col-md-8">
-                <h1>${tour.name}</h1>
+            <h1>${tour.name}</h1>
             <!-- Star rating -->
-            <span id="rateTour_${tour.tourId}"></span>
-            <span><i>(${ordersService.getRatioCount(tour.tourId)})</i></span>
-            <script type="text/javascript">
-                jQuery('#rateTour_${tour.tourId}').raty({
-                    readOnly: true,
-                    scoreName: 'Tour.ratio',
-                    score:     ${ordersService.getRatio(tour.tourId)},
-                    number: 5
-
-                });
-            </script>
+            <c:if test="${tour.rateCount>0}">
+                <div class="form-group col-md-12 text-center">
+                    <span id="rateTour_${tour.tourId}"></span>
+                    <span><i>(${tour.rateCount})</i></span>
+                    <script type="text/javascript">
+                        jQuery('#rateTour_${tour.tourId}').raty({
+                            readOnly: true,
+                            path: "<c:url value="/resources"/>",
+                            scoreName: 'Tour.ratio',
+                            score:     ${tour.rate},
+                            number: 5
+                        });
+                    </script>
+                    <!-- /Star rating -->
+                </div>
+            </c:if>
             <!-- /Star rating -->
         </div>
 
@@ -35,8 +41,17 @@
 </div>
 <div class="row">
     <div class="col-md-4">
-        <img src="/images/<c:url value="${tour.mainPhotoUrl}"/>"
-             style="height: 300px" class="img-thumbnail">
+        <c:choose>
+            <c:when test="${fn:contains(tour.photo.url,'http')}">
+                <img src="${tour.photo.url}"
+                     style="height: 300px" class="img-thumbnail">
+            </c:when>
+            <c:otherwise>
+                <img src="<c:url value="/images/${tour.photo.url}"/>"
+                     style="height: 300px" class="img-thumbnail">
+
+            </c:otherwise>
+        </c:choose>
     </div>
     <div class="col-md-3">
         <sec:authorize access="!(hasRole('agent'))">
@@ -51,7 +66,8 @@
                     <li role="presentation" class="dropdown-header">Please, select tour start date</li>
                     <c:forEach items="${tour.tourInfo}" var="date">
                         <li>
-                            <a href="/createOrder/${date.tourId}"><strong>${date.startDate} Price: ${date.tour.price-date.tour.price*date.discount/100}$</strong></a>
+                            <a href="/createOrder/${date.tourId}"><strong>${date.startDate}
+                                Price: ${date.tour.price-date.tour.price*date.discount/100}$</strong></a>
                         </li>
                     </c:forEach>
                 </ul>
@@ -59,8 +75,11 @@
         </sec:authorize>
     </div>
     <div class="col-md-2 pull-right">
-        <img class="img-thumbnail" src="<c:url value="/images/"/><c:url value="${tour.company.photosId.photoUrl}"/>" width="150px"/>
+        <img class="img-thumbnail" src="<c:url value="/images/"/><c:url value="${tour.company.photosId.url}"/>"
+             width="150px"/>
+
         <p></p>
+
         <p></p>
     </div>
     <div class="col-md-8">
@@ -119,7 +138,8 @@
             <p style="text-align: center">
                 <button class="btn btn-lg"><span class="glyphicon glyphicon-info-sign"></span></button>
                 <b>
-                    If you want change photo you may click on the map on marker or simply change tag pho the photo under the widget:
+                    If you want change photo you may click on the map on marker or simply change tag pho the photo under
+                    the widget:
                 </b>
                 <button class="btn btn-lg"><span class="glyphicon glyphicon-info-sign"></span></button>
             </p>
@@ -128,8 +148,8 @@
             <div class="col-md-6">
                 <div class="panel panel-default">
                     <div class="panel-body">
-                        <div  class="col-md-10">
-                            <div id="photoWidget">
+                        <div class="col-md-10">
+                        <div id="photoWidget">
                             </div>
                         </div>
                     </div>
@@ -147,6 +167,7 @@
         <div class="row">
             <div class="col-md-3 col-md-offset-2">
                 <p></p>
+
                 <p></p>
                 <select class="selectpicker" id="filter">
                     <option>Architecture</option>
@@ -157,15 +178,58 @@
                 </select>
 
                 <p></p>
+
                 <p></p>
             </div>
         </div>
         <div class="panel-footer">
-            <p style="text-align: center"><b><span class="glyphicon glyphicon-star"></span> Row painted for ${tour.travelType} travel type</b></p>
+            <p style="text-align: center"><b><span class="glyphicon glyphicon-star"></span> Row painted
+                for ${tour.travelType} travel type</b></p>
         </div>
 
     </div>
 </div>
 
-<div class="tab-pane active" id="comments">
+<div class="row">
+
+
+    <div class="comment-box">
+
+    </div>
+
+</div>
+<ul class="pagination" id="pagination"></ul>
+
+
+<sec:authorize access="isAuthenticated()">
+    <div class="row " id="editor">
+        <input type="hidden" id="login" value="${user.login}">
+        <input type="hidden" id="parent" value="">
+        <input type="hidden" id="commentId" value="">
+
+        <div class="row top-buffer">
+            <textarea class="col-md-12" id="new_message" name="new_message"
+                      placeholder="Type in your message" rows="5"></textarea>
+        </div>
+
+        <div class="row top-buffer">
+            <div class="col-md-4">
+                <button class="btn btn-primary" id="post" type="submit" onclick="addNewComment()">Save</button>
+            </div>
+        </div>
+    </div>
+</sec:authorize>
+<sec:authorize access="isAnonymous()">
+    <p></p>
+
+    <div class="col-sm-12">
+        <div class="row well no_margin_left">
+            <footer class="align-center">
+                <p>If you want to leave comment you must sign in or register.</p>
+            </footer>
+        </div>
+    </div>
+</sec:authorize>
+</div>
+
 </div>

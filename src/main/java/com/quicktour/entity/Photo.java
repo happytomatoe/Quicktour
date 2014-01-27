@@ -1,13 +1,16 @@
 package com.quicktour.entity;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 @Entity
 @Table(name = "photos", schema = "", catalog = "quicktour")
 public class Photo {
 
     private int id;
-    private String photoUrl;
+    private String url;
 
     @Column(name = "ID")
     @Id
@@ -19,13 +22,13 @@ public class Photo {
         this.id = id;
     }
 
-    @Column(name = "PhotoUrl")
-    public String getPhotoUrl() {
-        return photoUrl;
+    @Column(name = "url")
+    public String getUrl() {
+        return url;
     }
 
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
+    public void setUrl(String photoUrl) {
+        this.url = photoUrl;
     }
 
 }

@@ -14,6 +14,7 @@ import java.util.logging.Logger;
 
 /**
  * Contains all functional logic connected with the images that are used in the system
+ *
  * @author Andrew Zarichnyi
  * @version 1.0 12/27/2013
  */
@@ -30,54 +31,56 @@ public class PhotoService {
     /**
      * Describes absolute url of directory where images are stored
      */
-    @Value("${webRootPath}")
-    private String webRootPath;
+    @Value("${imageDirectory}")
+    private String imageDirectory;
 
 
     /**
      * Saves image that user uploads in registration forms to the filesystem
      *
      * @param filename - filename of the file to be saved
-     * @param image - contains file that user uploads
+     * @param image    - contains file that user uploads
      * @return - returns true if all is OK and false if we have errors
      */
-    public boolean saveImage(String filename, MultipartFile image){
-        if (image.isEmpty()){
+    public boolean saveImage(String filename, MultipartFile image) {
+        if (image.isEmpty()) {
             return false;
         }
-    try{
-            File file = new File(webRootPath + filename);
+        try {
+            File file = new File(imageDirectory + filename);
             FileUtils.writeByteArrayToFile(file, image.getBytes());
 
-    } catch (IOException io){
-               //logger.log
-                return false;
-    }  catch (NullPointerException npe){
-        //TODO set
-        return false;
-    }
-    Photo photo = new Photo();
-    photo.setPhotoUrl(filename);
-    if(photoRepository.findByPhotoUrl(filename) == null)
-        photoRepository.saveAndFlush(photo);
-    return true;
-}
-    public Photo findByPhotoUrl(String photoUrl){
-        return photoRepository.findByPhotoUrl(photoUrl);
+        } catch (IOException io) {
+            //logger.log
+            return false;
+        } catch (NullPointerException npe) {
+            //TODO set
+            return false;
+        }
+        Photo photo = new Photo();
+        photo.setUrl(filename);
+        if (photoRepository.findByUrl(filename) == null)
+            photoRepository.saveAndFlush(photo);
+        return true;
     }
 
-    public Photo saveAvatar(String filename, MultipartFile image){
-        if(saveImage(filename, image))
-            return photoRepository.findByPhotoUrl(filename);
+    public Photo findByPhotoUrl(String photoUrl) {
+        return photoRepository.findByUrl(photoUrl);
+    }
+
+    public Photo saveAvatar(String filename, MultipartFile image) {
+        if (saveImage(filename, image))
+            return photoRepository.findByUrl(filename);
         else return photoRepository.findOne(DEFAULT_AVATAR_ID);
     }
 
-    public Photo saveLogo(String filename, MultipartFile image){
-        if(saveImage(filename, image))
-            return photoRepository.findByPhotoUrl(filename);
+    public Photo saveLogo(String filename, MultipartFile image) {
+        if (saveImage(filename, image))
+            return photoRepository.findByUrl(filename);
         else return photoRepository.findOne(DEFAULT_LOGO_ID);
     }
-    public Photo findOne(Integer id){
+
+    public Photo findOne(Integer id) {
         return photoRepository.findOne(id);
     }
 }

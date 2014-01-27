@@ -8,10 +8,6 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Query;
 
-import java.math.BigDecimal;
-import java.math.BigInteger;
-import java.util.List;
-
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     Order findById(int id);
@@ -60,15 +56,5 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order AS o INNER JOIN o.userId AS u WHERE u.id = ?1 AND o.status IN ('Received', 'Accepted', 'Confirmed')")
     Page<Order> findActiveOrdersByUserId(int id, Pageable pageable);
 
-    @Query(value = "select avg(orders.vote) as ratio from orders inner join tour ON orders.TourId = tour.TourId where vote > 0 and tour.ToursId = ?1 group by tour.ToursId\n", nativeQuery = true)
-    BigDecimal getRatio(int tourId);
 
-    @Query(value = "select count(orders.vote) as ratio from orders inner join tour ON orders.TourId = tour.TourId where vote > 0 and tour.ToursId = ?1 group by tour.ToursId\n", nativeQuery = true)
-    BigInteger getRatioCount(int tourId);
-
-    @Query(value = "select avg(orders.vote) as ratio from orders inner join tour ON orders.TourId = tour.TourId where vote > 0 and tour.ToursId = ?1 and orders.users_ID = ?2 group by tour.ToursId\n", nativeQuery = true)
-    BigDecimal getRatio(int tourId, int userId);
-
-    @Query(value = "select count(orders.vote) as ratio from orders inner join tour ON orders.TourId = tour.TourId where vote > 0 and tour.ToursId = ?1 and orders.users_ID = ?2 group by tour.ToursId\n", nativeQuery = true)
-    BigInteger getRatioCount(int tourId, int userId);
 }

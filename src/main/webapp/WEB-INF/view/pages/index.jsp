@@ -2,6 +2,7 @@
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/bootstrap.css"/>">
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/styles.css"/>">
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/discount.css"/>">
@@ -20,26 +21,38 @@
                         <div class="panel-body">
                             <!-- Star rating -->
                             <div class="row">
-                                <div class="form-group col-md-12 text-center">
-                                    <span id="rateTour_${tour.tourId}"></span>
-                                    <span><i>(${ordersService.getRatioCount(tour.tourId)})</i></span>
-                                </div>
-                                <script type="text/javascript">
-                                    jQuery('#rateTour_${tour.tourId}').raty({
-                                        readOnly: true,
-                                        scoreName: 'Tour.ratio',
-                                        score:     ${ordersService.getRatio(tour.tourId)},
-                                        number: 5
-                                    });
-                                </script>
-                                <!-- /Star rating -->
+                                <c:if test="${tour.rateCount>0}">
+                                    <div class="form-group col-md-12 text-center">
+                                        <span id="rateTour_${tour.tourId}"></span>
+                                        <span><i>(${tour.rateCount})</i></span>
+                                        <script type="text/javascript">
+                                            jQuery('#rateTour_${tour.tourId}').raty({
+                                                readOnly: true,
+                                                path: "<c:url value="/resources"/>",
+                                                scoreName: 'Tour.ratio',
+                                                score:     ${tour.rate},
+                                                number: 5
+                                            });
+                                        </script>
+                                        <!-- /Star rating -->
+                                    </div>
+                                </c:if>
                             </div>
                             <c:if test="${tour.discount>0}">
                                 <img src="<c:url value="/resources/img/discount_icon.png"/>" class="icon">
                                 <span class="discount">-${tour.discount}%</span>
                             </c:if>
-                            <img src="/images/<c:url value="${tour.mainPhotoUrl}"/>"
-                                 style="height: 300px" class="img-thumbnail">
+                            <c:choose>
+                                <c:when test="${fn:contains(tour.photo.url,'http')}">
+                                    <img src="${tour.photo.url}"
+                                         style="height: 300px" class="img-thumbnail">
+                                </c:when>
+                                <c:otherwise>
+                                    <img src="<c:url value="/images/${tour.photo.url}"/>"
+                                         style="height: 300px" class="img-thumbnail">
+
+                                </c:otherwise>
+                            </c:choose>
                             <div class="row">
                                 <div class="col-md-12 pull-left">
                                     <h3>${tour.name}</h3>
@@ -49,6 +62,7 @@
                                 </div>
                             </div>
                             <br>
+
                             <div class="row">
                                 <div class="col-md-12">
                                     <a href="${torsPageUrl}" class="btn btn-success pull-left">
@@ -57,12 +71,15 @@
                                     </a>
                                     <sec:authorize access="!(hasRole('agent'))">
                                         <div class="btn-group pull-right">
-                                            <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
+                                            <button type="button" class="btn btn-success dropdown-toggle"
+                                                    data-toggle="dropdown">
                                                 Order it
                                                 <span class="caret"></span>
                                             </button>
                                             <ul class="dropdown-menu" role="menu">
-                                                <li role="presentation" class="dropdown-header">Please, select tour start date</li>
+                                                <li role="presentation" class="dropdown-header">Please, select tour
+                                                    start date
+                                                </li>
                                                 <c:forEach items="${tour.tourInfo}" var="date">
                                                     <li>
                                                         <a href="/createOrder/${date.tourId}">${date.startDate}</a>
@@ -79,49 +96,9 @@
             </c:if>
         </c:forEach>
     </div>
-    <%--    <s:url value="{pageNum}" var="next">
-            <s:param name="pageNum" value="${page.number + 1}" />
-        </s:url>
-        <s:url value="{pageNum}" var="prev">
-            <s:param name="pageNum" value="${page.number - 1}" />
-        </s:url> --%>
     <div class="row">
         <div class="col-md-12 text-center">
-            <%--     <div class="col-md-12 text-center">
-                     <ul class="pagination">
-                         <c:if test="${page.totalPages > 1}">
-                             <c:if test="${page.number > 0}">
-                                 <li>
-                                     <a href="${prev}">&laquo</a>
-                                 </li>
-                             </c:if>
-                             <c:forEach var="i" begin="1" end="${page.totalPages}">
-                                 <s:url value="{pageNum}" var="pageNumber">
-                                     <s:param name="pageNum" value="${i - 1}" />
-                                 </s:url>
-                                 <c:choose>
-                                     <c:when test="${page.number == i - 1}">
-                                         <c:set var="buttClass" value="active" />
-                                     </c:when>
-                                     <c:otherwise>
-                                         <c:set var="buttClass" value="" />
-                                     </c:otherwise>
-                                 </c:choose>
-                                 <li class="${buttClass}">
-                                     <a href="${pageNumber}">
-                                         <c:out value="${i}" />
-                                     </a>
-                                 </li>
-                             </c:forEach>
-                             <c:if test="${page.number < page.totalPages - 1}">
-                                 <li>
-                                     <a href="${next}">&raquo</a>
-                                 </li>
-                             </c:if>
-                         </c:if>
-                     </ul>
-                 </div>
-             </div>--%>
+
             <s:url value="{pageNum}" var="first">
                 <s:param name="pageNum" value="0"/>
             </s:url>
@@ -135,7 +112,7 @@
             </s:url>
 
             <s:url value="{pageNum}" var="previous">
-                <s:param name="pageNum" value="${page.number - 1}"/>
+                <s:param name="pageNum" value="${page.number>0?page.number - 1:0}"/>
             </s:url>
 
             <c:if test="${page.totalPages gt 1}">

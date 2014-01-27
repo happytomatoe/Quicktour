@@ -2,37 +2,60 @@ package com.quicktour.entity;
 
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.codehaus.jackson.annotate.JsonManagedReference;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
-import org.hibernate.validator.constraints.NotEmpty;
 
 import javax.persistence.*;
-import javax.validation.constraints.Size;
 import java.math.BigDecimal;
 import java.util.Collection;
 import java.util.List;
+import java.util.Set;
 
 @Entity
 @Table(name = "tours", schema = "", catalog = "quicktour")
 public class Tour {
     private int tourId;
-    @JsonIgnore private Company company;
+    private Company company;
     private BigDecimal price;
-    @JsonIgnore private Collection<TourInfo> tourInfo;     // TODO should be tours
-    @JsonIgnore private Collection<Comment> commentsByTourId;
-    @JsonIgnore private List<Place> toursPlaces;      // TODO palaces
-    @JsonIgnore private List<PriceDescription> priceIncludes;
-    private List<DiscountPolicy> discountPolicies;    // TODO policies
+    private Collection<TourInfo> tourInfo;
+    private List<Place> toursPlaces;
+    private Set<PriceDescription> priceIncludes;
+    private List<DiscountPolicy> discountPolicies;
     private String name;
     private String description;
     private String transportDesc;
-    private String mainPhotoUrl;
+    private Photo photo;
     private Boolean isActive;
     private BigDecimal discount = BigDecimal.ZERO;
     private String travelType;
+    private Double rate;
+    private Long rateCount;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @Formula("(select avg(orders.vote)  from orders inner join tours ON orders.TourId = tours.ToursId " +
+            "where orders.vote > 0 and tours.ToursId = ToursId group by tours.ToursId)")
+    public Double getRate() {
+        return rate;
+    }
+
+    public void setRate(Double rate) {
+        this.rate = rate;
+    }
+
+    @Formula("(select count(orders.vote) from orders inner join tours ON orders.TourId = tours.ToursId " +
+            "where orders.vote > 0 and tours.ToursId = ToursId group by tours.ToursId)")
+    public Long getRateCount() {
+        return rateCount;
+    }
+
+    public void setRateCount(Long rateCount) {
+        this.rateCount = rateCount;
+    }
+
+    @ManyToOne()
     @JoinColumn(name = "company_id")
+    @LazyCollection(LazyCollectionOption.TRUE)
+    @JsonIgnore
     public Company getCompany() {
         return company;
     }
@@ -70,18 +93,8 @@ public class Tour {
         this.travelType = travelType;
     }
 
-    @OneToMany(mappedBy = "tour")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public Collection<Comment> getCommentsByTourId() {
-        return commentsByTourId;
-    }
-
-    public void setCommentsByTourId(Collection<Comment> commentsByTourId) {
-        this.commentsByTourId = commentsByTourId;
-    }
-
-    @OneToMany(mappedBy = "tour")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER)
+    @JsonIgnore
     public Collection<TourInfo> getTourInfo() {
         return tourInfo;
     }
@@ -90,10 +103,12 @@ public class Tour {
         this.tourInfo = tourInfo;
     }
 
-    @ManyToMany(fetch = FetchType.EAGER, cascade = {CascadeType.ALL})
-    @JoinTable(name = "Tours_has_Places",
+    @ManyToMany(cascade = CascadeType.ALL)
+    @JoinTable(name = "tours_places",
             joinColumns = @JoinColumn(name = "ToursId"),
             inverseJoinColumns = @JoinColumn(name = "PlaceId"))
+    @JsonManagedReference
+    @LazyCollection(LazyCollectionOption.TRUE)
     public List<Place> getToursPlaces() {
         return toursPlaces;
     }
@@ -102,16 +117,17 @@ public class Tour {
         this.toursPlaces = toursPlaces;
     }
 
-    @ManyToMany()
-    @JoinTable(name = "Tours_has_PriceIncludes",
+    @OneToMany()
+    @JoinTable(name = "tours_price_includes",
             joinColumns = @JoinColumn(name = "ToursId"),
             inverseJoinColumns = @JoinColumn(name = "PriceIncludesId"))
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public List<PriceDescription> getPriceIncludes() {
+    @JsonIgnore
+    @LazyCollection(LazyCollectionOption.TRUE)
+    public Set<PriceDescription> getPriceIncludes() {
         return priceIncludes;
     }
 
-    public void setPriceIncludes(List<PriceDescription> priceIncludes) {
+    public void setPriceIncludes(Set<PriceDescription> priceIncludes) {
         this.priceIncludes = priceIncludes;
     }
 
@@ -120,7 +136,7 @@ public class Tour {
     @JoinTable(name = "tours_discount_policy",
             joinColumns = @JoinColumn(name = "Tours_ToursId"),
             inverseJoinColumns = @JoinColumn(name = "discount_policy_id"))
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.TRUE)
     public List<DiscountPolicy> getDiscountPolicies() {
         return discountPolicies;
     }
@@ -156,15 +172,6 @@ public class Tour {
         this.transportDesc = transportDesc;
     }
 
-    @Column(name = "MainPhotoUrl")
-    public String getMainPhotoUrl() {
-        return mainPhotoUrl;
-    }
-
-    public void setMainPhotoUrl(String mainPhotoUrl) {
-        this.mainPhotoUrl = mainPhotoUrl;
-    }
-
     @Column(name = "IsActive")
     public Boolean getActive() {
         return isActive;
@@ -181,6 +188,16 @@ public class Tour {
 
     public void setDiscount(BigDecimal discount) {
         this.discount = discount;
+    }
+
+    @OneToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "photo_id")
+    public Photo getPhoto() {
+        return photo;
+    }
+
+    public void setPhoto(Photo photo) {
+        this.photo = photo;
     }
 
     @Override

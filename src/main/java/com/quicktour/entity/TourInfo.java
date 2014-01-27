@@ -15,9 +15,11 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(name = "Tour", schema = "", catalog = "quicktour")
+@Table(name = "tourinfo", schema = "", catalog = "quicktour")
 public class TourInfo {
     private int tourId;
+
+    private Tour tour;
 
     @Column(name = "TourId")
     @GeneratedValue
@@ -30,9 +32,8 @@ public class TourInfo {
         this.tourId = tourId;
     }
 
-    private Tour tour;
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
+    @LazyCollection(LazyCollectionOption.TRUE)
     @JoinColumn(name = "ToursId")
     public Tour getTour() {
         return tour;
@@ -104,7 +105,7 @@ public class TourInfo {
     private Collection<Order> ordersByTourInfo;
 
     @OneToMany(mappedBy = "tourInfoId")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.TRUE)
     public Collection<Order> getOrdersByTourInfo() {
         return ordersByTourInfo;
     }

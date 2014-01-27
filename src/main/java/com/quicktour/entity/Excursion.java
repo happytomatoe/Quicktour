@@ -6,20 +6,20 @@ import javax.persistence.*;
 @Table(name = "excursions", schema = "", catalog = "quicktour")
 public class Excursion {
 
-    private int excursId;
+    private int id;
     private Place place;
     private String name;
     private Boolean isOptional;
     private Short price;
 
-    @Column(name = "ExcursId")
+    @Column(name = "id")
     @Id
-    public int getExcursId() {
-        return excursId;
+    public int getId() {
+        return id;
     }
 
-    public void setExcursId(int excursId) {
-        this.excursId = excursId;
+    public void setId(int excursId) {
+        this.id = excursId;
     }
 
     @Column(name = "Name")

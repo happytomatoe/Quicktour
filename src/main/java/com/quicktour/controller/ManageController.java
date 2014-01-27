@@ -120,7 +120,7 @@ public class ManageController {
     public Map<String, Object> getAgencyTours() {
         Map<String, Object> map = new HashMap<String, Object>();
         boolean empty = true;
-        List<Tour> agencyTours = toursService.findAgencyToursWithDiscountPolicies(empty);
+        List<Tour> agencyTours = toursService.findAgencyToursWithDiscountPoliciesAreEmpty(empty);
         for (Tour tour : agencyTours) {
             map.put(String.valueOf(tour.getTourId()), tour.getName());
         }

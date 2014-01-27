@@ -5,16 +5,13 @@ import com.quicktour.entity.Tour;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
-import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
-import org.springframework.transaction.annotation.Transactional;
-
-import java.util.List;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    List<Comment> findByTour(Tour tour);
-    Page<Comment> findCommentsByTour(Tour tour, Pageable pageable);
+    Page<Comment> findCommentsByTourAndParentIsNull(Tour tour, Pageable pageable);
+
+    @Query("SELECT COUNT(c.id) FROM Comment c WHERE c.tour.tourId=?1 AND c.parent IS NULL")
+    Long getSize(int tourId);
 
 }

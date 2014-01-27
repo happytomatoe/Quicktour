@@ -16,16 +16,6 @@ public class DiscountDependency {
     private String tableField;
     private String description;
 
-    public DiscountDependency(String tag, String tableField, String description) {
-        this.tag = tag;
-        this.tableField = tableField;
-        this.description = description;
-    }
-
-
-    public DiscountDependency() {
-    }
-
     @Column(name = "id")
     @GeneratedValue
     @Id

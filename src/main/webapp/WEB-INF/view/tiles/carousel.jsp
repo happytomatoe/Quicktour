@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
-<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <div class="row">
     <div class="col-md-3">
         <div class="panel panel-success">
@@ -12,6 +12,7 @@
                 <form action="/filter/results/0" method="post">
                     <div class="form-group">
                         <label for="country">Country</label>
+
                         <div class="input-group">
                             <input type="text" class="form-control" id="country" name="country" list="countries">
                             <datalist id="countries">
@@ -28,12 +29,13 @@
                     </div>
                     <div class="form-group">
                         <label for="place">Place</label>
+
                         <div class="input-group">
                             <input type="text" class="form-control" id="place" name="place" list="places">
                             <datalist id="places">
                                 <c:forEach items="${places}" var="place">
-                                    <option value="${place}">
-                                </c:forEach>
+                                <option value="${place}">
+                                    </c:forEach>
                             </datalist>
                             <div class="input-group-btn">
                                 <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
@@ -80,23 +82,36 @@
                     <s:url value="/tour/{id}" var="torsPageUrl">
                         <s:param name="id" value="${tour.tourId}"/>
                     </s:url>
-                    <c:set var="itemClass" value="item" />
+                    <c:set var="itemClass" value="item"/>
                     <c:if test="${i.index==0}">
-                        <c:set var="itemClass" value="item active" />
+                        <c:set var="itemClass" value="item active"/>
                     </c:if>
                     <div class="${itemClass}">
-                        <img src="/images/<c:url value="${tour.mainPhotoUrl}"/>" style="height: 500px; width: 100%">
+                        <c:choose>
+                            <c:when test="${fn:contains(tour.photo.url,'http')}">
+                                <img src="${tour.photo.url}"
+                                     style="height: 500px; width: 100%">
+                            </c:when>
+                            <c:otherwise>
+                                <img src="<c:url value="/images/${tour.photo.url}"/>"
+                                     style="height: 500px; width: 100%">
+
+                            </c:otherwise>
+                        </c:choose>
                         <div class="container">
                             <div class="carousel-caption">
                                 <h1>${tour.name}</h1>
+
                                 <p><a class="btn btn-success" href="${torsPageUrl}" role="button">Learn more</a></p>
                             </div>
                         </div>
                     </div>
                 </c:forEach>
             </div>
-            <a class="left carousel-control" href="#myCarousel" data-slide="prev"><span class="glyphicon glyphicon-chevron-left"></span></a>
-            <a class="right carousel-control" href="#myCarousel" data-slide="next"><span class="glyphicon glyphicon-chevron-right"></span></a>
+            <a class="left carousel-control" href="#myCarousel" data-slide="prev"><span
+                    class="glyphicon glyphicon-chevron-left"></span></a>
+            <a class="right carousel-control" href="#myCarousel" data-slide="next"><span
+                    class="glyphicon glyphicon-chevron-right"></span></a>
         </div>
     </div>
 </div>
@@ -105,14 +120,14 @@
     var country = document.getElementById("country");
     var placeInput = document.getElementById("place");
 
-    jQuery(function() {
+    jQuery(function () {
         jQuery("#minDate").datepicker({
             //defaultDate: "+1w",
             dateFormat: "yy-mm-dd",
             changeMonth: true,
             numberOfMonths: 1,
-            onClose: function( selectedDate ) {
-                jQuery( "#maxDate" ).datepicker( "option", "minDate", selectedDate );
+            onClose: function (selectedDate) {
+                jQuery("#maxDate").datepicker("option", "minDate", selectedDate);
             }
         });
         jQuery("#maxDate").datepicker({
@@ -120,34 +135,35 @@
             dateFormat: "yy-mm-dd",
             changeMonth: true,
             numberOfMonths: 1,
-            onClose: function( selectedDate ) {
-                $( "#minDate" ).datepicker( "option", "maxDate", selectedDate );
+            onClose: function (selectedDate) {
+                $("#minDate").datepicker("option", "maxDate", selectedDate);
             }
         });
     })
 
-    country.onchange = function() {
+    country.onchange = function () {
         getPlacesForCountry()
     }
 
     function getPlacesForCountry() {
-        jQuery.ajax ({
+        jQuery.ajax({
             url: "/placesByCountry",
             data: {country: country.value},
             type: "POST",
             timeout: 4000,
-            success: function(map) {
+            success: function (map) {
                 var places = map.places;
                 var placeUl = document.getElementById("placesDropDown");
                 while (placeUl.firstChild) {
                     placeUl.removeChild(placeUl.firstChild);
                 }
-                places.forEach(function(place) {
+                places.forEach(function (place) {
                     setPlacesList(place);
                 })
             },
-            error: function(xhr, status) {},
-            complete: function(data) {
+            error: function (xhr, status) {
+            },
+            complete: function (data) {
             }
         })
     }
@@ -157,7 +173,7 @@
         var li = document.createElement("li");
         var a = document.createElement("a");
         a.textContent = place;
-        a.onclick = function() {
+        a.onclick = function () {
             placeInput.value = this.textContent;
         }
         li.appendChild(a);

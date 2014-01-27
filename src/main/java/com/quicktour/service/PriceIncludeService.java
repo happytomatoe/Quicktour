@@ -26,7 +26,7 @@ public class PriceIncludeService {
     }
 
     public PriceDescription findByDescription(String description) {
-        return priceIncludeRepository.findByIncludeDescription(description);
+        return priceIncludeRepository.findByDescription(description);
     }
 
 }

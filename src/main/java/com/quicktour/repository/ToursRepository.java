@@ -13,17 +13,15 @@ import java.util.List;
 public interface ToursRepository extends JpaRepository<Tour, Integer> {
     Tour findByTourId(int id);
 
-    List<Tour> findByCompanyAndNameLike(Company company, String name);
 
     @Query("SELECT t FROM Tour t WHERE t.company=?1 AND t.discountPolicies IS NOT EMPTY ")
     List<Tour> findByCompanyAndDiscountPoliciesIsNotEmpty(Company company);
+
     @Query("SELECT t FROM Tour t WHERE t.company=?1 AND t.discountPolicies IS EMPTY ")
     List<Tour> findByCompanyAndDiscountPoliciesIsEmpty(Company company);
 
     Page<Tour> findByActive(boolean active, Pageable pageable);
 
-    @Query("select count(t.tourId) from Tour t")
-    long findTourCount();
 
     //search tours by country
     @Query("select distinct t from Tour as t inner join t.toursPlaces as p where p.country = ?1")
@@ -37,11 +35,9 @@ public interface ToursRepository extends JpaRepository<Tour, Integer> {
     @Query("select t from Tour as t where t.price>?1 and t.price<?2")
     Page<Tour> findToursByPrice(BigDecimal minPrice, BigDecimal maxPrice, Pageable pageable);
 
-    @Query("select distinct t from Tour as t inner join t.toursPlaces as p where p.country=?1 and p.name=?2")
-    Page<Tour> findToursByCountryAndPlaceName(String country, String placeName, Pageable pageable);
 
     @Query("select distinct t from Tour as t " +
             "inner join t.tourInfo as ti inner join ti.ordersByTourInfo as o " +
-            "group by ti.tour order by avg(o.tourVote) desc")
+            "group by ti.tour order by avg(o.vote) desc")
     Page<Tour> findFamousTours(Pageable pageable);
 }

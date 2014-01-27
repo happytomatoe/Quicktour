@@ -5,6 +5,9 @@
  * Copyright 2013 bootstrap-select
  * Licensed under the MIT license
  */
+.top-buffer {
+    margin-top: 20px;
+}
 
 .bootstrap-select.btn-group,
 .bootstrap-select.btn-group[class*="span"] {
@@ -13,6 +16,7 @@
     margin-bottom: 10px;
     margin-left: 0;
 }
+
 .form-search .bootstrap-select.btn-group,
 .form-inline .bootstrap-select.btn-group,
 .form-horizontal .bootstrap-select.btn-group {
@@ -45,7 +49,7 @@
 
 .bootstrap-select {
     /*width: 220px\9; IE8 and below*/
-    width: 220px\0; /*IE9 and below*/
+    width: 220 px\0; /*IE9 and below*/
 }
 
 .bootstrap-select.form-control:not([class*="span"]) {
@@ -60,9 +64,8 @@
     border: 1px solid #b94a48;
 }
 
-
 .dropdown-menu {
-  z-index: 2000;
+    z-index: 2000;
 }
 
 .bootstrap-select.show-menu-arrow.open > .btn {
@@ -117,11 +120,11 @@
     padding: 0;
     margin: 0;
     -webkit-border-radius: 0;
-       -moz-border-radius: 0;
-            border-radius: 0;
+    -moz-border-radius: 0;
+    border-radius: 0;
     -webkit-box-shadow: none;
-       -moz-box-shadow: none;
-            box-shadow: none;
+    -moz-box-shadow: none;
+    box-shadow: none;
 }
 
 .bootstrap-select.btn-group .dropdown-menu dt {
@@ -174,7 +177,7 @@
 .bootstrap-select.btn-group .dropdown-menu li:not(.disabled) > a:focus small,
 .bootstrap-select.btn-group .dropdown-menu li.active:not(.disabled) > a small {
     color: #64b1d8;
-    color: rgba(255,255,255,0.4);
+    color: rgba(255, 255, 255, 0.4);
 }
 
 .bootstrap-select.btn-group .dropdown-menu li > dt small {
@@ -207,24 +210,25 @@
 }
 
 .bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:before {
-  bottom: auto;
-  top: -3px;
-  border-top: 7px solid #ccc;
-  border-bottom: 0;
-  border-top-color: rgba(0, 0, 0, 0.2);
+    bottom: auto;
+    top: -3px;
+    border-top: 7px solid #ccc;
+    border-bottom: 0;
+    border-top-color: rgba(0, 0, 0, 0.2);
 }
 
 .bootstrap-select.show-menu-arrow.dropup .dropdown-toggle:after {
-  bottom: auto;
-  top: -3px;
-  border-top: 6px solid #ffffff;
-  border-bottom: 0;
+    bottom: auto;
+    top: -3px;
+    border-top: 6px solid #ffffff;
+    border-bottom: 0;
 }
 
 .bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:before {
     right: 12px;
     left: auto;
 }
+
 .bootstrap-select.show-menu-arrow.pull-right .dropdown-toggle:after {
     right: 13px;
     left: auto;
@@ -265,7 +269,7 @@
     margin-top: -1px;
 }
 
-.control-group.error .bootstrap-select .dropdown-toggle{
+.control-group.error .bootstrap-select .dropdown-toggle {
     border-color: #b94a48;
 }
 

@@ -39,7 +39,7 @@ public class Order {
     private String status;
     private User userId;
     private Company companyId;
-    private Integer tourVote;
+    private Integer vote;
 
     @Column(name = "id")
     @Id
@@ -112,7 +112,7 @@ public class Order {
         this.discount = discount;
     }
 
-    @DateTimeFormat(pattern="yyyy-MM-dd")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "next_payment_date")
     public Date getNextPaymentDate() {
         return nextPaymentDate;
@@ -159,8 +159,8 @@ public class Order {
     }
 
     @NotNull
-    @Pattern(regexp="Received|Accepted|Confirmed|Completed|Cancelled",
-             message="Available statuses are: Received, Accepted, Confirmed, Completed, Cancelled")
+    @Pattern(regexp = "Received|Accepted|Confirmed|Completed|Cancelled",
+            message = "Available statuses are: Received, Accepted, Confirmed, Completed, Cancelled")
     @Column(name = "status")
     public String getStatus() {
         return status;
@@ -201,12 +201,12 @@ public class Order {
     }
 
     @Column(name = "vote")
-    public Integer getTourVote() {
-        return (tourVote == null) ? 0 : tourVote;
+    public Integer getVote() {
+        return (vote == null) ? 0 : vote;
     }
 
-    public void setTourVote(Integer tourVote) {
-        this.tourVote = tourVote;
+    public void setVote(Integer tourVote) {
+        this.vote = tourVote;
     }
 
 

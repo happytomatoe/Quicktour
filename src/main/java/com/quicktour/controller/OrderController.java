@@ -152,7 +152,6 @@ public class OrderController {
         model.addAttribute("user", activeUser);
         model.addAttribute("tour", tourInfo);
         model.addAttribute("company", tour.getCompany());
-        model.addAttribute("ratio", ordersService.getRatio(tourId));
 
         return "create-order";
     }
@@ -250,15 +249,6 @@ public class OrderController {
         return "OK";
     }
 
-    @RequestMapping(value = "/orders/rate/{tourId}", method = RequestMethod.GET)
-    public
-    @ResponseBody
-    String getTourRatio(@PathVariable("tourId") int tourId) {
-
-        String res = ordersService.getRatio(tourId) == null ? "0" : ordersService.getRatio(tourId).toPlainString();
-
-        return res;
-    }
 
     @PreAuthorize("hasRole('user')")
     @RequestMapping(value = "/orders/comments", method = RequestMethod.POST)

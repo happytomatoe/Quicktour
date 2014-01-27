@@ -1,17 +1,23 @@
 package com.quicktour.service;
 
+import com.quicktour.Roles;
 import com.quicktour.dto.DiscountPoliciesResult;
-import com.quicktour.entity.*;
+import com.quicktour.entity.Company;
+import com.quicktour.entity.Tour;
+import com.quicktour.entity.TourInfo;
+import com.quicktour.entity.User;
 import com.quicktour.repository.CommentRepository;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.ToursRepository;
 import com.quicktour.repository.UserRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -24,8 +30,9 @@ import java.util.List;
 //import org.springframework.data.domain.PageImpl;
 
 @Service
+@Transactional
 public class ToursService {
-
+    Logger logger = LoggerFactory.getLogger(ToursService.class);
     private final int NUMBER_OF_RECORDS_PER_PAGE = 4;
     @Autowired
     UsersService usersService;
@@ -89,7 +96,7 @@ public class ToursService {
      */
     public List<Tour> findAgencyTour() {
         User user = usersService.getCurrentUser();
-        if (user.getRoleId().getRoleId() == Role.AGENT_ROLE) {
+        if (user.getRole() == Roles.agent) {
             Company company = companyRepository.findByCompanyCode(user.getCompanyCode());
             return (List<Tour>) company.getToursByCompanyId();
         }
@@ -103,8 +110,19 @@ public class ToursService {
      * @return selected tour page
      */
     public Page<Tour> findAllTours(int pageNumber) {
-        return toursRepository.findByActive(true,
+        Page<Tour> tours = toursRepository.findByActive(true,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
+        callRate(tours);
+        return tours;
+    }
+
+    private void callRate(Iterable<Tour> tours) {
+        for (Tour tour : tours) {
+            Long rateCount = tour.getRateCount();
+            if (rateCount != null && rateCount > 0) {
+                tour.getRate();
+            }
+        }
     }
 
     public Page<Tour> findAllToursAndCut(int pageNumber) {
@@ -132,8 +150,10 @@ public class ToursService {
      * @return tour page with search results
      */
     public Page<Tour> findToursByCountry(String country, int pageNumber) {
-        return toursRepository.findToursByCountry(country,
+        Page<Tour> tours = toursRepository.findToursByCountry(country,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
+        callRate(tours);
+        return tours;
     }
 
     public Page<Tour> findToursByCountryAndCut(String country, int pageNumber) {
@@ -145,6 +165,7 @@ public class ToursService {
     public Page<Tour> findToursByPlaces(String placeName, int pageNumber) {
         Page<Tour> tours = toursRepository.findToursByPlaceName(placeName,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
+        callRate(tours);
         return tours;
     }
 
@@ -155,8 +176,10 @@ public class ToursService {
     }
 
     public Page<Tour> findToursByPrice(int minPrice, int maxPrice, int pageNumber) {
-        return toursRepository.findToursByPrice(new BigDecimal(minPrice), new BigDecimal(maxPrice),
+        Page<Tour> tours = toursRepository.findToursByPrice(new BigDecimal(minPrice), new BigDecimal(maxPrice),
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
+        callRate(tours);
+        return tours;
     }
 
     public Page<Tour> findToursByPriceAndCut(int minPrice, int maxPrice, int pageNumber) {
@@ -203,6 +226,7 @@ public class ToursService {
             Page<Tour> tourPage = new PageImpl<Tour>(results,
                     new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE),
                     totalNumberOfResults);
+            callRate(tourPage);
             return cutToursOnPage(tourPage);
         }
         return null;
@@ -283,21 +307,12 @@ public class ToursService {
         return toursRepository.findFamousTours(new PageRequest(0, limit)).getContent();
     }
 
-    public void saveComment(String commentText, int id) {
-        String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Comment comment = new Comment();
-        comment.setComment(commentText);
-        comment.setUser(userRepository.findByLogin(userName));
-        comment.setTour(toursRepository.findByTourId(id));
-        commentRepository.saveAndFlush(comment);
-    }
-
     /**
      * Finds agency's tours
      *
      * @param empty true if you need tours without discount policies and false if you need tours with discount policies
      */
-    public List<Tour> findAgencyToursWithDiscountPolicies(boolean empty) {
+    public List<Tour> findAgencyToursWithDiscountPoliciesAreEmpty(boolean empty) {
         User currentUser = usersService.getCurrentUser();
         Company company = companyService.getCompanyByUserId(currentUser.getId());
         List<Tour> tours;
@@ -309,5 +324,17 @@ public class ToursService {
         return tours;
     }
 
+    public Tour findTourByIdWithPlaces(int id) {
+        Tour tour = findTourById(id);
+        logger.debug("Tour places {}", tour.getToursPlaces().size());
 
+        return tour;
+    }
+
+    public Tour findTourByIdWithCompany(int id) {
+        Tour tour = toursRepository.findOne(id);
+        tour.getCompany().getAddress();
+        logger.debug("Tour places {}", tour.getPriceIncludes().size());
+        return tour;
+    }
 }

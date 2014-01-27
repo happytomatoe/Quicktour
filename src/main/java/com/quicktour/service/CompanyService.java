@@ -64,7 +64,7 @@ public class CompanyService {
      */
     public Company getCompanyByUserId(int userId) {
         try {
-            User user = userRepository.findById(userId);
+            User user = userRepository.findOne(userId);
             if (!user.getCompanyCode().isEmpty()) {
                 Company company = companyRepository.findByCompanyCode(user.getCompanyCode());
                 return company;
@@ -121,15 +121,19 @@ public class CompanyService {
             return true;
         else return false;
     }
-    public BigDecimal getCompanyDiscount(User user){
-        BigDecimal result=BigDecimal.ZERO;
-        Company userCompany=getCompanyByUserId(user.getId());
-        if (userCompany!= null ) {
+
+    public BigDecimal getCompanyDiscount(User user) {
+        BigDecimal result = BigDecimal.ZERO;
+        if (user == null) {
+            return result;
+        }
+        Company userCompany = getCompanyByUserId(user.getId());
+        if (userCompany != null) {
             Integer companyDiscount = userCompany.getDiscountAmount();
-            if(companyDiscount!=null&&companyDiscount>0){
-                result=new BigDecimal(companyDiscount.toString());
+            if (companyDiscount != null && companyDiscount > 0) {
+                result = new BigDecimal(companyDiscount.toString());
             }
         }
-        return  result;
+        return result;
     }
 }

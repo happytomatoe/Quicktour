@@ -1,9 +1,8 @@
 package com.quicktour.service;
 
-import com.quicktour.entity.Role;
+import com.quicktour.Roles;
 import com.quicktour.entity.User;
 import com.quicktour.repository.CompanyRepository;
-import com.quicktour.repository.RoleRepository;
 import com.quicktour.repository.UserRepository;
 import org.apache.commons.lang.text.StrSubstitutor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -11,20 +10,16 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.MailException;
 import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
-import org.springframework.mail.javamail.JavaMailSenderImpl;
-import org.springframework.scheduling.annotation.Scheduled;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.security.core.Authentication;
-import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.context.SecurityContextHolder;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.util.DigestUtils;
 
-import java.sql.Timestamp;
-import java.util.*;
-import java.util.logging.Logger;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.Random;
 
 /**
  * Contains all functional logic connected with users, such as:
@@ -42,39 +37,27 @@ import java.util.logging.Logger;
 public class UsersService {
     public static final String USER_ROLE = "user";
     public static final String AGENT_ROLE = "agent";
-    private static final String ADMIN_ROLE = "admin";
     public static final String TOUR_AGENCY = "Tour Agency";
     public static final Integer DEFAULT_AVATAR_ID = 4;
+    public static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+    private static final String ADMIN_ROLE = "admin";
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
-
     @Autowired
     private PhotoService photoService;
-
     @Autowired
     private MailSender mailSender;
-
     @Autowired
     private UserRepository userRepository;
-
-    @Autowired
-    private RoleService roleService;
-
     @Autowired
     private CompanyRepository companyRepository;
-    public static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
     @Value("${systemEmail}")
     private String SYSTEM_EMAIL;
-
     @Value("${registrationMailSubject}")
     private String REGISTRATION_MAIL_SUBJECT;
-
     @Value("${registrationMailText}")
     private String REGISTRATION_MAIL_TEXT;
-
     @Value("${passwordRecoveryMailSubject}")
     private String RECOVERY_MAIL_SUBJECT;
-
     @Value("${passwordRecoveryMailText}")
     private String RECOVERY_MAIL_TEXT;
 
@@ -89,17 +72,18 @@ public class UsersService {
     public boolean registrateNewUser(User user) {
         if (userRepository.findByLogin(user.getLogin()) == null
                 && userRepository.findByEmail(user.getEmail()) == null) {
-            try{
-            sendRegistrationEmail(user);
-            }
-            catch (MailException me){
+            try {
+                sendRegistrationEmail(user);
+            } catch (MailException me) {
                 logger.error(me.getMessage());
-            };
+            }
             user.setActive(false);
             user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
-            user.setRoleId(chooseRole(user));
+            if (user.getRole() == null) {
+                user.setRole(updateRoleByCode(user));
+            }
             userRepository.saveAndFlush(user);
-            logger.info("New user saved: " + user.getLogin() + " " + user.getRoleId().getRole());
+            logger.info("New user saved: {} with role {}", user.getLogin(), user.getRole());
             return true;
         }
         return false;
@@ -107,27 +91,11 @@ public class UsersService {
 
     /**
      * @return object of User class which represents currently authenticated user
-     *         and null if user is not authenticated
+     * and null if user is not authenticated
      */
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
         return userRepository.findByLogin(auth.getName());
-    }
-
-    /**
-     * Updates user's profile in database with the changes made in edit profile form
-     * Note: login cannot be changed
-     *
-     * @param user - object of User class which contains all changes made in edit
-     *             profile form;
-     * @return true if update was successful, otherwise returns false.
-     */
-    public boolean updateUser(User user) {
-        User oldUser = userRepository.findByLogin(user.getLogin());
-        mapUserFromUIToDB(user, oldUser);
-        userRepository.saveAndFlush(oldUser);
-        logger.info("User updated: " + user.getLogin());
-        return true;
     }
 
     /**
@@ -136,17 +104,18 @@ public class UsersService {
      * @param user - object of User class which company code was changed
      * @return object of Role class which represents role that this user object has to have
      */
-    private Role updateRoleByCode(User user) {
-        if (user.getRoleId().getRole() != ADMIN_ROLE)
+    private Roles updateRoleByCode(User user) {
+        if (user.getRole() != Roles.admin)
             if (user.getCompanyCode() == null ||
                     companyRepository.findByCompanyCode(user.getCompanyCode()) == null) {
-                return roleService.findByRole(USER_ROLE);
+                return Roles.user;
             } else if (companyRepository.findByCompanyCode(user.getCompanyCode()).getType().equals(TOUR_AGENCY)) {
-                return roleService.findByRole(AGENT_ROLE);
+                return Roles.agent;
             } else {
-                return roleService.findByRole(USER_ROLE);
-            } else {
-            return roleService.findByRole(ADMIN_ROLE);
+                return Roles.user;
+            }
+        else {
+            return Roles.admin;
         }
     }
 
@@ -186,29 +155,6 @@ public class UsersService {
         return sub.replace(emailText);
     }
 
-    /**
-     * Maps the changes that user has done in edit profile form to his entity in database.
-     * Admin cannot change his role by company code. When admin changes user's role, this user
-     * has role without role_id, so we need to set it by role_name.
-     *
-     * @param user
-     * @param oldUser
-     */
-    private void mapUserFromUIToDB(User user, User oldUser) {
-        if (user.getPhotosId() != null)
-            oldUser.setPhotosId(user.getPhotosId());
-        oldUser.setEmail(user.getEmail());
-        oldUser.setName(user.getName());
-        oldUser.setSurname(user.getSurname());
-        oldUser.setAge(user.getAge());
-        oldUser.setPhone(user.getPhone());
-        oldUser.setCompanyCode(user.getCompanyCode());
-        oldUser.setRoleId(updateRoleByCode(oldUser));
-        oldUser.setSex(user.getSex());
-        if (user.getRoleId() != null)
-            oldUser.getRoleId().setRole(user.getRoleId().getRole());
-
-    }
 
     /**
      * Activates user's profile so he can log into the system
@@ -237,23 +183,6 @@ public class UsersService {
             userRepository.saveAndFlush(user);
             return true;
         } else return false;
-    }
-
-    /**
-     * This function is used when new user is registrated in the system
-     * When admin registrates new user with custom set role, object of User class comes from ui with cropped role.
-     * Usually, user's role is represented by roles id and roles name, but in this case user object
-     * has only roles name, so we need to set full role to this user. If role wasn't set by admin,
-     * we just update user's role by his company code.
-     *
-     * @param user - object of User class which comes from registration form
-     * @return - object of Role class which represents the role that this user has to have
-     */
-    private Role chooseRole(User user) {
-        if (user.getRoleId() == null) {
-            user.setRoleId(roleService.findByRole(USER_ROLE));
-            return updateRoleByCode(user);
-        } else return roleService.findByRole(user.getRoleId().getRole());
     }
 
     /**
@@ -321,7 +250,7 @@ public class UsersService {
     public void updateCompanyCode(String newCompanyCode) {
         User user = getCurrentUser();
         user.setCompanyCode(newCompanyCode);
-        user.setRoleId(updateRoleByCode(user));
+        user.setRole(updateRoleByCode(user));
         userRepository.saveAndFlush(user);
         logger.info("User " + user.getLogin() + " " + "has changed his company code to '"
                 + user.getCompanyCode() + "'");
@@ -339,14 +268,14 @@ public class UsersService {
     public User saveAnonymousCustomer(User user) {
         String login = user.getEmail().split("@")[0];
         String password = login;
-        user.setRoleId(roleService.findByRole(USER_ROLE));
+        user.setRole(Roles.user);
         user.setLogin(login);
         user.setPassword(password);
         user.setPhotosId(photoService.findOne(DEFAULT_AVATAR_ID));
         sendRegistrationEmail(user);
         user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
         userRepository.saveAndFlush(user);
-        logger.info("Anonymous user with email " + user.getEmail() + " has ordered a tour");
+        logger.info("Anonymous user with email {} has ordered a tour", user.getEmail());
         return userRepository.findByEmail(user.getEmail());
     }
 
@@ -358,16 +287,17 @@ public class UsersService {
         return userRepository.findOne(id);
     }
 
+
     public User findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
 
-    public User findById(int id) {
-        return userRepository.findById(id);
-    }
 
     public List<User> findAll() {
         return userRepository.findAll();
     }
 
+    public User save(User user) {
+        return userRepository.saveAndFlush(user);
+    }
 }

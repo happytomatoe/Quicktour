@@ -1,5 +1,6 @@
 package com.quicktour.entity;
 
+import com.quicktour.Roles;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -15,26 +16,46 @@ import java.util.Collection;
 public class User {
 
     private int id;
-    @JsonIgnore private Role roleId;
     private String login;
+    @JsonIgnore
     private String password;
+    @JsonIgnore
     private String email;
+    @JsonIgnore
     private String phone;
+    @JsonIgnore
     private Timestamp createTime;
+    @JsonIgnore
     private String name;
+    @JsonIgnore
     private String surname;
+    @JsonIgnore
     private Integer age;
+    @JsonIgnore
     private String sex;
+    @JsonIgnore
     private String companyCode;
     private Photo photosId;
+    @JsonIgnore
     private boolean active;
+    @JsonIgnore
+    private Roles role;
+    @JsonIgnore
+    private Collection<Order> ordersByUserId;
+    @JsonIgnore
+    private Collection<Comment> commentsByUserId;
+
+    @Enumerated(EnumType.STRING)
+    public Roles getRole() {
+        return role;
+    }
+
+    public void setRole(Roles role) {
+        this.role = role;
+    }
 
 
-    @JsonIgnore private Collection<CompanyCreationRequests> requestByUserId;
-    @JsonIgnore private Collection<Order> ordersByUserId;
-    @JsonIgnore private Collection<Comment> commentsByUserId;
-
-    @Column(name = "ID")
+    @Column(name = "id")
     @Id
     public int getId() {
         return id;
@@ -44,8 +65,8 @@ public class User {
         this.id = id;
     }
 
-    @Pattern(regexp="^[a-zA-Z0-9]+$",
-            message="Login must be alpha numeric with no spaces")
+    @Pattern(regexp = "^[a-zA-Z0-9]+$",
+            message = "Login must be alpha numeric with no spaces")
     @Size(min = 3, max = 30, message = "Login must be between 3 and 30 characters long.")
     @Column(name = "login")
     public String getLogin() {
@@ -98,8 +119,8 @@ public class User {
         this.createTime = createTime;
     }
 
-    @Pattern(regexp="^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
-            message="Name must contain only letters with no spaces")
+    @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
+            message = "Name must contain only letters with no spaces")
     @Size(min = 3, max = 30, message = "Name must be between 3 and 30 characters long.")
     @Column(name = "Name")
     public String getName() {
@@ -110,8 +131,8 @@ public class User {
         this.name = name;
     }
 
-    @Pattern(regexp="^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
-            message="Surname must contain only letters with no spaces")
+    @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
+            message = "Surname must contain only letters with no spaces")
     @Size(min = 3, max = 30, message = "Surname must be between 3 and 30 characters long.")
     @Column(name = "Surname")
     public String getSurname() {
@@ -150,8 +171,8 @@ public class User {
         this.companyCode = companyCode;
     }
 
-    @OneToMany( mappedBy = "userId")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @OneToMany(mappedBy = "userId")
+    @LazyCollection(LazyCollectionOption.TRUE)
     public Collection<Order> getOrdersByUserId() {
         return ordersByUserId;
     }
@@ -160,16 +181,9 @@ public class User {
         this.ordersByUserId = ordersByUserId;
     }
 
-    @OneToMany(mappedBy = "userId")
-    public Collection<CompanyCreationRequests> getRequestByUserId() {
-        return requestByUserId;
-    }
 
-    public void setRequestByUserId(Collection<CompanyCreationRequests> requestByUserId) {
-        this.requestByUserId = requestByUserId;
-    }
-
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne()
+    @LazyCollection(LazyCollectionOption.TRUE)
     @JoinColumn(name = "Photos_ID")
     public Photo getPhotosId() {
         return photosId;
@@ -179,18 +193,9 @@ public class User {
         this.photosId = photosId;
     }
 
-    @ManyToOne(fetch= FetchType.EAGER)
-    @JoinColumn(name = "Roles_RoleId")
-    public Role getRoleId() {
-        return roleId;
-    }
-
-    public void setRoleId(Role roleId) {
-        this.roleId = roleId;
-    }
 
     @OneToMany(mappedBy = "user")
-    @LazyCollection(LazyCollectionOption.FALSE)
+    @LazyCollection(LazyCollectionOption.TRUE)
     public Collection<Comment> getCommentsByUserId() {
         return commentsByUserId;
     }
@@ -200,7 +205,7 @@ public class User {
     }
 
     @Column(name = "active")
-    public boolean getActive() {
+    public boolean isActive() {
         return active;
     }
 
@@ -208,11 +213,32 @@ public class User {
         this.active = active;
     }
 
-    public User(){
+    public User() {
 
     }
 
-    public User(String name, String surname, String email, String phone){
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("User{");
+        sb.append("role=").append(role);
+        sb.append(", id=").append(id);
+        sb.append(", login='").append(login).append('\'');
+        sb.append(", password='").append(password).append('\'');
+        sb.append(", email='").append(email).append('\'');
+        sb.append(", phone='").append(phone).append('\'');
+        sb.append(", createTime=").append(createTime);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", surname='").append(surname).append('\'');
+        sb.append(", age=").append(age);
+        sb.append(", sex='").append(sex).append('\'');
+        sb.append(", companyCode='").append(companyCode).append('\'');
+        sb.append(", photosId=").append(photosId);
+        sb.append(", active=").append(active);
+        sb.append('}');
+        return sb.toString();
+    }
+
+    public User(String name, String surname, String email, String phone) {
         setName(name);
         setSurname(surname);
         setEmail(email);

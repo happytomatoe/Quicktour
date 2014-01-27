@@ -36,21 +36,21 @@ public class ApplyDiscountPolicyController {
 
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> add(@RequestParam(required = false)Integer[] discount_policies,
-                                   @RequestParam(required = false)Integer[] tours) {
+    public Map<String, Object> add(@RequestParam(required = false) Integer[] discount_policies,
+                                   @RequestParam(required = false) Integer[] tours) {
         Map<String, Object> map = new HashMap<String, Object>(3);
-        boolean error=false;
-        if (tours == null||tours.length==0) {
+        boolean error = false;
+        if (tours == null || tours.length == 0) {
             map.put("Result", "ERROR");
             map.put("Message", "Please select tour");
-            error=true;
+            error = true;
         }
-        if (discount_policies == null||discount_policies.length==0) {
+        if (discount_policies == null || discount_policies.length == 0) {
             map.put("Result", "ERROR");
             map.put("Message", "Please select policy");
-            error=true;
+            error = true;
         }
-        if(error){
+        if (error) {
             return map;
         }
         logger.debug("Apply discount policies: {} \nto Tours\n{}", discount_policies, tours);
@@ -83,7 +83,7 @@ public class ApplyDiscountPolicyController {
         Map<String, Object> map = new HashMap<String, Object>(3);
         boolean empty = false;
         map.put("Result", "OK");
-        map.put("Records", toursService.findAgencyToursWithDiscountPolicies(empty));
+        map.put("Records", toursService.findAgencyToursWithDiscountPoliciesAreEmpty(empty));
         return map;
 
     }

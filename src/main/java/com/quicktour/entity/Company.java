@@ -25,8 +25,6 @@ public class Company {
     private String license;
     private String companyCode;
     private Photo photosId;
-    private Collection<DiscountPolicy> discountPolicyByCompanyId;
-    private Collection<CompanyCreationRequests> requestByCompanyId;
     private Collection<Order> ordersByCompanyId;
     private Collection<Tour> toursByCompanyId;
 
@@ -40,8 +38,8 @@ public class Company {
         this.id = id;
     }
 
-    @Pattern(regexp="^[а-яА-ЯІіЇїЄєa-zA-Z\\s]+$",
-            message="Company name must consist only of English or Ukrainian letters(or both)")
+    @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z\\s]+$",
+            message = "Company name must consist only of English or Ukrainian letters(or both)")
     @Size(min = 3, max = 30, message = "Name must be between 3 and 30 characters long.")
     @Column(name = "Name")
     public String getName() {
@@ -113,6 +111,7 @@ public class Company {
     public void setDiscountAmount(Integer discountAmount) {
         this.discountAmount = discountAmount;
     }
+
     @Size(min = 5, max = 25, message = "License must be between 5 and 25 characters long")
     @Column(name = "License", unique = true)
     public String getLicense() {
@@ -122,6 +121,7 @@ public class Company {
     public void setLicense(String license) {
         this.license = license;
     }
+
     @Size(min = 5, max = 25, message = "Company code must be between 5 and 25 characters long")
     @Column(name = "Company_Code", unique = true)
     public String getCompanyCode() {
@@ -151,26 +151,6 @@ public class Company {
 
     public void setOrdersByCompanyId(Collection<Order> ordersByCompanyId) {
         this.ordersByCompanyId = ordersByCompanyId;
-    }
-
-    @OneToMany(mappedBy = "companyId")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public Collection<CompanyCreationRequests> getRequestByCompanyId() {
-        return requestByCompanyId;
-    }
-
-    public void setRequestByCompanyId(Collection<CompanyCreationRequests> requestByCompanyId) {
-        this.requestByCompanyId = requestByCompanyId;
-    }
-
-    @OneToMany(mappedBy = "company")
-    @LazyCollection(LazyCollectionOption.FALSE)
-    public Collection<DiscountPolicy> getDiscountPolicyByCompanyId() {
-        return discountPolicyByCompanyId;
-    }
-
-    public void setDiscountPolicyByCompanyId(Collection<DiscountPolicy> discountPolicyByCompanyId) {
-        this.discountPolicyByCompanyId = discountPolicyByCompanyId;
     }
 
 

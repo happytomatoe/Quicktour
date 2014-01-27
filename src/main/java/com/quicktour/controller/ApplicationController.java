@@ -18,24 +18,25 @@ import java.util.List;
 import java.util.Map;
 
 /**
- * controller that handle all activity on main page
+ * Controller that handles all activity on main page
  *
  * @author Bogdan Shpakovsky
  */
 
 @Controller
 public class ApplicationController {
+    private static final int NUMBER_OF_FAMOUS_TOURS = 3;
     Logger logger = LoggerFactory.getLogger(ApplicationController.class);
     @Autowired
-    private ToursService toursService;
-     @Autowired
     DiscountPolicyService discountPolicyService;
     @Autowired
+    UsersService usersService;
+    @Autowired
+    private ToursService toursService;
+    @Autowired
     private PlaceService placeService;
-
     @Autowired
     private OrdersService ordersService;
-
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -44,7 +45,7 @@ public class ApplicationController {
     }
 
     /**
-     * Method run when user come into portal and redirect it to url set in return
+     * Method that runs when user come into portal and redirect it to url set in return
      */
     @RequestMapping(value = "/", method = RequestMethod.GET)
     public String index() {
@@ -54,18 +55,18 @@ public class ApplicationController {
     /**
      * add all tours to main page of application
      *
-     * @param map map of model attributes
+     * @param map     map of model attributes
      * @param pageNum number of current user page for pagination
      * @return string which describe representation of main page
      */
     @RequestMapping(value = "/page/{page}", method = RequestMethod.GET)
     public String showPage(ModelMap map,
                            @PathVariable("page") int pageNum) {
+
         addSidebarAttributes(map);
         Page page = toursService.findAllToursAndCut(pageNum);
 
         map.addAttribute("page", page);
-        map.addAttribute("ordersService", ordersService);
 
         return "index-extended";
     }
@@ -79,7 +80,6 @@ public class ApplicationController {
                                @PathVariable("page") int pageNum,
                                ModelMap map) {
         map.addAttribute("page", toursService.findToursByCountryAndCut(country, pageNum));
-        map.addAttribute("ordersService", ordersService);
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -93,7 +93,6 @@ public class ApplicationController {
                              @PathVariable("page") int pageNum,
                              ModelMap map) {
         map.addAttribute("page", toursService.findToursByPlacesAndCut(place, pageNum));
-        map.addAttribute("ordersService", ordersService);
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -108,7 +107,6 @@ public class ApplicationController {
                                   @PathVariable("page") int pageNum,
                                   ModelMap map) {
         map.addAttribute("page", toursService.findToursByPriceAndCut(min, max, pageNum));
-        map.addAttribute("ordersService", ordersService);
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -127,7 +125,6 @@ public class ApplicationController {
                          ModelMap map) {
         map.addAttribute("page", toursService.extendFilter(country, place, minDate, maxDate,
                 minPrice, maxPrice, pageNum));
-        map.addAttribute("ordersService", ordersService);
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -138,11 +135,10 @@ public class ApplicationController {
         return "login";
     }
 
-
     @RequestMapping(value = "/placesByCountry")
     @ResponseBody
     private Map<String, List<String>> getPlasecByCountry(@RequestParam("country") String country) {
-        Map <String, List<String>> map = new HashMap<String, List<String>>();
+        Map<String, List<String>> map = new HashMap<String, List<String>>();
         map.put("places", placeService.findPlacesByCountry(country));
         return map;
     }
@@ -152,9 +148,8 @@ public class ApplicationController {
 
         map.addAttribute("places", placeService.findPlacesNames());
 
-        map.addAttribute("famousTours", toursService.findFamousTours(3));
+        map.addAttribute("famousTours", toursService.findFamousTours(NUMBER_OF_FAMOUS_TOURS));
     }
-
 
 
 }

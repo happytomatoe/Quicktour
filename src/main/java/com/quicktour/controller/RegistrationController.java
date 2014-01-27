@@ -1,10 +1,11 @@
 package com.quicktour.controller;
 
 import com.quicktour.entity.Company;
-import com.quicktour.entity.Role;
 import com.quicktour.entity.User;
-import com.quicktour.entity.ValidationLink;
-import com.quicktour.service.*;
+import com.quicktour.service.CompanyService;
+import com.quicktour.service.PhotoService;
+import com.quicktour.service.UsersService;
+import com.quicktour.service.ValidationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -67,7 +68,7 @@ public class RegistrationController {
      * @param image         - contains file that user will upload with his information as avatar
      *                      (may be empty)
      * @return - redirects user back to registration page if something goes wrong and to the
-     *         "registration success" notification if all is OK
+     * "registration success" notification if all is OK
      */
     @Transactional
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
@@ -78,12 +79,11 @@ public class RegistrationController {
         if (bindingResult.hasErrors()) {
             return "registration";
         }
-       user.setPhotosId(photoService.saveAvatar(avatarName, image));
-       if(usersService.registrateNewUser(user))
-       {
-        validationService.createValidationLink(user);
-        return "registrationsuccess-tile";
-       } else return "registration";
+        user.setPhotosId(photoService.saveAvatar(avatarName, image));
+        if (usersService.registrateNewUser(user)) {
+            validationService.createValidationLink(user);
+            return "registrationsuccess-tile";
+        } else return "registration";
     }
 
     /**
@@ -112,7 +112,7 @@ public class RegistrationController {
      * @param image         - contains file that admin will upload with company information as its avatar
      *                      (may be empty)
      * @return - redirects admin back to the registration form if something is wrong or to the main
-     *         page if all is OK
+     * page if all is OK
      */
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = "/addcompany", method = RequestMethod.POST)

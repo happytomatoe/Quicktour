@@ -9,18 +9,19 @@
     <c:forEach items="${companies}" var="company">
         <div class="row featurette">
             <div class="col-md-2">
-                <img src="/images/<c:out value='${company.photosId.photoUrl}'/>" style='width:auto; height:100px'>
+                <img src="/images/<c:out value='${company.photosId.url}'/>" style='width:auto; height:100px'>
             </div>
             <div class="col-md-7">
                 <h2 class="featurette-heading">
-                    ${company.name}
+                        ${company.name}
                     <span class="text-muted">${company.type}</span>
                 </h2>
+
                 <p class="lead">Company code: ${company.companyCode}</p>
             </div>
             <div class="col-md-3">
                 <a href="/editcompany/<c:out value='${company.id}'/>" class="btn btn-warning">
-                Details
+                    Details
                 </a>
             </div>
         </div>

@@ -9,15 +9,12 @@ import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 public class ToursManageService {
@@ -45,8 +42,8 @@ public class ToursManageService {
     @Autowired
     ToursRepository toursRepository;
 
-    @Value("${webRootPath}")
-    private String webRootPath;
+    @Value("${imageDirectory}")
+    private String imageDirectory;
 
     /**
      * change tour active state to state preset in activeState parameter
@@ -60,7 +57,7 @@ public class ToursManageService {
         tour.setActive(activeState);
         tour = toursRepository.saveAndFlush(tour);
         if (tour.getActive() == activeState) {
-            logger.debug("Change tour " + tour.getTourId() + " active state to " + activeState);
+            logger.debug("Change tour {} active state to {}", tour.getTourId(), activeState);
             return true;
         } else {
             return false;
@@ -79,7 +76,7 @@ public class ToursManageService {
 
         cleanTourUnsafeHTML(completeTourInfo.getTour());
         Tour tour = saveTour(completeTourInfo);
-        tour.setMainPhotoUrl(saveImage(tour.getTourId() + ".jpg", mainPhoto));
+        //tour.setPhoto(saveImage(tour.getTourId() + ".jpg", mainPhoto));
         toursService.saveTour(tour);
 
         for (TourInfo tourInfo: completeTourInfo.getTourInfo()){
@@ -98,7 +95,7 @@ public class ToursManageService {
         tourService.saveTour(completeTourInfo.getTourInfo());
         placeService.savePlases(completeTourInfo.getPlaces());
         toursService.saveTour(tour);
-        logger.debug("Tour " + tour.getTourId() + "saved successfully");
+        logger.debug("Tour {} saved successfully", tour.getTourId());
     }
 
     private String saveImage(String filename, MultipartFile image) {
@@ -106,7 +103,7 @@ public class ToursManageService {
             return null;
         }
         try{
-            File file = new File(webRootPath + filename);
+            File file = new File(imageDirectory + filename);
             FileUtils.writeByteArrayToFile(file, image.getBytes());
 
         } catch (IOException io){
@@ -140,7 +137,7 @@ public class ToursManageService {
     private Tour saveTour(CompleteTourInfo completeTourInfo) {
         Tour tour = completeTourInfo.getTour();
         List<String> priceIncludesDesc = completeTourInfo.getPriceIncludes();
-        List<PriceDescription> priceDescriptionList = new ArrayList<PriceDescription>();
+        Set<PriceDescription> priceDescriptionList = new HashSet<PriceDescription>();
 
         tour.setCompany(getCompanyByCurentUser());
 
