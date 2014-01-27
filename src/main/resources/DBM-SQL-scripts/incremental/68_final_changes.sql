@@ -40,7 +40,7 @@ SET `role` = 'admin'
 WHERE `users`.`id` IN (3, 4);
 UPDATE `quicktour`.`users`
 SET `role` = 'agent'
-WHERE `users`.`id` IN (2, 5, 6);
+WHERE `users`.`id` IN (1, 2, 5, 6);
 UPDATE `quicktour`.`users`
 SET `role` = 'user'
 WHERE `users`.`id` IN (7, 8, 9, 10);
@@ -125,3 +125,35 @@ ALTER TABLE `comments` ADD FOREIGN KEY (`tour_id`) REFERENCES `quicktour`.`tours
 )
   ON DELETE CASCADE
   ON UPDATE CASCADE;
+
+# Change passwords to SHA-256
+UPDATE `quicktour`.`users`
+SET `password` = '7a9b4bd9948d7a47e824f873f72e371254850fa7284b2ec2d6beb048246ed981b9c9e20493e137f4'
+WHERE `users`.`id` = 1;
+UPDATE `quicktour`.`users`
+SET `password` = '74ec0c44deec96ba486de709ec327932f43c0c40ae0d2c0c286528f23ae61e92eb57762ef3a06925'
+WHERE `users`.`id` = 2;
+UPDATE `quicktour`.`users`
+SET `password` = '9b93c8bf2241cf090ecf95a16914d82987d0a0f2bd4a380f5a907558844d896f0c9eaac8e574b288'
+WHERE `users`.`id` = 3;
+UPDATE `quicktour`.`users`
+SET `password` = 'c018ea78cf1602d6bc5ff3d94462b332bd1c2c099caab19a6910fa160e5ebeb6fcfc5eee605d96b3'
+WHERE `users`.`id` = 4;
+UPDATE `quicktour`.`users`
+SET `password` = '091fd45e668251e235831fbceaa76630cfeede62c968dca8ea340dd54c3f5990cf5cec733f744a64'
+WHERE `users`.`id` = 5;
+UPDATE `quicktour`.`users`
+SET `password` = '4c59e5b9cb5a491ff5c1fedd7254a345b35af67ff40bbd7b39ec8bde390cc3a7f6c2f7ff9a26dab8'
+WHERE `users`.`id` = 6;
+UPDATE `quicktour`.`users`
+SET `password` = '55ff08400ab98e506e2ab58b3e62215dd1774776fa2f0dd3d94170456995d9b6a6f93b41823c92b5'
+WHERE `users`.`id` = 7;
+UPDATE `quicktour`.`users`
+SET `password` = '3a4e3ccd5f2937f1e179e9a015a7f26892e997399c33862cfd8e9fd459e4a88f0c73191d9aa4c66e'
+WHERE `users`.`id` = 8;
+UPDATE `quicktour`.`users`
+SET `password` = '2eaf7abd06b27207ef710b08b996454349f8fa2b49021249118cbb83e0b20a3f43cd0bd2a7a907db'
+WHERE `users`.`id` = 9;
+UPDATE `quicktour`.`users`
+SET `password` = '4f1f27ec51ab9f12c62ba54ce5e041de144f6611bf83666ed33db05984fa83ede6b1c6fc0f0fd1fb'
+WHERE `users`.`id` = 10;

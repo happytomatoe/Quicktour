@@ -12,9 +12,9 @@ import org.springframework.mail.MailSender;
 import org.springframework.mail.SimpleMailMessage;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-import org.springframework.util.DigestUtils;
 
 import java.util.HashMap;
 import java.util.List;
@@ -35,13 +35,12 @@ import java.util.Random;
 @Service
 @Transactional
 public class UsersService {
-    public static final String USER_ROLE = "user";
-    public static final String AGENT_ROLE = "agent";
     public static final String TOUR_AGENCY = "Tour Agency";
     public static final Integer DEFAULT_AVATAR_ID = 4;
     public static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-    private static final String ADMIN_ROLE = "admin";
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
+    @Autowired
+    StandardPasswordEncoder passwordEncoder;
     @Autowired
     private PhotoService photoService;
     @Autowired
@@ -78,7 +77,7 @@ public class UsersService {
                 logger.error(me.getMessage());
             }
             user.setActive(false);
-            user.setPassword(DigestUtils.md5DigestAsHex(user.getPassword().getBytes()));
+            user.setPassword(passwordEncoder.encode(user.getPassword()));
             if (user.getRole() == null) {
                 user.setRole(updateRoleByCode(user));
             }
@@ -150,11 +149,9 @@ public class UsersService {
         values.put("Name", user.getName());
         values.put("Surname", user.getSurname());
         values.put("Login", user.getLogin());
-        values.put("Password", user.getPassword());
         StrSubstitutor sub = new StrSubstitutor(values, "%(", ")");
         return sub.replace(emailText);
     }
-
 
     /**
      * Activates user's profile so he can log into the system
@@ -203,7 +200,7 @@ public class UsersService {
             user.setLogin(oldUser.getLogin());
             user.setName(oldUser.getName());
             user.setSurname(oldUser.getSurname());
-            oldUser.setPassword(DigestUtils.md5DigestAsHex(newPassword.getBytes()));
+            oldUser.setPassword(passwordEncoder.encode(newPassword));
             userRepository.saveAndFlush(oldUser);
             sendNewPasswordEmail(user);
             logger.info("Password for user " + user.getLogin() + " was changed to '" + newPassword + "'");
@@ -273,7 +270,7 @@ public class UsersService {
         user.setPassword(password);
         user.setPhotosId(photoService.findOne(DEFAULT_AVATAR_ID));
         sendRegistrationEmail(user);
-        user.setPassword(DigestUtils.md5DigestAsHex(password.getBytes()));
+        user.setPassword(passwordEncoder.encode(password));
         userRepository.saveAndFlush(user);
         logger.info("Anonymous user with email {} has ordered a tour", user.getEmail());
         return userRepository.findByEmail(user.getEmail());
@@ -287,11 +284,9 @@ public class UsersService {
         return userRepository.findOne(id);
     }
 
-
     public User findByLogin(String login) {
         return userRepository.findByLogin(login);
     }
-
 
     public List<User> findAll() {
         return userRepository.findAll();
@@ -300,4 +295,6 @@ public class UsersService {
     public User save(User user) {
         return userRepository.saveAndFlush(user);
     }
+
+
 }
