@@ -14,8 +14,8 @@ function addCondition(relation, condition) {
         'users.age ': 'User\'s age',
         "users.sex": "User\'s sex",
         "users.name": "User\'s name ",
-        "orders.number_of_adults": "Number of adults places in order",
-        "orders.number_of_children": "Number of children in order",
+        "orders.numberOfAdults": "Number of adults places in order",
+        "orders.numberOfChildren": "Number of children in order",
         "Day of week": "Day of week"};
     /*
      Form elements
@@ -83,6 +83,11 @@ function addCondition(relation, condition) {
 
         }
         divRelationAndCondition.parentNode.removeChild(divRelationAndCondition);
+        var condition = document.getElementById('condition');
+        console.log("Delete scrollheight", condition.scrollHeight);
+        if (condition.scrollHeight <= 150) {
+            condition.style = "";
+        }
 
     });
     var deleteIcon = document.createElement("i");
@@ -118,8 +123,9 @@ function addCondition(relation, condition) {
         divCondition.clientHeight);
     if (divCondition.scrollHeight > 150) {
         divCondition.style.height = "150px";
-    } else {
-        divCondition.style.height = "auto";
+        divCondition.style.overflowY = "auto";
+        divCondition.style.overflowX = "hidden";
+
     }
     $('#ui-id-3').dialog('option', 'position', 'center');
 

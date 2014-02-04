@@ -78,7 +78,7 @@ public class DiscountPolicyController {
         Map<String, Object> map = new HashMap<String, Object>();
         List<DiscountPolicy> discountPolicies = discountPolicyService.findByCompany();
         for (DiscountPolicy discountPolicy : discountPolicies) {
-            map.put(String.valueOf(discountPolicy.getId()), discountPolicy.getName());
+            map.put(String.valueOf(discountPolicy.getDiscountPolicyId()), discountPolicy.getName());
         }
         return map;
     }
@@ -95,7 +95,7 @@ public class DiscountPolicyController {
         Map<String, Object> map = new HashMap<String, Object>(3);
         StringBuilder message = new StringBuilder();
         double amount = 0;
-        boolean isFormula=false;
+        boolean isFormula = false;
         Date startDate = discountPolicy.getStartDate();
         Date endDate = discountPolicy.getEndDate();
         boolean startDateIsNULL = startDate == null;
@@ -109,10 +109,9 @@ public class DiscountPolicyController {
             Pattern pattern = Pattern.compile("[()\\d\\+\\*/.-]+");
             if (!pattern.matcher(formula).find()) {
                 bindingResult.rejectValue("formula", "formula.syntaxerror", "Discount syntax is incorrect");
-            } else {
-                if (!discountPolicyService.testFormula(formula)) {
-                    bindingResult.rejectValue("formula", "formula.syntaxerror", "Discount syntax is incorrect");
-                }
+            } else if (discountPolicyService.formulaIsNotValid(formula)) {
+                bindingResult.rejectValue("formula", "formula.syntaxerror", "Discount syntax is incorrect");
+
             }
         }
         if (!startDateIsNULL) {
@@ -130,7 +129,7 @@ public class DiscountPolicyController {
         try {
             amount = Double.valueOf(discountPolicy.getFormula());
         } catch (Exception e) {
-            isFormula=true;
+            isFormula = true;
         }
         if (amount < 0 || amount > 100) {
             bindingResult.rejectValue("formula", "formula.invalid", "Discount is higher than 100 or lower than 0");
@@ -166,7 +165,7 @@ public class DiscountPolicyController {
         } else {
             discountPolicy = discountPolicyService.addDiscountPolicy(discountPolicy);
         }
-        if(isFormula){
+        if (isFormula) {
             discountPolicy.setFormula(discountDependencyService.convertFormula(discountPolicy.getFormula()));
         }
         map.put(RESULT, OK);

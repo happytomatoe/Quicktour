@@ -1,6 +1,7 @@
 package com.quicktour.controller;
 
 import com.quicktour.entity.Company;
+import com.quicktour.entity.Photo;
 import com.quicktour.entity.User;
 import com.quicktour.service.CompanyService;
 import com.quicktour.service.PhotoService;
@@ -59,8 +60,8 @@ public class ProfileController {
                                 @RequestParam(value = "avatar", required = false)
                                 MultipartFile image) {
         String newAvatarName;
-        if (usersService.findByLogin(user.getLogin()).getPhotosId() != null) {
-            newAvatarName = "@" + usersService.findByLogin(user.getLogin()).getPhotosId().getUrl();
+        if (usersService.findByLogin(user.getLogin()).getPhoto() != null) {
+            newAvatarName = "@" + usersService.findByLogin(user.getLogin()).getPhoto().getUrl();
 
         } else {
             newAvatarName = user.getLogin() + ".jpg";
@@ -72,12 +73,15 @@ public class ProfileController {
         if (image.isEmpty()) {
             usersService.save(user);
             return "redirect:/";
-        } else if (photoService.saveImage(newAvatarName, image)) {
-            user.setPhotosId(photoService.findByPhotoUrl(newAvatarName));
-            usersService.save(user);
-            //TODO :test
-            return "redirect:/";
-        } else return "/myprofile";
+        } else {
+            Photo photo = photoService.saveImage(newAvatarName, image);
+            if (photo != null) {
+                user.setPhoto(photo);
+                usersService.save(user);
+                //TODO :test
+                return "redirect:/";
+            } else return "/myprofile";
+        }
     }
 
     /**
@@ -90,7 +94,7 @@ public class ProfileController {
     public String myCompany(Model model) {
         Company myCompany = companyService.findByCompanyCode(usersService.getCurrentUser().getCompanyCode());
         model.addAttribute("company", myCompany);
-        model.addAttribute("newCompanyCode", new String());
+        model.addAttribute("newCompanyCode", "");
         return "mycompany";
     }
 
@@ -107,7 +111,7 @@ public class ProfileController {
         usersService.updateCompanyCode(newCompanyCode);
         Company myCompany = companyService.findByCompanyCode(usersService.getCurrentUser().getCompanyCode());
         model.addAttribute("company", myCompany);
-        model.addAttribute("newCompanyCode", new String());
+        model.addAttribute("newCompanyCode", "");
         return "mycompany";
     }
 

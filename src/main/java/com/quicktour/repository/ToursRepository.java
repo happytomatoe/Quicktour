@@ -20,8 +20,9 @@ public interface ToursRepository extends JpaRepository<Tour, Integer> {
     @Query("SELECT t FROM Tour t WHERE t.company=?1 AND t.discountPolicies IS EMPTY ")
     List<Tour> findByCompanyAndDiscountPoliciesIsEmpty(Company company);
 
-    Page<Tour> findByActive(boolean active, Pageable pageable);
+    Page<Tour> findByActiveTrue(Pageable pageable);
 
+    List<Tour> findByTourIdIn(List<Integer> ids);
 
     //search tours by country
     @Query("select distinct t from Tour as t inner join t.toursPlaces as p where p.country = ?1")
@@ -37,7 +38,7 @@ public interface ToursRepository extends JpaRepository<Tour, Integer> {
 
 
     @Query("select distinct t from Tour as t " +
-            "inner join t.tourInfo as ti inner join ti.ordersByTourInfo as o " +
+            "inner join t.tourInfo as ti inner join ti.orders as o " +
             "group by ti.tour order by avg(o.vote) desc")
     Page<Tour> findFamousTours(Pageable pageable);
 }

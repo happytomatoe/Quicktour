@@ -2,29 +2,31 @@ package com.quicktour.entity;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.*;
+import javax.persistence.Column;
+import javax.persistence.Entity;
+import javax.persistence.Id;
+import javax.persistence.Table;
 
 /**
  * @author Roman Lukash
  */
-@Table(name = "discount_dependency", schema = "", catalog = "quicktour")
+@Table(name = "discount_dependency")
 @Entity
 public class DiscountDependency {
 
-    private int id;
+    private int discountDependencyId;
     private String tag;
     private String tableField;
     private String description;
 
-    @Column(name = "id")
-    @GeneratedValue
+    @Column(name = "discount_dependency_id")
     @Id
-    public int getId() {
-        return id;
+    public int getDiscountDependencyId() {
+        return discountDependencyId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setDiscountDependencyId(int id) {
+        this.discountDependencyId = id;
     }
 
     @NotEmpty(message = "Tag is empty")
@@ -60,7 +62,7 @@ public class DiscountDependency {
     @Override
     public String toString() {
         return "DiscountDependency{" +
-                "id=" + id +
+                "id=" + discountDependencyId +
                 ", tag='" + tag + '\'' +
                 ", tableField='" + tableField + '\'' +
                 ", description='" + description + '\'' +

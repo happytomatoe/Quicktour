@@ -7,24 +7,25 @@ import javax.persistence.Table;
 import java.sql.Timestamp;
 
 @Entity
-@Table(name = "validation_links", schema = "", catalog = "quicktour")
+@Table(name = "validation_links")
 public class ValidationLink {
 
-    private int id;
+    private int validationLinkId;
     private int userId;
-    private String validationLink;
-    private Timestamp timeRegistered;
+    private String url;
+    private Timestamp createTime;
 
-    @Column(name = "ID", insertable = false, updatable = false)
+    @Column(name = "validation_link_id")
     @Id
-    public int getId() {
-        return id;
+    public int getValidationLinkId() {
+        return validationLinkId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setValidationLinkId(int id) {
+        this.validationLinkId = id;
     }
-    @Column(name = "userId")
+
+    @Column(name = "user_id")
     public int getUserId() {
         return userId;
     }
@@ -33,22 +34,22 @@ public class ValidationLink {
         this.userId = userId;
     }
 
-    @Column(name = "validationLink")
-    public String getValidationLink() {
-        return validationLink;
+    @Column(name = "url")
+    public String getUrl() {
+        return url;
     }
 
-    public void setValidationLink(String validationLink) {
-        this.validationLink = validationLink;
+    public void setUrl(String validationLink) {
+        this.url = validationLink;
     }
 
-    @Column(name = "time_registered")
-    public Timestamp getTimeRegistered() {
-        return timeRegistered;
+    @Column(name = "create_time")
+    public Timestamp getCreateTime() {
+        return createTime;
     }
 
-    public void setTimeRegistered(Timestamp time_registered) {
-        this.timeRegistered = time_registered;
+    public void setCreateTime(Timestamp time_registered) {
+        this.createTime = time_registered;
     }
 
 }

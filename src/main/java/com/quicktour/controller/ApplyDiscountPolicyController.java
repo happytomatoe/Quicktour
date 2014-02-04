@@ -29,10 +29,10 @@ import java.util.Map;
 @PreAuthorize("hasRole('agent')")
 public class ApplyDiscountPolicyController {
     @Autowired
-    ToursService toursService;
+    private ToursService toursService;
     @Autowired
-    DiscountPolicyService discountPolicyService;
-    Logger logger = LoggerFactory.getLogger(ApplyDiscountPolicyController.class);
+    private DiscountPolicyService discountPolicyService;
+    private final Logger logger = LoggerFactory.getLogger(ApplyDiscountPolicyController.class);
 
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody

@@ -5,7 +5,6 @@ import com.quicktour.entity.Place;
 import com.quicktour.entity.Tour;
 import com.quicktour.entity.User;
 import com.quicktour.service.CommentService;
-import com.quicktour.service.OrdersService;
 import com.quicktour.service.ToursService;
 import com.quicktour.service.UsersService;
 import org.slf4j.Logger;
@@ -36,8 +35,6 @@ public class TourController {
     @Autowired
     private CommentService commentService;
     @Autowired
-    private OrdersService ordersService;
-    @Autowired
     private UsersService usersService;
 
     /**
@@ -51,7 +48,7 @@ public class TourController {
     @RequestMapping(value = "/{id}", method = RequestMethod.GET)
     public String getTours(@PathVariable("id") int id, ModelMap map) {
 
-        Tour tour = toursService.findTourByIdWithCompany(id);
+        Tour tour = toursService.findTourByIdWithPlacesAndPriceIncludes(id);
         String description = toursService.cutDescription(tour.getDescription());
         BigDecimal minPrice = toursService.findMinPrice(tour);
         double maxDiscount = toursService.findMaxDiscount(tour);
@@ -76,8 +73,7 @@ public class TourController {
             @PathVariable("id") int tourId,
             @RequestParam("page") int page,
             @RequestParam("numberOfRecords") int numberOfRecordsPerPage) {
-        Page pageOfComments = commentService.findAllComments(tourId, page, numberOfRecordsPerPage);
-        return pageOfComments;
+        return commentService.findAllComments(tourId, page, numberOfRecordsPerPage);
     }
 
     @RequestMapping(value = "/{id}/removeComment", method = RequestMethod.POST)
@@ -85,7 +81,7 @@ public class TourController {
     public String removeComment(
             Comment comment
     ) {
-        User commentUser = commentService.findOne(comment.getId()).getUser();
+        User commentUser = commentService.findOne(comment.getCommentId()).getUser();
         if (!commentUser.getLogin().equals(usersService.getCurrentUser().getLogin())) {
             return "Error";
         }
@@ -98,8 +94,7 @@ public class TourController {
     public Page getLastComments(
             @PathVariable("id") int tourId,
             @RequestParam(value = "numberOfRecords") int numberOfRecordsPerPage) {
-        Page pageOfComments = commentService.findLastPageComments(tourId, numberOfRecordsPerPage);
-        return pageOfComments;
+        return commentService.findLastPageComments(tourId, numberOfRecordsPerPage);
     }
 
     @RequestMapping(value = "/{tourId}/saveComment", method = RequestMethod.POST)
@@ -109,7 +104,7 @@ public class TourController {
         tour.setTourId(tourId);
         comment.setTour(tour);
         logger.debug("Comment {}", comment);
-        if (!"".equals(comment.getComment())) {
+        if (!"".equals(comment.getContent())) {
             comment = commentService.saveComment(comment);
         }
         return comment;
@@ -128,6 +123,7 @@ public class TourController {
     @ResponseBody
     Map<String, Object> getData(@RequestParam("id") int id) {
         Tour tour = toursService.findTourByIdWithPlaces(id);
+        logger.debug("Find tour {}", tour);
         List<Place> toursPlaces = tour.getToursPlaces();
         Map<String, Object> map = new HashMap<>();
         map.put("places", toursPlaces);

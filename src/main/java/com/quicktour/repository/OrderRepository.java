@@ -10,35 +10,34 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface OrderRepository extends JpaRepository<Order, Integer> {
 
-    Order findById(int id);
 
-    @Query("SELECT COUNT(o.id) FROM Order o WHERE Companies_id = ?1")
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE  o.company.companyId = ?1")
     long countByCompanyId(int id);
 
-    @Query("SELECT COUNT(o.id) FROM Order o WHERE Users_ID = ?1")
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.user.userId = ?1")
     long countByUserId(int id);
 
-    @Query("SELECT COUNT(o.id) FROM Order o WHERE o.status = ?1")
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.status = ?1")
     long countByStatus(String status);
 
-    @Query("SELECT COUNT(o.id) FROM Order o WHERE Companies_id = ?1 AND o.status = ?2")
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.company.companyId = ?1 AND o.status = ?2")
     long countByCompanyIdAndStatus(int id, String status);
 
-    @Query("SELECT COUNT(o.id) FROM Order o WHERE Users_ID = ?1 AND o.status = ?2")
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.user.userId = ?1 AND o.status = ?2")
     long countByUserIdAndStatus(int id, String status);
 
     Page<Order> findAll(Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.companyId AS c WHERE c.id = ?1")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1")
     Page<Order> findByCompanyId(int id, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.companyId AS c WHERE c.id = ?1 AND o.id = ?2")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1 AND o.orderId = ?2")
     Order findByCompanyId(int id, int orderId);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.userId AS u WHERE u.id = ?1")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1")
     Page<Order> findByUsersId(int id, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.userId AS u WHERE u.id = ?1 AND o.id = ?2")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1 AND o.orderId = ?2")
     Order findByUserId(int id, int orderId);
 
     Page<Order> findByStatus(String status, Pageable pageable);
@@ -46,14 +45,14 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order AS o WHERE o.status IN ('Received', 'Accepted', 'Confirmed')")
     Page<Order> findActiveOrders(Pageable pageable);
 
-    Page<Order> findByStatusAndCompanyId(String status, Company id, Pageable pageable);
+    Page<Order> findByStatusAndCompany(String status, Company id, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.companyId AS c WHERE c.id = ?1 AND o.status IN ('Received', 'Accepted', 'Confirmed')")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1 AND o.status IN ('Received', 'Accepted', 'Confirmed')")
     Page<Order> findActiveOrdersByCompanyId(int id, Pageable pageable);
 
-    Page<Order> findByStatusAndUserId(String status, User id, Pageable pageable);
+    Page<Order> findByStatusAndUser(String status, User user, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.userId AS u WHERE u.id = ?1 AND o.status IN ('Received', 'Accepted', 'Confirmed')")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1 AND o.status IN ('Received', 'Accepted', 'Confirmed')")
     Page<Order> findActiveOrdersByUserId(int id, Pageable pageable);
 
 

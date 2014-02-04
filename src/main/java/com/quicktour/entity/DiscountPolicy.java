@@ -12,32 +12,32 @@ import java.sql.Date;
  * @author Roman Lukash
  */
 @Entity
-@Table(name = "discount_policy", schema = "", catalog = "quicktour")
+@Table(name = "discount_policy")
 public class DiscountPolicy {
 
     public static final String DAYOFWEEK = "Day of week";
     public static final String USERS_SEX = "users.sex";
 
-    private int id;
+    private int discountPolicyId;
     private String name;
     private String description;
     private String condition;
     private String formula;
     private Date startDate;
     private Date endDate;
-    private boolean active;
+    private boolean active = false;
     private Company company;
 
 
     @Id
     @GeneratedValue
-    @Column(name = "id")
-    public int getId() {
-        return id;
+    @Column(name = "discount_policy_id")
+    public int getDiscountPolicyId() {
+        return discountPolicyId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setDiscountPolicyId(int id) {
+        this.discountPolicyId = id;
     }
 
     @NotEmpty(message = "Name is empty")
@@ -78,7 +78,7 @@ public class DiscountPolicy {
         this.formula = formula;
     }
 
-    @Column(name = "startDate")
+    @Column(name = "start_date")
     public Date getStartDate() {
         return startDate;
     }
@@ -87,7 +87,7 @@ public class DiscountPolicy {
         this.startDate = startDate;
     }
 
-    @Column(name = "endDate")
+    @Column(name = "end_date")
     public Date getEndDate() {
         return endDate;
     }
@@ -99,7 +99,7 @@ public class DiscountPolicy {
     @ManyToOne()
     @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "Companies_id")
+    @JoinColumn(name = "companies_id", insertable = false, updatable = false)
     public Company getCompany() {
         return company;
     }
@@ -121,7 +121,7 @@ public class DiscountPolicy {
     @Override
     public String toString() {
         return "DiscountPolicy{" +
-                "id=" + id +
+                "id=" + discountPolicyId +
                 ", name='" + name + '\'' +
                 ", description='" + description + '\'' +
                 ", condition='" + condition + '\'' +

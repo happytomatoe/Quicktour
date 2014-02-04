@@ -2,7 +2,10 @@ package com.quicktour.service;
 
 import com.quicktour.entity.DiscountDependency;
 import com.quicktour.repository.DiscountDependencyRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -15,13 +18,15 @@ import java.util.List;
 @Service
 @Transactional
 public class DiscountDependencyService {
-
     @Autowired
     DiscountDependencyRepository discountDependenciesRepository;
     @Autowired
     OrdersService ordersService;
     @Autowired
     UsersService usersService;
+    @Value("${dbname}")
+    private String dbName;
+    private Logger logger = LoggerFactory.getLogger(DiscountDependencyService.class);
 
     public List<DiscountDependency> findAllDependencies() {
         return discountDependenciesRepository.findAll();
@@ -71,6 +76,7 @@ public class DiscountDependencyService {
      * Finds columns in user and order tables whose type is all types of int,double,real,float,decimal
      */
     public List<String> findAvailableColumns() {
-        return discountDependenciesRepository.getColumnNames();
+        logger.debug("DBname {}", dbName);
+        return discountDependenciesRepository.getNumberTypeColumnNames(dbName);
     }
 }

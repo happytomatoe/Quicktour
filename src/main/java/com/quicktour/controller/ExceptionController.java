@@ -19,7 +19,7 @@ import javax.servlet.http.HttpServletRequest;
  */
 @ControllerAdvice
 public class ExceptionController {
-    Logger logger = LoggerFactory.getLogger(ExceptionController.class);
+    final Logger logger = LoggerFactory.getLogger(ExceptionController.class);
 
     @ResponseStatus(HttpStatus.METHOD_NOT_ALLOWED)
     @ExceptionHandler(HttpRequestMethodNotSupportedException.class)

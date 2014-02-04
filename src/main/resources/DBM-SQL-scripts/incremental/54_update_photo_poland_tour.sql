@@ -1,1 +1,0 @@
-UPDATE `quicktour`.`tours` SET `MainPhotoUrl`='http://starholiday.info/sites/default/files/poland.jpg' WHERE `ToursId`='3';

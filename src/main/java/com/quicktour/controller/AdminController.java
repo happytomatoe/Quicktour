@@ -134,15 +134,15 @@ public class AdminController {
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
         String newAvatarName;
-        if (companyService.findByName(company.getName()).getPhotosId() != null)                            /** check if current company already has avatar*/
-            newAvatarName = "@" + companyService.findByName(company.getName()).getPhotosId().getUrl(); /** if true, we need to create new avatars url for correct inserting to database */
+        if (companyService.findByName(company.getName()).getPhoto() != null)                            /** check if current company already has avatar*/
+            newAvatarName = "@" + companyService.findByName(company.getName()).getPhoto().getUrl(); /** if true, we need to create new avatars url for correct inserting to database */
         else
             newAvatarName = company.getName() + "comp.jpg";                                              /** else use standart filename creation algorithm*/
         if (bindingResult.hasErrors()) {
             return "editcompany";
         }
-        company.setPhotosId(photoService.saveLogo(newAvatarName, image));
-        if (!companyService.updateCompany(company)) {
+        company.setPhoto(photoService.saveImage(newAvatarName, image));
+        if (companyService.saveAndFlush(company) == null) {
             return "editcompany";
         } else return "redirect:/";
     }

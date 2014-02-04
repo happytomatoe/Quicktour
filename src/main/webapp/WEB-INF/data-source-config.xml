@@ -21,7 +21,7 @@
 
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
         <property name="driverClass" value="${driverClass}"/>
-        <property name="jdbcUrl" value="jdbc:mysql://${host}:${port}/quicktour?characterEncoding=UTF-8"/>
+        <property name="jdbcUrl" value="jdbc:mysql://${host}:${port}/${dbname}?characterEncoding=UTF-8"/>
         <property name="user" value="${user}"/>
         <property name="password" value="${password}"/>
         <property name="minPoolSize" value="${minPoolSize}"/>
@@ -48,11 +48,6 @@
         <property name="dataSource" ref="dataSource"/>
         <property name="jpaVendorAdapter" ref="hibernateVendor"/>
         <property name="packagesToScan" value="com.quicktour.entity"/>
-        <property name="jpaProperties">
-            <props>
-                <prop key="hibernate.enable_lazy_load_no_trans">true</prop>
-            </props>
-        </property>
     </bean>
 
     <bean id="hibernateVendor" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">

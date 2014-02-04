@@ -5,20 +5,20 @@ import javax.persistence.Entity;
 import javax.persistence.Id;
 import javax.persistence.Table;
 
-@Table(name = "priceincludes", schema = "", catalog = "quicktour")
+@Table(name = "price_includes")
 @Entity
 public class PriceDescription {
-    private int id;
+    private int priceDescriptionId;
     private String description;
 
-    @Column(name = "PriceIncludesId")
+    @Column(name = "price_include_id")
     @Id
-    public int getId() {
-        return id;
+    public int getPriceDescriptionId() {
+        return priceDescriptionId;
     }
 
-    public void setId(int priceIncludesId) {
-        this.id = priceIncludesId;
+    public void setPriceDescriptionId(int priceIncludesId) {
+        this.priceDescriptionId = priceIncludesId;
     }
 
     @Column(name = "description")
@@ -32,27 +32,28 @@ public class PriceDescription {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         PriceDescription that = (PriceDescription) o;
 
-        if (id != that.id) return false;
-        if (description != null ? !description.equals(that.description) : that.description != null)
+        if (priceDescriptionId != that.priceDescriptionId) {
             return false;
+        }
+        return description.equals(that.description);
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = id;
+        int result = priceDescriptionId;
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
 
-    @Override
-    public String toString() {
-        return this.description;
-    }
+
 }

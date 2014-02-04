@@ -28,7 +28,7 @@
         <appender-ref ref="STDOUT"/>
     </appender>
 
-    <logger name="com.quicktour" level="ALL"/>
+    <logger name="com.quicktour" level="All"/>
     <root level="ERROR">
         <appender-ref ref="FileAsync"/>
         <appender-ref ref="StdoutAsync"/>

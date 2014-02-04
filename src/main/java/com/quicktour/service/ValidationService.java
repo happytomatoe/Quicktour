@@ -6,11 +6,8 @@ import com.quicktour.repository.PhotoRepository;
 import com.quicktour.repository.UserRepository;
 import com.quicktour.repository.ValidationLinksRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-
-import java.sql.Timestamp;
-import java.util.List;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Contains all functional logic connected with validation links
@@ -19,6 +16,7 @@ import java.util.List;
  * @version 1.0 12/27/2013
  */
 @Service
+@Transactional
 public class ValidationService {
 
     @Autowired
@@ -37,20 +35,19 @@ public class ValidationService {
      * Every 5 minutes checks database for links that are more than 2 hours old and, if there are
      * ones, cleans database from user who didn't activate his profile and his avatar.
      */
-    @Scheduled(fixedRate = 300000)
-    public void checkExpiredValidationLinks() {
-        Timestamp time = new Timestamp(System.currentTimeMillis());
-        List<ValidationLink> links = validationLinksRepository.findAll();
-        for (ValidationLink link : links) {
-            if (time.getTime() - link.getTimeRegistered().getTime() > 7200000) {
-                photoRepository.delete(photoRepository.findOne
-                        (userRepository.findOne(link.getUserId()).getPhotosId().getId()));
-                userRepository.delete(link.getUserId());
-                validationLinksRepository.delete(link.getId());
-            }
-        }
-    }
-
+//    @Scheduled(cron="0 0 0 0/1 * ?")
+//    public void checkExpiredValidationLinks() {
+//        Timestamp time = new Timestamp(System.currentTimeMillis());
+//        List<ValidationLink> links = validationLinksRepository.findAll();
+//        for (ValidationLink link : links) {
+//            if (time.getTime() - link.getTimeRegistered().getTime() > 7200000) {
+//                photoRepository.delete(photoRepository.findOne
+//                        (userRepository.findOne(link.getUserId()).getPhotosId().getId()));
+//                userRepository.delete(link.getUserId());
+//                validationLinksRepository.delete(link.getId());
+//            }
+//        }
+//    }
     public boolean addValidationLink(ValidationLink link) {
         validationLinksRepository.saveAndFlush(link);
         return true;
@@ -64,7 +61,7 @@ public class ValidationService {
      */
     public boolean clearLink(String userLogin) {
         validationLinksRepository.delete(validationLinksRepository.findByUserId(
-                userRepository.findByLogin(userLogin).getId()).getId());
+                userRepository.findByLogin(userLogin).getUserId()).getValidationLinkId());
         return true;
     }
 
@@ -75,13 +72,13 @@ public class ValidationService {
      */
     public void createValidationLink(User user) {
         ValidationLink link = new ValidationLink();
-        link.setUserId(userService.findByLogin(user.getLogin()).getId());
-        link.setValidationLink("localhost:/login/" + user.getLogin());
+        link.setUserId(userService.findByLogin(user.getLogin()).getUserId());
+        link.setUrl("localhost:/login/" + user.getLogin());
         addValidationLink(link);
     }
 
     public void resolveLink(String validationLink) {
-        ValidationLink link = validationLinksRepository.findByValidationLink("localhost:/login/" + validationLink);
+        ValidationLink link = validationLinksRepository.findByUrl("localhost:/login/" + validationLink);
         if (link != null) {
             User user = userService.findOne(link.getUserId());
             userService.setUserActive(user);

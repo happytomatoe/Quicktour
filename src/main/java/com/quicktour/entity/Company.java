@@ -11,37 +11,37 @@ import javax.validation.constraints.Size;
 import java.util.Collection;
 
 @Entity
-@Table(name = "companies", schema = "", catalog = "quicktour")
+@Table(name = "companies")
 public class Company {
 
-    private int id;
+    private int companyId;
     private String name;
     private String information;
     private String address;
     private String contactPhone;
     private String contactEmail;
     private String type;
-    private Integer discountAmount;
+    private Integer discount;
     private String license;
     private String companyCode;
-    private Photo photosId;
-    private Collection<Order> ordersByCompanyId;
-    private Collection<Tour> toursByCompanyId;
+    private Photo photo;
+    private Collection<Order> orders;
+    private Collection<Tour> tours;
 
-    @Column(name = "id")
+    @Column(name = "company_id")
     @Id
-    public int getId() {
-        return id;
+    public int getCompanyId() {
+        return companyId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCompanyId(int id) {
+        this.companyId = id;
     }
 
     @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z\\s]+$",
             message = "Company name must consist only of English or Ukrainian letters(or both)")
     @Size(min = 3, max = 30, message = "Name must be between 3 and 30 characters long.")
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -50,7 +50,7 @@ public class Company {
         this.name = name;
     }
 
-    @Column(name = "Information")
+    @Column(name = "information")
     public String getInformation() {
         return information;
     }
@@ -60,7 +60,7 @@ public class Company {
     }
 
     @Size(min = 3, message = "Address cannot be so short")
-    @Column(name = "Address")
+    @Column(name = "address")
     public String getAddress() {
         return address;
     }
@@ -72,7 +72,7 @@ public class Company {
     @Size(min = 5, max = 25, message = "Phone number must be between 5 and 25 characters long")
     @Pattern(regexp = "^\\+?\\d+(-\\d+)*$",
             message = "There should be only numbers, '+' and '-' symbols in your phone number")
-    @Column(name = "Contact_Phone", unique = true)
+    @Column(name = "contact_phone", unique = true)
     public String getContactPhone() {
         return contactPhone;
     }
@@ -83,7 +83,7 @@ public class Company {
 
     @Pattern(regexp = "[-0-9a-zA-Z.+_]+@[-0-9a-zA-Z.+_]+\\.[a-zA-Z]{2,4}",
             message = "Input correct email")
-    @Column(name = "Contact_Email", unique = true)
+    @Column(name = "contact_email", unique = true)
     public String getContactEmail() {
         return contactEmail;
     }
@@ -92,7 +92,7 @@ public class Company {
         this.contactEmail = contactEmail;
     }
 
-    @Column(name = "Type")
+    @Column(name = "type")
     public String getType() {
         return type;
     }
@@ -103,17 +103,17 @@ public class Company {
 
     @DecimalMin(value = "0", message = "Input correct discount amount, it cannot be less than 0%")
     @DecimalMax(value = "100", message = "Input correct discount amount, it cannot be more than 100%")
-    @Column(name = "Discount_amount")
-    public Integer getDiscountAmount() {
-        return discountAmount;
+    @Column(name = "discount")
+    public Integer getDiscount() {
+        return discount;
     }
 
-    public void setDiscountAmount(Integer discountAmount) {
-        this.discountAmount = discountAmount;
+    public void setDiscount(Integer discountAmount) {
+        this.discount = discountAmount;
     }
 
     @Size(min = 5, max = 25, message = "License must be between 5 and 25 characters long")
-    @Column(name = "License", unique = true)
+    @Column(name = "license", unique = true)
     public String getLicense() {
         return license;
     }
@@ -123,7 +123,7 @@ public class Company {
     }
 
     @Size(min = 5, max = 25, message = "Company code must be between 5 and 25 characters long")
-    @Column(name = "Company_Code", unique = true)
+    @Column(name = "company_code", unique = true)
     public String getCompanyCode() {
         return companyCode;
     }
@@ -135,33 +135,33 @@ public class Company {
 
     @OneToMany(mappedBy = "company")
     @LazyCollection(LazyCollectionOption.FALSE)
-    public Collection<Tour> getToursByCompanyId() {
-        return toursByCompanyId;
+    public Collection<Tour> getTours() {
+        return tours;
     }
 
-    public void setToursByCompanyId(Collection<Tour> toursByCompanyId) {
-        this.toursByCompanyId = toursByCompanyId;
+    public void setTours(Collection<Tour> toursByCompanyId) {
+        this.tours = toursByCompanyId;
     }
 
-    @OneToMany(mappedBy = "companyId")
+    @OneToMany(mappedBy = "company")
     @LazyCollection(LazyCollectionOption.FALSE)
-    public Collection<Order> getOrdersByCompanyId() {
-        return ordersByCompanyId;
+    public Collection<Order> getOrders() {
+        return orders;
     }
 
-    public void setOrdersByCompanyId(Collection<Order> ordersByCompanyId) {
-        this.ordersByCompanyId = ordersByCompanyId;
+    public void setOrders(Collection<Order> ordersByCompanyId) {
+        this.orders = ordersByCompanyId;
     }
 
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "Photos_ID")
-    public Photo getPhotosId() {
-        return photosId;
+    @JoinColumn(name = "photos_id", insertable = false, updatable = false)
+    public Photo getPhoto() {
+        return photo;
     }
 
-    public void setPhotosId(Photo photosId) {
-        this.photosId = photosId;
+    public void setPhoto(Photo photosId) {
+        this.photo = photosId;
     }
 
 }

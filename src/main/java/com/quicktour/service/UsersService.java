@@ -36,7 +36,6 @@ import java.util.Random;
 @Transactional
 public class UsersService {
     public static final String TOUR_AGENCY = "Tour Agency";
-    public static final Integer DEFAULT_AVATAR_ID = 4;
     public static final String VALID_CHARS = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
     @Autowired
@@ -268,7 +267,7 @@ public class UsersService {
         user.setRole(Roles.user);
         user.setLogin(login);
         user.setPassword(password);
-        user.setPhotosId(photoService.findOne(DEFAULT_AVATAR_ID));
+        user.setPhoto(photoService.getDefaultAvatar());
         sendRegistrationEmail(user);
         user.setPassword(passwordEncoder.encode(password));
         userRepository.saveAndFlush(user);

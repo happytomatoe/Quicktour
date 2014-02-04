@@ -11,7 +11,7 @@ public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
     Page<Comment> findCommentsByTourAndParentIsNull(Tour tour, Pageable pageable);
 
-    @Query("SELECT COUNT(c.id) FROM Comment c WHERE c.tour.tourId=?1 AND c.parent IS NULL")
-    Long getSize(int tourId);
+    @Query("SELECT COUNT(c.commentId) FROM Comment c WHERE c.tour.tourId=?1 AND c.parent IS NULL")
+    Long findCountByTourId(int tourId);
 
 }

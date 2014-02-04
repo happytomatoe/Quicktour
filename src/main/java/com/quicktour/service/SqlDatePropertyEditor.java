@@ -1,6 +1,7 @@
 package com.quicktour.service;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.beans.PropertyEditorSupport;
 import java.sql.Date;
@@ -8,6 +9,7 @@ import java.text.ParseException;
 import java.text.SimpleDateFormat;
 
 @Service
+@Transactional
 public class SqlDatePropertyEditor extends PropertyEditorSupport {
     public static final String DEFAULT_BATCH_PATTERN = "yyyy-MM-dd";
     private final SimpleDateFormat sdf;

@@ -4,7 +4,6 @@
        xmlns:security="http://www.springframework.org/schema/security"
        xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
        http://www.springframework.org/schema/security http://www.springframework.org/schema/security/spring-security-3.1.xsd">
-    <security:debug/>
 
     <security:global-method-security jsr250-annotations="enabled" pre-post-annotations="enabled"
                                      secured-annotations="enabled"/>
@@ -30,7 +29,6 @@
         <security:authentication-provider>
             <security:password-encoder ref="encoder"/>
             <security:jdbc-user-service id="userService"
-
                                         data-source-ref="dataSource"
                                         users-by-username-query="select login, password, true
                             from users where login=? and active='1'"

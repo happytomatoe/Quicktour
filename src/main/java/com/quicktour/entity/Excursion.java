@@ -3,26 +3,26 @@ package com.quicktour.entity;
 import javax.persistence.*;
 
 @Entity
-@Table(name = "excursions", schema = "", catalog = "quicktour")
+@Table(name = "excursions")
 public class Excursion {
 
-    private int id;
+    private int excursionId;
     private Place place;
     private String name;
-    private Boolean isOptional;
+    private Boolean optional;
     private Short price;
 
-    @Column(name = "id")
+    @Column(name = "excursion_id")
     @Id
-    public int getId() {
-        return id;
+    public int getExcursionId() {
+        return excursionId;
     }
 
-    public void setId(int excursId) {
-        this.id = excursId;
+    public void setExcursionId(int excursId) {
+        this.excursionId = excursId;
     }
 
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -31,16 +31,16 @@ public class Excursion {
         this.name = name;
     }
 
-    @Column(name = "IsOptional")
-    public Boolean getOptional() {
-        return isOptional;
+    @Column(name = "optional")
+    public Boolean isOptional() {
+        return optional;
     }
 
     public void setOptional(Boolean optional) {
-        isOptional = optional;
+        this.optional = optional;
     }
 
-    @Column(name = "Price")
+    @Column(name = "price")
     public Short getPrice() {
         return price;
     }
@@ -50,7 +50,7 @@ public class Excursion {
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "PlaceId")
+    @JoinColumn(name = "places_id", insertable = false, updatable = false)
     public Place getPlace() {
         return place;
     }

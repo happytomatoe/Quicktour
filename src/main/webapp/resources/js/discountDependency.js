@@ -37,8 +37,8 @@ $(document).ready(function () {
                 width: "60%"
             }
         }, formCreated: function (event, data) {
-                var $availableFieds = $('<select name="availableFields" required="required"></select>');
-            $.each(availableFields,function(i,item){
+            var $availableFieds = $('<select name="tableField" required="required"></select>');
+            $.each(availableFields, function (i, item) {
                 $availableFieds.append($('<option>', {
                     value: item,
                     text: item

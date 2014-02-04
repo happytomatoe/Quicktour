@@ -1,1 +1,0 @@
-insert into roles(RoleId,Role)values(1,'admin'),(2,'agent'),(3,'user');

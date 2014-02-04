@@ -6,8 +6,6 @@
     <title><tiles:getAsString name="title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/bootstrap.css"/>">
     <link rel="stylesheet" href="http://code.jquery.com/ui/1.10.3/themes/smoothness/jquery-ui.css">
-    <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/signin.css"/>">
-    <link href="<c:url value="/resources/css/orders.css"/>" type="text/css" rel="stylesheet">
 
     <script src="<c:url value="/resources/js/jquery.js" />" type="text/javascript"></script>
     <script src="<c:url value="/resources/js/jquery.MetaData.js" />" type="text/javascript"></script>

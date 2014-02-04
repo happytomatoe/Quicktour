@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 /**
  * Service which processed required information for the comments on tour page
@@ -18,18 +19,16 @@ import org.springframework.stereotype.Service;
  * @author Kolya Yanchiy
  */
 @Service
+@Transactional
 public class CommentService {
-    TextProcessor processor = BBProcessorFactory.getInstance().createFromResource("org/kefirsf/bb/safehtml.xml");
+    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
+    final TextProcessor processor = BBProcessorFactory.getInstance().createFromResource("org/kefirsf/bb/safehtml.xml");
     @Autowired
     CommentRepository commentRepository;
-
     @Autowired
     ToursRepository toursRepository;
-
     @Autowired
     UsersService usersService;
-    private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
-
 
     /**
      * Method returns page of comments we are intersted in
@@ -44,20 +43,17 @@ public class CommentService {
         return commentRepository.findCommentsByTourAndParentIsNull(tour, pageRequest);
     }
 
-
     /**
      * Method find and return last page with comments for current tour
      *
      * @return last page with comments for current tour
      */
     public Page<Comment> findLastPageComments(int tourId, int numberOfRecordsPerPage) {
-        int size = commentRepository.getSize(tourId).intValue();
+        int size = commentRepository.findCountByTourId(tourId).intValue();
         double divider = size % numberOfRecordsPerPage;
         int page = divider == 0 ? size / numberOfRecordsPerPage - 1 : size / numberOfRecordsPerPage;
         logger.debug("Size {}.\nDivider {}.\nPage {}", size, divider, page);
-
-        Page<Comment> comments = findAllComments(tourId, page, numberOfRecordsPerPage);
-        return comments;
+        return findAllComments(tourId, page, numberOfRecordsPerPage);
     }
 
     public Comment findOne(Integer id) {
@@ -70,14 +66,14 @@ public class CommentService {
      */
     public Comment saveComment(Comment comment) {
         User currentUser = usersService.getCurrentUser();
-        String commentText = comment.getComment();
+        String commentText = comment.getContent();
         String commentUpdated = commentText.replace("\n", "<br/>");
         String commentTextForSave = processor.process(commentUpdated);
         if (commentTextForSave.isEmpty()) {
         } else {
-            comment.setComment(commentTextForSave);
+            comment.setContent(commentTextForSave);
             comment.setUser(currentUser);
-            logger.info("The user {}  was add new comment: {}", comment.getUser().getLogin(), comment.getComment());
+            logger.info("The user {}  was add new comment: {}", comment.getUser().getLogin(), comment.getContent());
             comment = commentRepository.saveAndFlush(comment);
         }
         return comment;

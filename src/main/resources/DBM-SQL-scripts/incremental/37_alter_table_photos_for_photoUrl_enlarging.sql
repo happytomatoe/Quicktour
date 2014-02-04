@@ -1,1 +1,0 @@
-ALTER TABLE photos MODIFY PhotoUrl VARCHAR(256);

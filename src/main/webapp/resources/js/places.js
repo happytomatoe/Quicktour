@@ -14,13 +14,14 @@ var editor;
 $(document).ready(function () {
     getData();
     commentBox = $(".comment-box");
+    getPage(0);
     var $login = $("#login");
     if ($login.length > 0) {
         login = $login.val();
+        CKEDITOR.replace(textBoxId);
+        editor = CKEDITOR.instances[textBoxId];
+
     }
-    getPage(0);
-    CKEDITOR.replace(textBoxId);
-    editor = CKEDITOR.instances[textBoxId];
 });
 
 /**
@@ -192,7 +193,7 @@ function createComment(comment, parentId) {
                 <div class="col-md-2">\
                     <a href="' + baseUrl + 'user/' + comment.user.login + '" class="comment' + comment.id + '">\
                         <img class="img-rounded" width="100px"\
-                        src="' + baseUrl + 'images/' + comment.user.photosId.url + '"/>\
+                        src="' + baseUrl + 'images/' + comment.user.photo.url + '"/>\
                         <h4 class="username">' + comment.user.login + '</h4>\
                     </a>\
                 </div>\
@@ -217,7 +218,7 @@ function displayComment(content, commentBox) {
                 <div class="col-md-2">\
                     <a href="' + baseUrl + 'user/' + comment.user.login + '" class="comment' + comment.id + '">\
                         <img class="img-rounded" width="100px"\
-                        src="' + baseUrl + 'images/' + comment.user.photosId.url + '"/>\
+                        src="' + baseUrl + 'images/' + comment.user.photo.url + '"/>\
                         <h4 class="username">' + comment.user.login + '</h4>\
                     </a>\
                 </div>\

@@ -26,7 +26,6 @@
     <definition name="index-tile" template="/WEB-INF/view/layouts/classic.jsp">
         <put-attribute name="title" value="TourServe Travel Company"/>
         <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
-        <!--<put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp" />-->
         <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
         <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
     </definition>
@@ -34,13 +33,12 @@
     <definition name="mainPage-tile" template="/WEB-INF/view/layouts/mainPage.jsp">
         <put-attribute name="title" value="TourServe Travel Company"/>
         <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
-        <!--<put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp" />-->
         <put-attribute name="body" value="/WEB-INF/view/tiles/body-page.jsp"/>
         <put-attribute name="footer" value="/WEB-INF/view/tiles/footer-page.jsp"/>
     </definition>
 
     <definition name="index-extended" extends="mainPage-tile">
-        <put-attribute name="carousel" value="/WEB-INF/view/tiles/carousel.jsp" />
+        <put-attribute name="carousel" value="/WEB-INF/view/tiles/carousel.jsp"/>
         <put-attribute name="menu" value="/WEB-INF/view/tiles/main-page-menu.jsp"/>
         <put-attribute name="body" value="/WEB-INF/view/pages/index.jsp"/>
     </definition>
@@ -49,11 +47,9 @@
         <put-attribute name="body" value="/WEB-INF/view/pages/manageTours.jsp"/>
     </definition>
 
-    <definition name="place-extended" template="/WEB-INF/view/layouts/noSideBar.jsp">
+    <definition name="place-extended" extends="classic-tile">
         <put-attribute name="title" value="Tour"/>
-        <put-attribute name="meta-info" value="/WEB-INF/view/tiles/orders-css-js.jsp"/>
-        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
-        <put-attribute name="body" value="/WEB-INF/view/pages/place.jsp" />
+        <put-attribute name="body" value="/WEB-INF/view/pages/place.jsp"/>
     </definition>
 
 
@@ -140,7 +136,7 @@
 
     <definition name="companyregistration" extends="classic-tile">
         <put-attribute name="body" value="/WEB-INF/view/pages/addcompany.jsp"/>
-	</definition>
+    </definition>
 
     <definition name="edituser-tile" extends="classic-tile">
         <put-attribute name="body" value="/WEB-INF/view/pages/edituser.jsp"/>
@@ -160,9 +156,9 @@
     </definition>
 
     <definition name="agentTours" extends="classic-tile">
-        <put-attribute name="title" value="My tours" cascade="true" />
-        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp" />
-        <put-attribute name="body" value="/WEB-INF/view/pages/agentTours.jsp" />
+        <put-attribute name="title" value="My tours" cascade="true"/>
+        <put-attribute name="header" value="/WEB-INF/view/tiles/header-page.jsp"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/agentTours.jsp"/>
     </definition>
 
     <definition name="viewcompanies" extends="classic-tile">

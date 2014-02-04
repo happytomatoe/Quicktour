@@ -9,42 +9,25 @@
                 Filter by...
             </div>
             <div class="panel-body">
-                <form action="/filter/results/0" method="post">
+                <form action="<c:url value="/filter/results/0"/>" method="post">
                     <div class="form-group">
                         <label for="country">Country</label>
 
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="country" name="country" list="countries">
-                            <datalist id="countries">
-                                <c:forEach items="${countries}" var="country">
-                                <option value="${country}">
-                                    </c:forEach>
-                            </datalist>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                    <span class="caret"></span>
-                                </button>
-                            </div>
-                        </div>
+                        <select type="text" class="form-control" id="country" name="country" list="countries">
+                            <c:forEach items="${countries}" var="country">
+                                <option value="${country}"> ${country}</option>
+                            </c:forEach>
+                        </select>
+
                     </div>
                     <div class="form-group">
                         <label for="place">Place</label>
 
-                        <div class="input-group">
-                            <input type="text" class="form-control" id="place" name="place" list="places">
-                            <datalist id="places">
-                                <c:forEach items="${places}" var="place">
-                                <option value="${place}">
-                                    </c:forEach>
-                            </datalist>
-                            <div class="input-group-btn">
-                                <button type="button" class="btn btn-default dropdown-toggle" data-toggle="dropdown">
-                                    <span class="caret"></span>
-                                </button>
-                                <ul class="dropdown-menu" id="placesDropDown">
-                                </ul>
-                            </div>
-                        </div>
+                        <select class="form-control" id="place" name="place">
+                            <c:forEach items="${places}" var="place">
+                                <option value="${place}">${place}</option>
+                            </c:forEach>
+                        </select>
                     </div>
                     <div class="row">
                         <div class="form-group col-md-6">
@@ -64,7 +47,7 @@
                             <input type="text" class="form-control" id="maxPrice" name="maxPrice">
                         </div>
                     </div>
-                    <input type="submit" class="btn btn-success pull-left" value="Filter">
+                    <input type="submit" class="btn btn-success pull-left" value="Search">
                 </form>
             </div>
         </div>
@@ -116,67 +99,3 @@
     </div>
 </div>
 
-<script>
-    var country = document.getElementById("country");
-    var placeInput = document.getElementById("place");
-
-    jQuery(function () {
-        jQuery("#minDate").datepicker({
-            //defaultDate: "+1w",
-            dateFormat: "yy-mm-dd",
-            changeMonth: true,
-            numberOfMonths: 1,
-            onClose: function (selectedDate) {
-                jQuery("#maxDate").datepicker("option", "minDate", selectedDate);
-            }
-        });
-        jQuery("#maxDate").datepicker({
-            //defaultDate: "+1w",
-            dateFormat: "yy-mm-dd",
-            changeMonth: true,
-            numberOfMonths: 1,
-            onClose: function (selectedDate) {
-                $("#minDate").datepicker("option", "maxDate", selectedDate);
-            }
-        });
-    })
-
-    country.onchange = function () {
-        getPlacesForCountry()
-    }
-
-    function getPlacesForCountry() {
-        jQuery.ajax({
-            url: "/placesByCountry",
-            data: {country: country.value},
-            type: "POST",
-            timeout: 4000,
-            success: function (map) {
-                var places = map.places;
-                var placeUl = document.getElementById("placesDropDown");
-                while (placeUl.firstChild) {
-                    placeUl.removeChild(placeUl.firstChild);
-                }
-                places.forEach(function (place) {
-                    setPlacesList(place);
-                })
-            },
-            error: function (xhr, status) {
-            },
-            complete: function (data) {
-            }
-        })
-    }
-
-    function setPlacesList(place) {
-        var placeUl = document.getElementById("placesDropDown");
-        var li = document.createElement("li");
-        var a = document.createElement("a");
-        a.textContent = place;
-        a.onclick = function () {
-            placeInput.value = this.textContent;
-        }
-        li.appendChild(a);
-        placeUl.appendChild(li);
-    }
-</script>

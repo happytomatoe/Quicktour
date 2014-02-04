@@ -1,34 +1,45 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<html>
-<head>
-    <title>Login</title>
-    <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/bootstrap.css"/>">
-    <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/signin.css"/>">
-</head>
-<body>
-<div class="container">
-    <form class="form-signin" name="f" method="POST"
-          action="<c:url value="/j_spring_security_check"/>">
-        <h2 class="form-signin-heading">Please sign in</h2>
-        <c:if test="${param.fail eq true}">
-            <p class="text-danger">Login failed!</p>
-            Reason:${SPRING_SECURITY_LAST_EXCEPTION.message}
-        </c:if>
-        <input class="form-control" type="text"
-               autofocus="" required=""
-               placeholder="Username"
-               name="j_username">
-        <input class="form-control" type="password"
-               required="" placeholder="Password"
-               name="j_password">
-        <label class="checkbox">
-            <input type="checkbox" value="remember-me">
-            Remember me
-        </label>
-        <button class="btn btn-lg btn-success" type="submit">Sign in</button>
-        <a href="/passwordrecovery">Forgot your password?</a>
-    </form>
+<link rel="stylesheet" href="<c:url value="/resources/css/login.css"/>"/>
+
+
+<div class="row">
+    <div class="col-md-4 col-md-offset-4">
+        <div class="panel panel-default">
+            <div class="panel-heading">
+                <h3 class="panel-title">Login via site</h3>
+            </div>
+            <div class="panel-body">
+                <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
+                      method="post">
+                    <fieldset>
+                        <c:if test="${param.fail eq true}">
+                            <div class="form-group text-danger text-center">
+                                <h3> Your login attempt was not successful, try again.<br/> Caused :
+                                        ${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}</h3>
+                            </div>
+                        </c:if>
+                        <div class="form-group">
+                            <input class="form-control" placeholder="E-mail" name="j_username" type="text" required="">
+                        </div>
+                        <div class="form-group">
+                            <input class="form-control" placeholder="Password" name="j_password" type="password"
+                                   required>
+                        </div>
+                        <div class=" checkbox">
+                            <label>
+                                <input name="_spring_security_remember_me" type="checkbox"> Remember Me
+                            </label>
+                            <a href="<c:url value="/passwordrecovery"/>" class="pull-right">Forgot your password?</a>
+
+                        </div>
+                        <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
+                    </fieldset>
+                </form>
+                <hr/>
+                <center><h4>OR</h4></center>
+                <input class="btn btn-lg btn-facebook btn-block" type="submit" value="Login via facebook">
+            </div>
+        </div>
+    </div>
 </div>
-</body>
-</html>

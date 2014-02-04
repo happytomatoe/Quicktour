@@ -9,13 +9,13 @@ import javax.persistence.*;
 import java.util.List;
 
 @Entity
-@Table(name = "places", schema = "", catalog = "quicktour")
+@Table(name = "places")
 public class Place {
 
-    private int id;
+    private int placeId;
     private String country;
     private String name;
-    private Boolean isOptional;
+    private boolean optional;
     private String price;
     private Double geoWidth;
     private Double geoHeight;
@@ -26,18 +26,18 @@ public class Place {
     @JsonBackReference
     private List<Tour> tours;
 
-    @Column(name = "PlaceId")
+    @Column(name = "place_id")
     @GeneratedValue
     @Id
-    public int getId() {
-        return id;
+    public int getPlaceId() {
+        return placeId;
     }
 
-    public void setId(int placeId) {
-        this.id = placeId;
+    public void setPlaceId(int placeId) {
+        this.placeId = placeId;
     }
 
-    @Column(name = "Country")
+    @Column(name = "country")
     public String getCountry() {
         return country;
     }
@@ -46,7 +46,7 @@ public class Place {
         this.country = country;
     }
 
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -55,7 +55,7 @@ public class Place {
         this.name = name;
     }
 
-    @Column(name = "Description")
+    @Column(name = "description")
     public String getDescription() {
         return description;
     }
@@ -64,16 +64,16 @@ public class Place {
         this.description = description;
     }
 
-    @Column(name = "IsOptional")
-    public Boolean getOptional() {
-        return isOptional;
+    @Column(name = "optional")
+    public boolean isOptional() {
+        return optional;
     }
 
-    public void setOptional(Boolean optional) {
-        isOptional = optional;
+    public void setOptional(boolean optional) {
+        this.optional = optional;
     }
 
-    @Column(name = "Price")
+    @Column(name = "price")
     public String getPrice() {
         return price;
     }
@@ -82,7 +82,7 @@ public class Place {
         this.price = price;
     }
 
-    @Column(name = "GeoHeight")
+    @Column(name = "geoheight")
     public Double getGeoHeight() {
         return geoHeight;
     }
@@ -91,7 +91,7 @@ public class Place {
         this.geoHeight = geoHeight;
     }
 
-    @Column(name = "GeoWidth")
+    @Column(name = "geowidth")
     public Double getGeoWidth() {
         return geoWidth;
     }

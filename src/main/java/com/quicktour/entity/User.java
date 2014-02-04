@@ -12,10 +12,10 @@ import java.sql.Timestamp;
 import java.util.Collection;
 
 @Entity
-@Table(name = "users", schema = "", catalog = "quicktour")
+@Table(name = "users")
 public class User {
 
-    private int id;
+    private int userId;
     private String login;
     @JsonIgnore
     private String password;
@@ -35,15 +35,27 @@ public class User {
     private String sex;
     @JsonIgnore
     private String companyCode;
-    private Photo photosId;
+    private Photo photo;
     @JsonIgnore
     private boolean active;
     @JsonIgnore
     private Roles role;
     @JsonIgnore
-    private Collection<Order> ordersByUserId;
+    private Collection<Order> orders;
     @JsonIgnore
-    private Collection<Comment> commentsByUserId;
+    private Collection<Comment> comments;
+
+
+    public User() {
+    }
+
+    public User(String name, String surname, String email, String phone) {
+        setName(name);
+        setSurname(surname);
+        setEmail(email);
+        setPhone(phone);
+    }
+
 
     @Enumerated(EnumType.STRING)
     public Roles getRole() {
@@ -55,14 +67,15 @@ public class User {
     }
 
 
-    @Column(name = "id")
+    @Column(name = "user_id")
     @Id
-    public int getId() {
-        return id;
+    @GeneratedValue
+    public int getUserId() {
+        return userId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setUserId(int id) {
+        this.userId = id;
     }
 
     @Pattern(regexp = "^[a-zA-Z0-9]+$",
@@ -101,7 +114,7 @@ public class User {
     @Size(min = 5, max = 25, message = "Phone number must be between 5 and 25 characters long")
     @Pattern(regexp = "^\\+?\\d+(-\\d+)*$",
             message = "There should be only numbers, '+' and '-' symbols in your phone number")
-    @Column(name = "Phone")
+    @Column(name = "phone")
     public String getPhone() {
         return phone;
     }
@@ -122,7 +135,7 @@ public class User {
     @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
             message = "Name must contain only letters with no spaces")
     @Size(min = 3, max = 30, message = "Name must be between 3 and 30 characters long.")
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -134,7 +147,7 @@ public class User {
     @Pattern(regexp = "^[а-яА-ЯІіЇїЄєa-zA-Z]+$",
             message = "Surname must contain only letters with no spaces")
     @Size(min = 3, max = 30, message = "Surname must be between 3 and 30 characters long.")
-    @Column(name = "Surname")
+    @Column(name = "surname")
     public String getSurname() {
         return surname;
     }
@@ -144,7 +157,7 @@ public class User {
     }
 
 
-    @Column(name = "Age")
+    @Column(name = "age")
     public Integer getAge() {
         return age;
     }
@@ -153,7 +166,7 @@ public class User {
         this.age = age;
     }
 
-    @Column(name = "Sex")
+    @Column(name = "sex")
     public String getSex() {
         return sex;
     }
@@ -162,7 +175,7 @@ public class User {
         this.sex = sex;
     }
 
-    @Column(name = "Company_Code")
+    @Column(name = "company_code")
     public String getCompanyCode() {
         return companyCode;
     }
@@ -171,37 +184,37 @@ public class User {
         this.companyCode = companyCode;
     }
 
-    @OneToMany(mappedBy = "userId")
+    @OneToMany(mappedBy = "user")
     @LazyCollection(LazyCollectionOption.TRUE)
-    public Collection<Order> getOrdersByUserId() {
-        return ordersByUserId;
+    public Collection<Order> getOrders() {
+        return orders;
     }
 
-    public void setOrdersByUserId(Collection<Order> ordersByUserId) {
-        this.ordersByUserId = ordersByUserId;
+    public void setOrders(Collection<Order> ordersByUserId) {
+        this.orders = ordersByUserId;
     }
 
 
     @ManyToOne()
     @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "Photos_ID")
-    public Photo getPhotosId() {
-        return photosId;
+    @JoinColumn(name = "photos_id")
+    public Photo getPhoto() {
+        return photo;
     }
 
-    public void setPhotosId(Photo photosId) {
-        this.photosId = photosId;
+    public void setPhoto(Photo photosId) {
+        this.photo = photosId;
     }
 
 
     @OneToMany(mappedBy = "user")
     @LazyCollection(LazyCollectionOption.TRUE)
-    public Collection<Comment> getCommentsByUserId() {
-        return commentsByUserId;
+    public Collection<Comment> getComments() {
+        return comments;
     }
 
-    public void setCommentsByUserId(Collection<Comment> commentsByUserId) {
-        this.commentsByUserId = commentsByUserId;
+    public void setComments(Collection<Comment> comments) {
+        this.comments = comments;
     }
 
     @Column(name = "active")
@@ -213,15 +226,12 @@ public class User {
         this.active = active;
     }
 
-    public User() {
-
-    }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("User{");
         sb.append("role=").append(role);
-        sb.append(", id=").append(id);
+        sb.append(", id=").append(userId);
         sb.append(", login='").append(login).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", email='").append(email).append('\'');
@@ -232,16 +242,9 @@ public class User {
         sb.append(", age=").append(age);
         sb.append(", sex='").append(sex).append('\'');
         sb.append(", companyCode='").append(companyCode).append('\'');
-        sb.append(", photosId=").append(photosId);
+        sb.append(", photosId=").append(photo);
         sb.append(", active=").append(active);
         sb.append('}');
         return sb.toString();
-    }
-
-    public User(String name, String surname, String email, String phone) {
-        setName(name);
-        setSurname(surname);
-        setEmail(email);
-        setPhone(phone);
     }
 }

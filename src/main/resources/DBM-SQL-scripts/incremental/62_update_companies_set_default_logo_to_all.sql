@@ -1,1 +1,0 @@
-update companies set Photos_ID = 5;

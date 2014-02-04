@@ -63,17 +63,13 @@ public class CompanyService {
      * @return company if request was successful, else returns null
      */
     public Company getCompanyByUserId(int userId) {
-        try {
-            User user = userRepository.findOne(userId);
-            if (!user.getCompanyCode().isEmpty()) {
-                Company company = companyRepository.findByCompanyCode(user.getCompanyCode());
-                return company;
-            } else
-                return null;
-        } catch (NullPointerException npe) {
-            logger.error(npe.getMessage());
+        User user = userRepository.findOne(userId);
+        if (user.getCompanyCode() != null && !user.getCompanyCode().isEmpty()) {
+            return companyRepository.findByCompanyCode(user.getCompanyCode());
+        } else {
             return null;
         }
+
     }
 
     /**
@@ -91,7 +87,7 @@ public class CompanyService {
             logger.warn(me.getMessage());
             return true;
         }
-        return true;
+        return false;
     }
 
     /**
@@ -109,17 +105,11 @@ public class CompanyService {
                 + company.getName() + "!\n"
                 + "Your company have been registrated in TourServe!\n"
                 + "Your company code " + company.getCompanyCode() + "\n"
-                + "Your discount amount: " + company.getDiscountAmount() + "\n"
+                + "Your discount amount: " + company.getDiscount() + "\n"
                 + "Spread company code among your employee and they will obtain discount by it in our system :3\n");
         mailSender.send(message);
         logger.debug(message.getTo()[0]);
         logger.debug(message.getText());
-    }
-
-    public boolean updateCompany(Company company) {
-        if (companyRepository.saveAndFlush(company) != null)
-            return true;
-        else return false;
     }
 
     public BigDecimal getCompanyDiscount(User user) {
@@ -127,9 +117,9 @@ public class CompanyService {
         if (user == null) {
             return result;
         }
-        Company userCompany = getCompanyByUserId(user.getId());
+        Company userCompany = getCompanyByUserId(user.getUserId());
         if (userCompany != null) {
-            Integer companyDiscount = userCompany.getDiscountAmount();
+            Integer companyDiscount = userCompany.getDiscount();
             if (companyDiscount != null && companyDiscount > 0) {
                 result = new BigDecimal(companyDiscount.toString());
             }

@@ -25,7 +25,6 @@ import java.util.Map;
 
 @Controller
 public class ApplicationController {
-    private static final int NUMBER_OF_FAMOUS_TOURS = 3;
     Logger logger = LoggerFactory.getLogger(ApplicationController.class);
     @Autowired
     DiscountPolicyService discountPolicyService;
@@ -35,8 +34,6 @@ public class ApplicationController {
     private ToursService toursService;
     @Autowired
     private PlaceService placeService;
-    @Autowired
-    private OrdersService ordersService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -137,9 +134,12 @@ public class ApplicationController {
 
     @RequestMapping(value = "/placesByCountry")
     @ResponseBody
-    private Map<String, List<String>> getPlasecByCountry(@RequestParam("country") String country) {
+    private Map<String, List<String>> getPlacesByCountry(@RequestParam("country") String country) {
         Map<String, List<String>> map = new HashMap<String, List<String>>();
-        map.put("places", placeService.findPlacesByCountry(country));
+        logger.debug("Trying to find places by country {}.{}", country, placeService);
+        List<String> places = placeService.findPlacesByCountry(country);
+        logger.debug("Found {}", places);
+        map.put("places", places);
         return map;
     }
 
@@ -148,7 +148,7 @@ public class ApplicationController {
 
         map.addAttribute("places", placeService.findPlacesNames());
 
-        map.addAttribute("famousTours", toursService.findFamousTours(NUMBER_OF_FAMOUS_TOURS));
+        map.addAttribute("famousTours", toursService.findFamousTours());
     }
 
 

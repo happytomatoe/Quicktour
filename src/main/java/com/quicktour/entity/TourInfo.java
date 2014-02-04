@@ -15,26 +15,33 @@ import java.util.Collection;
  * To change this template use File | Settings | File Templates.
  */
 @Entity
-@Table(name = "tourinfo", schema = "", catalog = "quicktour")
+@Table(name = "tour_info")
 public class TourInfo {
-    private int tourId;
+    private int tourInfoId;
 
     private Tour tour;
 
-    @Column(name = "TourId")
+    private Date startDate;
+
+    private Date endDate;
+
+    private Integer discount;
+
+    private Collection<Order> orders;
+
     @GeneratedValue
     @Id
-    public int getTourId() {
-        return tourId;
+    @Column(name = "tour_info_id")
+    public int getTourInfoId() {
+        return tourInfoId;
     }
 
-    public void setTourId(int tourId) {
-        this.tourId = tourId;
+    public void setTourInfoId(int tourId) {
+        this.tourInfoId = tourId;
     }
 
-    @ManyToOne()
-    @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "ToursId")
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tours_id")
     public Tour getTour() {
         return tour;
     }
@@ -43,9 +50,7 @@ public class TourInfo {
         this.tour = tour;
     }
 
-    private Date startDate;
-
-    @Column(name = "StartDate")
+    @Column(name = "start_date")
     public Date getStartDate() {
         return startDate;
     }
@@ -54,9 +59,7 @@ public class TourInfo {
         this.startDate = startDate;
     }
 
-    private Date endDate;
-
-    @Column(name = "EndDate")
+    @Column(name = "end_date")
     public Date getEndDate() {
         return endDate;
     }
@@ -65,9 +68,7 @@ public class TourInfo {
         this.endDate = endDate;
     }
 
-    private Integer discount;
-
-    @Column(name = "Discount")
+    @Column(name = "discount")
     public Integer getDiscount() {
         return discount;
     }
@@ -78,23 +79,22 @@ public class TourInfo {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         TourInfo tourInfo = (TourInfo) o;
 
-        if (tourId != tourInfo.tourId) return false;
-        //if (tour != tourInfo.tour) return false;
-        if (discount != null ? !discount.equals(tourInfo.discount) : tourInfo.discount != null) return false;
-        if (startDate != null ? !startDate.equals(tourInfo.startDate) : tourInfo.startDate != null) return false;
-        if (endDate != null ? !endDate.equals(tourInfo.endDate) : tourInfo.endDate != null) return false;
+        return tourInfoId == tourInfo.tourInfoId;
 
-        return true;
     }
 
     @Override
     public int hashCode() {
-        int result = tourId;
+        int result = tourInfoId;
         //result = 31 * result + tour;
         result = 31 * result + (startDate != null ? startDate.hashCode() : 0);
         result = 31 * result + (endDate != null ? endDate.hashCode() : 0);
@@ -102,16 +102,14 @@ public class TourInfo {
         return result;
     }
 
-    private Collection<Order> ordersByTourInfo;
-
-    @OneToMany(mappedBy = "tourInfoId")
-    @LazyCollection(LazyCollectionOption.TRUE)
-    public Collection<Order> getOrdersByTourInfo() {
-        return ordersByTourInfo;
+    @OneToMany(mappedBy = "tourInfo")
+    @LazyCollection(LazyCollectionOption.FALSE)
+    public Collection<Order> getOrders() {
+        return orders;
     }
 
-    public void setOrdersByTourInfo(Collection<Order> ordersByTourInfo) {
-        this.ordersByTourInfo = ordersByTourInfo;
+    public void setOrders(Collection<Order> ordersByTourInfo) {
+        this.orders = ordersByTourInfo;
     }
 
 }

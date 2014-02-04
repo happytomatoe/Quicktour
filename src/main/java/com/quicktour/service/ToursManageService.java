@@ -2,21 +2,19 @@ package com.quicktour.service;
 
 import com.quicktour.entity.*;
 import com.quicktour.repository.ToursRepository;
-import org.apache.commons.io.FileUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
-import java.io.File;
-import java.io.IOException;
 import java.math.BigDecimal;
 import java.util.*;
 
 @Service
+@Transactional
 public class ToursManageService {
 
     final Logger logger = org.slf4j.LoggerFactory.getLogger(ToursManageService.class);
@@ -26,7 +24,8 @@ public class ToursManageService {
 
     @Autowired
     private ToursService toursService;
-
+    @Autowired
+    PhotoService photoService;
     @Autowired
     private TourService tourService;
 
@@ -42,8 +41,6 @@ public class ToursManageService {
     @Autowired
     ToursRepository toursRepository;
 
-    @Value("${imageDirectory}")
-    private String imageDirectory;
 
     /**
      * change tour active state to state preset in activeState parameter
@@ -69,17 +66,18 @@ public class ToursManageService {
      *
      * @param completeTourInfo object of class CompleteTourInfo which contains Tour, list of Place,
      *                         list of String which represent Price descriptions, and list of TourInfo
-     * @param mainPhoto file which contains main photo of the tour
+     * @param mainPhoto        file which contains main photo of the tour
      */
     public void saveCombineTours(CompleteTourInfo completeTourInfo, MultipartFile mainPhoto) {
         int price = 0;
-
+        //TODO:inspect and rework
         cleanTourUnsafeHTML(completeTourInfo.getTour());
         Tour tour = saveTour(completeTourInfo);
-        //tour.setPhoto(saveImage(tour.getTourId() + ".jpg", mainPhoto));
+        tour.setPhoto(photoService.saveImage(completeTourInfo.getTour().getName(), mainPhoto));
+        logger.debug("Editted tour photo is {}", tour.getPhoto());
         toursService.saveTour(tour);
 
-        for (TourInfo tourInfo: completeTourInfo.getTourInfo()){
+        for (TourInfo tourInfo : completeTourInfo.getTourInfo()) {
             tourInfo.setTour(tour);
         }
 
@@ -98,21 +96,6 @@ public class ToursManageService {
         logger.debug("Tour {} saved successfully", tour.getTourId());
     }
 
-    private String saveImage(String filename, MultipartFile image) {
-        if (image.isEmpty()){
-            return null;
-        }
-        try{
-            File file = new File(imageDirectory + filename);
-            FileUtils.writeByteArrayToFile(file, image.getBytes());
-
-        } catch (IOException io){
-            return null;
-        }  catch (NullPointerException npe){
-            return null;
-        }
-        return filename;
-    }
 
     private void setTourIdForPlaces(CompleteTourInfo completeTourInfo) {
         if (completeTourInfo.getPlaces() != null) {
@@ -127,7 +110,7 @@ public class ToursManageService {
     private int calculateTourPrice(CompleteTourInfo completeTourInfo) {
         int price = 0;
         if (completeTourInfo.getPlaces() != null) {
-            for (Place place: completeTourInfo.getPlaces()) {
+            for (Place place : completeTourInfo.getPlaces()) {
                 price += Integer.decode(place.getPrice());
             }
         }
@@ -142,7 +125,7 @@ public class ToursManageService {
         tour.setCompany(getCompanyByCurentUser());
 
         if (priceIncludesDesc != null) {
-            for (String desc: priceIncludesDesc) {
+            for (String desc : priceIncludesDesc) {
                 priceDescriptionList.add(priceIncludeService.findByDescription(desc));
             }
             tour.setPriceIncludes(priceDescriptionList);
@@ -172,7 +155,7 @@ public class ToursManageService {
     }
 
     private void checkTourInfo(CompleteTourInfo completeTourInfo) {
-        for(TourInfo tourInfo: completeTourInfo.getTourInfo()) {
+        for (TourInfo tourInfo : completeTourInfo.getTourInfo()) {
             if (tourInfo.getDiscount() == null) {
                 tourInfo.setDiscount(0);
             }
@@ -189,7 +172,7 @@ public class ToursManageService {
 
     private void cleanPlacesUnsafeHTML(List<Place> places) {
         if (places != null) {
-            for(Place place: places) {
+            for (Place place : places) {
                 place.setName(Jsoup.clean(place.getName(), Whitelist.basic()));
                 place.setDescription(Jsoup.clean(place.getDescription(), Whitelist.basic()));
             }

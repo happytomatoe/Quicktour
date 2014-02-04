@@ -2,8 +2,10 @@ package com.quicktour.service;
 
 import com.quicktour.entity.Place;
 import com.quicktour.repository.PlaceRepository;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -16,9 +18,11 @@ import java.util.List;
  */
 
 @Service
+@Transactional
 public class PlaceService {
     @Autowired
     private PlaceRepository placeRepository;
+    private org.slf4j.Logger logger = LoggerFactory.getLogger(PhotoService.class);
 
     public List<String> findCountries() {
         return placeRepository.findCountries();
@@ -29,6 +33,7 @@ public class PlaceService {
     }
 
     public List<String> findPlacesByCountry(String country) {
+        logger.debug("This {}", placeRepository);
         return placeRepository.findPlacesByCountry(country);
     }
 

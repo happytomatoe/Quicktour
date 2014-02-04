@@ -3,7 +3,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/screen.css"/>">
-
+<link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
+<script src="<c:url value="/resources/js/jasny-bootstrap.min.js"/> "></script>
 <script src="<c:url value="/resources/ckeditor/ckeditor.js" />"></script>
 
 <script type="text/javascript"
@@ -19,13 +20,13 @@
                 <div class="panel-body">
                     <c:choose>
                         <c:when test="${edit}">
-                            <form:hidden path="tour.tourId" />
-                            <input type="hidden" id="tourInfoCount" value="${toursInfo.tour.tourInfo.size()}" />
-                            <input type="hidden" id="tourPlacesCount" value="${toursInfo.tour.toursPlaces.size()}" />
+                            <form:hidden path="tour.tourId"/>
+                            <input type="hidden" id="tourInfoCount" value="${toursInfo.tour.tourInfo.size()}"/>
+                            <input type="hidden" id="tourPlacesCount" value="${toursInfo.tour.toursPlaces.size()}"/>
                         </c:when>
                         <c:otherwise>
-                            <input type="hidden" id="tourInfoCount" value="0" />
-                            <input type="hidden" id="tourPlacesCount" value="0" />
+                            <input type="hidden" id="tourInfoCount" value="0"/>
+                            <input type="hidden" id="tourPlacesCount" value="0"/>
                         </c:otherwise>
                     </c:choose>
                     <div class="form-group">
@@ -33,15 +34,15 @@
                         <form:input type="text" class="form-control" id="inputName"
                                     path="tour.name" placeholder="Tour name"
                                     name="inputName" required="true"/>
-                        <form:errors path="tour.name" />
+                        <form:errors path="tour.name"/>
                     </div>
                     <div class="form-group">
-                        <form:label path="tour.description" for="editor1" >
+                        <form:label path="tour.description" for="editor1">
                             Tour description
                         </form:label>
                         <form:textarea path="tour.description" id="editor1" rows="10" cols="10"
                                        required="true"/>
-                        <form:errors path="tour.description" />
+                        <form:errors path="tour.description"/>
                         <script>
                             CKEDITOR.replace("editor1");
                         </script>
@@ -52,32 +53,42 @@
                                     type="text" class="form-control"
                                     id="inputTransport"
                                     placeholder="Transport description"
-                                    required="true" />
-                        <form:errors path="tour.transportDesc" />
+                                    required="true"/>
+                        <form:errors path="tour.transportDesc"/>
                     </div>
                     <div class="form-group col-md-6">
                         <form:label path="tour.travelType">Travel type</form:label>
                         <form:select path="tour.travelType" class="form-control">
-                            <form:option value="driving" />
-                            <form:option value="walking" />
-                            <form:option value="bycicling" />
+                            <form:option value="driving"/>
+                            <form:option value="walking"/>
+                            <form:option value="bycicling"/>
                         </form:select>
                     </div>
                     <div class="form-group">
-                        <form:checkbox path="tour.active" value="active" /><b>Tour active</b>
+                        <form:checkbox path="tour.active" value="active"/><b>Tour active</b>
                     </div>
                     <div class="form-group">
-                        <label for="mainPhoto">
-                            Select main photo for tourInfo
-                        </label>
-                        <input type="file" name="mainPhoto" id="mainPhoto" />
+                        <h4>Main photo</h4>
+
+                        <div class="fileinput fileinput-new" data-provides="fileinput">
+                            <div>
+                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span
+                            class="fileinput-exists">Change</span><input type="file" accept="image/*" name="mainPhoto"
+                                                                         tabindex="11"></span>
+                                <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                            </div>
+                            <div class="fileinput-preview fileinput-exists thumbnail"
+                                 style="max-width: 320px; max-height: 320px;"></div>
+
+                        </div>
+                        <form:errors path="tour.photo" cssClass="alert-danger"/>
                     </div>
                     <div class="form-group">
                         <form:label path="priceIncludes" for="prInclude">
                             Price Includes:
                         </form:label>
-                        <br />
-                        <form:checkboxes path="priceIncludes" element="div" items="${prIncludes}" />
+                        <br/>
+                        <form:checkboxes path="priceIncludes" element="div" items="${prIncludes}"/>
                     </div>
                     <hr/>
                     <div class="row">
@@ -98,7 +109,7 @@
                             <c:if test="${edit}">
                                 <c:forEach items="${toursInfo.tour.tourInfo}" varStatus="i">
                                     <div class="form-group col-md-4">
-                                        <form:hidden path="tourInfo[${i.index}].tourId" />
+                                        <form:hidden path="tourInfo[${i.index}].id"/>
                                         <div class="form-group">
                                             <form:label path="tourInfo[${i.index}].startDate">Start date</form:label>
                                             <form:input path="tourInfo[${i.index}].startDate" type="date"
@@ -146,30 +157,31 @@
                                class="form-control" placeholder="Place name">
                     </div>
                     <button type="button" class="btn btn-success" id="geocode">Add Place</button>
-                    <br />
+                    <br/>
+
                     <div id="map" style="width: 100%; height: 400px"></div>
                     <div class="row">
                         <div id="placeBlock">
                             <c:if test="${edit}">
                                 <c:forEach items="${toursInfo.tour.toursPlaces}" varStatus="i">
                                     <div class="form-group col-md-6" id="place${i.index}">
-                                        <form:hidden path="places[${i.index}].placeId" />
-                                        <form:hidden path="places[${i.index}].name" />
-                                        <form:hidden path="places[${i.index}].country" />
-                                        <form:hidden path="places[${i.index}].geoWidth" />
-                                        <form:hidden path="places[${i.index}].geoHeight" />
+                                        <form:hidden path="places[${i.index}].placeId"/>
+                                        <form:hidden path="places[${i.index}].name"/>
+                                        <form:hidden path="places[${i.index}].country"/>
+                                        <form:hidden path="places[${i.index}].geoWidth"/>
+                                        <form:hidden path="places[${i.index}].geoHeight"/>
                                         <form:label path="places[${i.index}].name">Place name</form:label>
-                                        <form:input path="places[${i.index}].name" class="form-control" />
+                                        <form:input path="places[${i.index}].name" class="form-control"/>
                                         <form:label path="places[${i.index}].description">Place description</form:label>
-                                        <form:textarea path="places[${i.index}].description" class="form-control" />
+                                        <form:textarea path="places[${i.index}].description" class="form-control"/>
                                         <form:label path="places[${i.index}].price">Price</form:label>
-                                        <form:input path="places[${i.index}].price" class="form-control" />
+                                        <form:input path="places[${i.index}].price" class="form-control"/>
                                     </div>
                                 </c:forEach>
                             </c:if>
                         </div>
                     </div>
-                    <hr />
+                    <hr/>
                     <div class="row">
                         <div class="col-md-2 col-md-offset-5">
                             <button type="button" class="btn btn-danger pull-left" id="prev2">

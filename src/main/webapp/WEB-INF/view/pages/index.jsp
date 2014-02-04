@@ -6,7 +6,13 @@
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/bootstrap.css"/>">
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/styles.css"/>">
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/discount.css"/>">
+<link rel="stylesheet" type="text/css" href="<c:url value="/resources/select2-3.4.5/select2-bootstrap.css"/>">
+<link rel="stylesheet" type="text/css" href="<c:url value="/resources/select2-3.4.5/select2.css"/>">
+<script src="<c:url value="/resources/select2-3.4.5/select2.min.js"/> "></script>
+<script src="<c:url value="/resources/js/index.js"/> "></script>
 <div>
+    <input type="hidden" id="baseUrl" name="baseUrl" value="<c:url value="/"/>"/>
+
     <div class="row">
         <c:if test="${page.content == null}">
             <h1>Sorry can't find tours for your request</h1>
@@ -21,8 +27,9 @@
                         <div class="panel-body">
                             <!-- Star rating -->
                             <div class="row">
-                                <c:if test="${tour.rateCount>0}">
-                                    <div class="form-group col-md-12 text-center">
+                                <div class="form-group col-md-12 text-center">
+
+                                    <c:if test="${tour.rateCount>0}">
                                         <span id="rateTour_${tour.tourId}"></span>
                                         <span><i>(${tour.rateCount})</i></span>
                                         <script type="text/javascript">
@@ -35,8 +42,8 @@
                                             });
                                         </script>
                                         <!-- /Star rating -->
-                                    </div>
-                                </c:if>
+                                    </c:if>
+                                </div>
                             </div>
                             <c:if test="${tour.discount>0}">
                                 <img src="<c:url value="/resources/img/discount_icon.png"/>" class="icon">
@@ -80,9 +87,9 @@
                                                 <li role="presentation" class="dropdown-header">Please, select tour
                                                     start date
                                                 </li>
-                                                <c:forEach items="${tour.tourInfo}" var="date">
+                                                <c:forEach items="${tour.tourInfo}" var="tourInfo">
                                                     <li>
-                                                        <a href="/createOrder/${date.tourId}">${date.startDate}</a>
+                                                        <a href="<c:url value="/createOrder/${tourInfo.tourInfoId}"/>">${tourInfo.startDate}</a>
                                                     </li>
                                                 </c:forEach>
                                             </ul>

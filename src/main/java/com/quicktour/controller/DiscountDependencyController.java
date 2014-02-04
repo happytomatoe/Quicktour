@@ -31,7 +31,7 @@ public class DiscountDependencyController {
     @Autowired
     DiscountDependencyService dependenciesService;
 
-    private Logger logger = LoggerFactory.getLogger(DiscountDependencyController.class);
+    private final Logger logger = LoggerFactory.getLogger(DiscountDependencyController.class);
 
     @PreAuthorize("hasAnyRole('admin','agent')")
     @RequestMapping(value = "/getAllDependencies")

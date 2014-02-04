@@ -90,7 +90,7 @@
                         </form:select>
 
                     <p><label name="avatar">Logo:</label>
-                        <img src="/images/<c:out value='${company.photosId.url}'/>" style='width:auto; height:100px'>
+                        <img src="/images/<c:out value='${company.photo.url}'/>" style='width:auto; height:100px'>
                         <input name="avatar" type="file" value="Upload new"/>
                     </p>
 

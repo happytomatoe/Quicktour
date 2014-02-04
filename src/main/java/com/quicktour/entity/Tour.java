@@ -13,7 +13,7 @@ import java.util.List;
 import java.util.Set;
 
 @Entity
-@Table(name = "tours", schema = "", catalog = "quicktour")
+@Table(name = "tours")
 public class Tour {
     private int tourId;
     private Company company;
@@ -30,20 +30,29 @@ public class Tour {
     private BigDecimal discount = BigDecimal.ZERO;
     private String travelType;
     private Double rate;
-    private Long rateCount;
 
-    @Formula("(select avg(orders.vote)  from orders inner join tours ON orders.TourId = tours.ToursId " +
-            "where orders.vote > 0 and tours.ToursId = ToursId group by tours.ToursId)")
+    @Formula("(SELECT AVG( orders.vote ) FROM orders " +
+            "INNER JOIN tour_info ON orders.tour_info_id = tour_info.tour_info_id " +
+            "INNER JOIN tours ON tour_info.tours_id = tours.tour_id " +
+            "WHERE orders.vote >0 " +
+            "AND tours.tour_id =tour_id " +
+            "GROUP BY tours.tour_id)")
+    @JsonIgnore
     public Double getRate() {
         return rate;
     }
+
+    private Long rateCount;
 
     public void setRate(Double rate) {
         this.rate = rate;
     }
 
-    @Formula("(select count(orders.vote) from orders inner join tours ON orders.TourId = tours.ToursId " +
-            "where orders.vote > 0 and tours.ToursId = ToursId group by tours.ToursId)")
+    @Formula("(SELECT count(orders.vote) FROM orders " +
+            "INNER JOIN tour_info ON orders.tour_info_id = tour_info.tour_info_id " +
+            "INNER JOIN tours ON tour_info.tours_id = tours.tour_id " +
+            "WHERE orders.vote >0 AND tours.tour_id =tour_id GROUP BY tours.tour_id)")
+    @JsonIgnore
     public Long getRateCount() {
         return rateCount;
     }
@@ -53,7 +62,7 @@ public class Tour {
     }
 
     @ManyToOne()
-    @JoinColumn(name = "company_id")
+    @JoinColumn(name = "companies_id")
     @LazyCollection(LazyCollectionOption.TRUE)
     @JsonIgnore
     public Company getCompany() {
@@ -64,7 +73,7 @@ public class Tour {
         this.company = company;
     }
 
-    @Column(name = "ToursId", insertable = false, updatable = false)
+    @Column(name = "tour_id")
     @GeneratedValue
     @Id
     public int getTourId() {
@@ -103,12 +112,11 @@ public class Tour {
         this.tourInfo = tourInfo;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "tours_places",
-            joinColumns = @JoinColumn(name = "ToursId"),
-            inverseJoinColumns = @JoinColumn(name = "PlaceId"))
+            joinColumns = @JoinColumn(name = "tours_id"),
+            inverseJoinColumns = @JoinColumn(name = "places_id"))
     @JsonManagedReference
-    @LazyCollection(LazyCollectionOption.TRUE)
     public List<Place> getToursPlaces() {
         return toursPlaces;
     }
@@ -117,12 +125,10 @@ public class Tour {
         this.toursPlaces = toursPlaces;
     }
 
-    @OneToMany()
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tours_price_includes",
-            joinColumns = @JoinColumn(name = "ToursId"),
-            inverseJoinColumns = @JoinColumn(name = "PriceIncludesId"))
-    @JsonIgnore
-    @LazyCollection(LazyCollectionOption.TRUE)
+            joinColumns = @JoinColumn(name = "tours_id"),
+            inverseJoinColumns = @JoinColumn(name = "price_includes_id"))
     public Set<PriceDescription> getPriceIncludes() {
         return priceIncludes;
     }
@@ -131,12 +137,12 @@ public class Tour {
         this.priceIncludes = priceIncludes;
     }
 
-    @ManyToMany(cascade = CascadeType.ALL)
+    @OneToMany(cascade = CascadeType.ALL)
     @JsonManagedReference
     @JoinTable(name = "tours_discount_policy",
-            joinColumns = @JoinColumn(name = "Tours_ToursId"),
+            joinColumns = @JoinColumn(name = "tours_id"),
             inverseJoinColumns = @JoinColumn(name = "discount_policy_id"))
-    @LazyCollection(LazyCollectionOption.TRUE)
+    @LazyCollection(LazyCollectionOption.FALSE)
     public List<DiscountPolicy> getDiscountPolicies() {
         return discountPolicies;
     }
@@ -145,7 +151,7 @@ public class Tour {
         this.discountPolicies = discountPolicy;
     }
 
-    @Column(name = "Name")
+    @Column(name = "name")
     public String getName() {
         return name;
     }
@@ -154,7 +160,7 @@ public class Tour {
         this.name = name;
     }
 
-    @Column(name = "Description")
+    @Column(name = "description")
     public String getDescription() {
         return description;
     }
@@ -163,7 +169,7 @@ public class Tour {
         this.description = description;
     }
 
-    @Column(name = "TransportDesc")
+    @Column(name = "transport_description")
     public String getTransportDesc() {
         return transportDesc;
     }
@@ -172,7 +178,7 @@ public class Tour {
         this.transportDesc = transportDesc;
     }
 
-    @Column(name = "IsActive")
+    @Column(name = "active")
     public Boolean getActive() {
         return isActive;
     }
@@ -204,6 +210,8 @@ public class Tour {
     public String toString() {
         final StringBuilder sb = new StringBuilder("Tour{");
         sb.append("tourId=").append(tourId);
+        sb.append("places=").append(toursPlaces.size());
+        sb.append("travelType=").append(travelType);
         sb.append(", company=").append(company);
         sb.append(", price=").append(price);
         sb.append(", discountPolicies=").append(discountPolicies);

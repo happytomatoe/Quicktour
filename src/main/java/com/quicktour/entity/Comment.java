@@ -15,8 +15,8 @@ import java.util.Collection;
 @Entity
 @Table(name = "comments")
 public class Comment {
-    private int id;
-    private String comment;
+    private int commentId;
+    private String content;
     private Tour tour;
     private Timestamp commentDate;
     private User user;
@@ -24,24 +24,24 @@ public class Comment {
     private Collection<Comment> children;
 
     @Id
-    @Column(name = "id")
+    @Column(name = "comment_id")
     @GeneratedValue
-    public int getId() {
-        return id;
+    public int getCommentId() {
+        return commentId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setCommentId(int id) {
+        this.commentId = id;
     }
 
 
-    @Column(name = "comment")
-    public String getComment() {
-        return comment;
+    @Column(name = "content")
+    public String getContent() {
+        return content;
     }
 
-    public void setComment(String comment) {
-        this.comment = comment;
+    public void setContent(String comment) {
+        this.content = comment;
     }
 
 
@@ -56,23 +56,23 @@ public class Comment {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
-        Comment comments = (Comment) o;
-
-        if (id != comments.id) return false;
-        if (comment != null ? !comment.equals(comments.comment) : comments.comment != null) return false;
-        if (commentDate != null ? !commentDate.equals(comments.commentDate) : comments.commentDate != null)
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
             return false;
+        }
 
-        return true;
+        Comment comment = (Comment) o;
+
+        return commentId == comment.commentId;
+
     }
 
     @Override
     public int hashCode() {
-        int result = id;
-        result = 31 * result + (comment != null ? comment.hashCode() : 0);
+        int result = commentId;
+        result = 31 * result + (content != null ? content.hashCode() : 0);
         result = 31 * result + (commentDate != null ? commentDate.hashCode() : 0);
         return result;
     }
@@ -80,7 +80,7 @@ public class Comment {
     @ManyToOne
     @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "tour_id", referencedColumnName = "ToursId", nullable = false)
+    @JoinColumn(name = "tour_id", referencedColumnName = "tour_id", nullable = false, insertable = false, updatable = false)
     public Tour getTour() {
         return tour;
     }
@@ -90,7 +90,7 @@ public class Comment {
     }
 
     @ManyToOne
-    @JoinColumn(name = "user_id", referencedColumnName = "id", nullable = false)
+    @JoinColumn(name = "users_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false)
     public User getUser() {
         return user;
     }
@@ -101,7 +101,7 @@ public class Comment {
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "next_comment_id", referencedColumnName = "id")
+    @JoinColumn(name = "next_comment_id", referencedColumnName = "comment_id", insertable = false, updatable = false)
     public Comment getParent() {
         return parent;
     }
@@ -123,8 +123,8 @@ public class Comment {
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("Comment{");
-        sb.append("id=").append(id);
-        sb.append(", comment='").append(comment).append('\'');
+        sb.append("id=").append(commentId);
+        sb.append(", comment='").append(content).append('\'');
         sb.append(", tour=").append(tour);
         sb.append(", commentDate=").append(commentDate);
         sb.append(", user=").append(user);

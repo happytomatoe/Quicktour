@@ -60,14 +60,14 @@
                     <p>
 
                     <h3><label name="name" cssClass="form-signin-heading">Company Discount:</label>
-                        <span class="btn btn-success">${company.discountAmount} %</span></h3>
+                        <span class="btn btn-success">${company.discount} %</span></h3>
                     </p>
                 </div>
             </fieldset>
 
         </div>
     </div>
-    <img src="/images/<c:out value='${company.photosId.url}'/>" class="col-md-4">
+    <img src="/images/<c:out value='${company.photo.url}'/>" class="col-md-4">
     <label><h2>If you want to change your company, please enter your new company code:</h2></label>
 
     <form method="post" action="/mycompany">

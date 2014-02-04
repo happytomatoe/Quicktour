@@ -11,20 +11,21 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 
+/**
+ * Entity that describes table orders in DB.
+ * Some functionality of system(calculating discount policies ) requires than column names
+ * in table orders match properties in class
+ */
 @Entity
-@Table(name = "orders", schema = "", catalog = "quicktour")
+@Table(name = "orders")
 public class Order {
 
     final public static String STATUS_ACCEPTED = "Accepted";
     final public static String STATUS_CONFIRMED = "Confirmed";
     final public static String STATUS_COMPLETED = "Completed";
     final public static String STATUS_CANCELLED = "Cancelled";
-
-    public static final String NUMBER_OF_CHILDREN = "orders.number_of_children";
-    public static final String NUMBER_OF_ADULTS = "orders.number_of_adults";
-
-    private int id;
-    private TourInfo tourInfoId;
+    private int orderId;
+    private TourInfo tourInfo;
     private Timestamp orderDate;
     private Integer numberOfAdults;
     private Integer numberOfChildren;
@@ -34,21 +35,21 @@ public class Order {
     private Date nextPaymentDate;
     private Timestamp acceptedDate;
     private Timestamp confirmedDate;
-    private Timestamp completedDate;
     private Timestamp cancelledDate;
+    private Timestamp completedDate;
     private String status;
-    private User userId;
-    private Company companyId;
+    private User user;
+    private Company company;
     private Integer vote;
 
-    @Column(name = "id")
     @Id
-    public int getId() {
-        return id;
+    @Column(name = "order_id")
+    public int getOrderId() {
+        return orderId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setOrderId(int id) {
+        this.orderId = id;
     }
 
     @Column(name = "order_date")
@@ -60,9 +61,9 @@ public class Order {
         this.orderDate = orderDate;
     }
 
+    @Column(name = "number_of_adults")
     @NotNull
     @Min(1)
-    @Column(name = "number_of_adults")
     public Integer getNumberOfAdults() {
         return numberOfAdults;
     }
@@ -71,9 +72,9 @@ public class Order {
         this.numberOfAdults = numberOfAdults;
     }
 
+    @Column(name = "number_of_children")
     @NotNull
     @Min(0)
-    @Column(name = "number_of_children")
     public Integer getNumberOfChildren() {
         return numberOfChildren;
     }
@@ -100,10 +101,10 @@ public class Order {
         this.price = price;
     }
 
+    @Column(name = "discount")
     @NotNull
     @Min(0)
     @Max(100)
-    @Column(name = "discount")
     public BigDecimal getDiscount() {
         return discount;
     }
@@ -112,8 +113,8 @@ public class Order {
         this.discount = discount;
     }
 
-    @DateTimeFormat(pattern = "yyyy-MM-dd")
     @Column(name = "next_payment_date")
+    @DateTimeFormat(pattern = "yyyy-MM-dd")
     public Date getNextPaymentDate() {
         return nextPaymentDate;
     }
@@ -122,7 +123,7 @@ public class Order {
         this.nextPaymentDate = nextPaymentDate;
     }
 
-    @Column(name = "Accepted_date")
+    @Column(name = "accepted_date")
     public Timestamp getAcceptedDate() {
         return acceptedDate;
     }
@@ -131,7 +132,7 @@ public class Order {
         this.acceptedDate = acceptedDate;
     }
 
-    @Column(name = "Confirmed_date")
+    @Column(name = "confirmed_date")
     public Timestamp getConfirmedDate() {
         return confirmedDate;
     }
@@ -140,7 +141,7 @@ public class Order {
         this.confirmedDate = confirmedDate;
     }
 
-    @Column(name = "Completed_date")
+    @Column(name = "completed_date")
     public Timestamp getCompletedDate() {
         return completedDate;
     }
@@ -149,7 +150,7 @@ public class Order {
         this.completedDate = completedDate;
     }
 
-    @Column(name = "Cancelled_date")
+    @Column(name = "cancelled_date")
     public Timestamp getCancelledDate() {
         return cancelledDate;
     }
@@ -158,10 +159,10 @@ public class Order {
         this.cancelledDate = cancelledDate;
     }
 
+    @Column(name = "status")
     @NotNull
     @Pattern(regexp = "Received|Accepted|Confirmed|Completed|Cancelled",
             message = "Available statuses are: Received, Accepted, Confirmed, Completed, Cancelled")
-    @Column(name = "status")
     public String getStatus() {
         return status;
     }
@@ -171,42 +172,52 @@ public class Order {
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "Users_ID")
-    public User getUserId() {
-        return userId;
+    @JoinColumn(name = "users_id", referencedColumnName = "user_id")
+    public User getUser() {
+        return user;
     }
 
-    public void setUserId(User userId) {
-        this.userId = userId;
-    }
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "Companies_id")
-    public Company getCompanyId() {
-        return companyId;
-    }
-
-    public void setCompanyId(Company companyId) {
-        this.companyId = companyId;
+    public void setUser(User userId) {
+        this.user = userId;
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "TourId")
-    public TourInfo getTourInfoId() {
-        return tourInfoId;
+    @JoinColumn(name = "companies_id")
+    public Company getCompany() {
+        return company;
     }
 
-    public void setTourInfoId(TourInfo tourInfoId) {
-        this.tourInfoId = tourInfoId;
+    public void setCompany(Company companyId) {
+        this.company = companyId;
+    }
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "tour_info_id")
+    public TourInfo getTourInfo() {
+        return tourInfo;
+    }
+
+    public void setTourInfo(TourInfo tourInfoId) {
+        this.tourInfo = tourInfoId;
     }
 
     @Column(name = "vote")
     public Integer getVote() {
-        return (vote == null) ? 0 : vote;
+        return (vote == null) ? new Integer("0") : vote;
     }
 
     public void setVote(Integer tourVote) {
         this.vote = tourVote;
+    }
+
+    @Override
+    public String toString() {
+        final StringBuilder sb = new StringBuilder("Order{");
+        sb.append("id=").append(orderId);
+        sb.append(", numberOfAdults=").append(numberOfAdults);
+        sb.append(", numberOfChildren=").append(numberOfChildren);
+        sb.append('}');
+        return sb.toString();
     }
 
 

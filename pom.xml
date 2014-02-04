@@ -22,7 +22,7 @@
         <db.password>root</db.password>
         <db.url>jdbc:mysql://localhost:3306/</db.url>
         <dbmaintain-maven-plugin.driverClassName>com.mysql.jdbc.Driver</dbmaintain-maven-plugin.driverClassName>
-        <db.name>quicktour</db.name>
+        <db.name>quicktour2</db.name>
         <c3p0.version>0.9.2.1</c3p0.version>
         <spring.data.jpa.version>1.1.1.RELEASE</spring.data.jpa.version>
         <hibernate.jpa-api.version>2.0-cr-1</hibernate.jpa-api.version>
@@ -32,6 +32,8 @@
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <javax.validator.version>1.0.0.GA</javax.validator.version>
         <jsoup.version>1.7.2</jsoup.version>
+        <kefirbb.version>1.0</kefirbb.version>
+        <javax.mail.version>1.4.7</javax.mail.version>
 
     </properties>
 
@@ -57,7 +59,7 @@
         <dependency>
             <groupId>javax.mail</groupId>
             <artifactId>mail</artifactId>
-            <version>1.4.7</version>
+            <version>${javax.mail.version}</version>
         </dependency>
 
         <dependency>
@@ -191,7 +193,11 @@
             <version>2.5</version>
             <scope>compile</scope>
         </dependency>
-
+        <dependency>
+            <groupId>com.flickr4java</groupId>
+            <artifactId>flickr</artifactId>
+            <version>2.5</version>
+        </dependency>
 
         <dependency>
             <groupId>commons-fileupload</groupId>
@@ -214,7 +220,7 @@
         <dependency>
             <groupId>org.kefirsf</groupId>
             <artifactId>kefirbb</artifactId>
-            <version>1.0</version>
+            <version>${kefirbb.version}</version>
         </dependency>
 
     </dependencies>
@@ -283,6 +289,13 @@
             </plugin>
         </plugins>
     </build>
+
+    <repositories>
+        <repository>
+            <id>jcenter</id>
+            <url>http://jcenter.bintray.com/</url>
+        </repository>
+    </repositories>
     <reporting>
         <plugins>
             <plugin>

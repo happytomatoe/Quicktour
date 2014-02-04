@@ -6,7 +6,10 @@ import com.quicktour.service.CompanyService;
 import com.quicktour.service.PhotoService;
 import com.quicktour.service.UsersService;
 import com.quicktour.service.ValidationService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.transaction.annotation.Transactional;
@@ -34,6 +37,7 @@ public class RegistrationController {
     @Autowired
     private UsersService usersService;
 
+    private final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
     @Autowired
     private PhotoService photoService;
 
@@ -42,7 +46,8 @@ public class RegistrationController {
 
     @Autowired
     private CompanyService companyService;
-
+    @Value("${maxImageSize}")
+    int maxImageSize;
 
     /**
      * Maps empty User object to the registration form
@@ -75,11 +80,19 @@ public class RegistrationController {
     public String registrationForm(@Valid User user, BindingResult bindingResult,
                                    @RequestParam(value = "avatar", required = false)
                                    MultipartFile image) {
+        String type = image.getContentType().split("/")[0];
+        logger.debug("Content type {}.Type {}", image.getContentType(), type);
+        if (!type.equalsIgnoreCase("image")) {
+            bindingResult.rejectValue("photo", "photo.type", "Uploaded file is not image");
+        }
+        if (image.getSize() > maxImageSize) {
+            bindingResult.rejectValue("photo", "photo.invalid", "Maximum upload size of " + maxImageSize + " bytes exceeded ");
+        }
         String avatarName = user.getLogin() + ".jpg";
         if (bindingResult.hasErrors()) {
             return "registration";
         }
-        user.setPhotosId(photoService.saveAvatar(avatarName, image));
+        user.setPhoto(photoService.saveImage(avatarName, image));
         if (usersService.registrateNewUser(user)) {
             validationService.createValidationLink(user);
             return "registrationsuccess-tile";
@@ -120,9 +133,9 @@ public class RegistrationController {
                                 @RequestParam(value = "avatar", required = false)
                                 MultipartFile image) {
         String avatarName = company.getName() + "comp.jpg";
-        company.setPhotosId(photoService.saveLogo(avatarName, image));
+        company.setPhoto(photoService.saveImage(avatarName, image));
 
-        if (bindingResult.hasErrors() || !companyService.addNewCompany(company)) {
+        if (bindingResult.hasErrors() || companyService.addNewCompany(company)) {
             return "companyregistration";
         }
         return "redirect:/";

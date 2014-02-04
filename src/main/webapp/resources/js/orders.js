@@ -1,49 +1,70 @@
-jQuery(document).ready(
-    function(){
+var discount;
+var oldPrice;
+var price;
+var $oldPrice;
+$(document).ready(
+    function () {
 
         // Date picker for "Next payment date" field
-        jQuery(function() {
-            jQuery( "#paymentDate" ).datepicker({dateFormat: "yy-mm-dd", constraintInput: true});
+        $(function () {
+            $("#paymentDate").datepicker({dateFormat: "yy-mm-dd", constraintInput: true});
         });
 
         // Editable SELECT with validation for "Number Of Adults" and "Number Of Children" fields
-        jQuery('#numberOfAdults').jec({maxLength: 3, acceptedKeys: [{min:48, max:57}], blinkingCursor: true,
+        $('#numberOfAdults').jec({maxLength: 3, acceptedKeys: [
+            {min: 48, max: 57}
+        ], blinkingCursor: true,
             blinkingCursorInterval: 500});
-        jQuery('#numberOfChildren').jec({maxLength: 3, acceptedKeys: [{min:48, max:57}], blinkingCursor: true,
+        $('#numberOfChildren').jec({maxLength: 3, acceptedKeys: [
+            {min: 48, max: 57}
+        ], blinkingCursor: true,
             blinkingCursorInterval: 500});
 
         // Calculation and display discount price
-        var discount = jQuery('#discount');
-        var oldPrice = jQuery('#oldPrice').html();
+        discount = $('#discount');
+        $oldPrice = $('#oldPrice');
+        oldPrice = Number($oldPrice.text());
+        price = oldPrice;
+        console.log("Price", price);
 
-        displayDiscount();
-
+        calculatePrice();
         discount.change(
-            function(){
-                jQuery('.price-old').show();
-                displayDiscount();
+            function () {
+                console.log("Total discount", discount.val());
+                $oldPrice.show();
+                console.log("Discount ", discount.val());
+                calculatePrice();
             }
-        )
+        );
 
-        function displayDiscount(){
+        function calculatePrice() {
+            if (typeof numOfAdults != "undefined") {
+                oldPrice = price * Number(numOfAdults.val());
+                console.log()
+            }
+            console.log("Old price", oldPrice, price, numOfAdults);
             if ((discount.val() >= 0) && (discount.val() <= 100)) {
-                var newPrice = oldPrice - oldPrice * discount.val() / 100;
-                jQuery('#priceWithDiscount').text('$ ' + Math.round(newPrice*100)/100);
-            }  else {
-                jQuery('.price-old').hide();
-                jQuery('#priceWithDiscount').text('$ ' + (oldPrice - 0));
+                var newPrice = oldPrice - oldPrice * Number(discount.val()) / 100;
+                newPrice = Math.round(newPrice * 100) / 100;
+                console.log("New price", newPrice);
+                $('#priceWithDiscount').text('$ ' + newPrice);
+                $("#totalDiscount").text(discount.val() + "%");
+                $oldPrice.text(oldPrice);
+            } else {
+                $oldPrice.hide();
+                $('#priceWithDiscount').text('$ ' + oldPrice);
             }
         }
 
         // Order status icons color change
-        var statusField = jQuery('#status');
-        var received = jQuery('.received');
-        var accepted = jQuery('.accepted');
-        var confirmed = jQuery('.confirmed');
-        var completed = jQuery('.completed');
-        var cancelled = jQuery('.cancelled');
+        var statusField = $('#status');
+        var received = $('.received');
+        var accepted = $('.accepted');
+        var confirmed = $('.confirmed');
+        var completed = $('.completed');
+        var cancelled = $('.cancelled');
 
-        switch (statusField.val()){
+        switch (statusField.val()) {
             case 'Accepted':
                 accepted.removeClass("gray");
                 break;
@@ -63,55 +84,55 @@ jQuery(document).ready(
         }
 
         // Days in tour calculation
-        var startingDate = new Date(jQuery('#startingDate').html());
-        var endingDate = new Date(jQuery('#endingDate').html())
-        var daysInTour = (endingDate - startingDate)/(1000*60*60*24);
-        (daysInTour >= 0) ? jQuery('#daysInTour').text(daysInTour) : jQuery('#daysInTour').text('sorry... wrong dates');
+        var startingDate = new Date($('#startingDate').html());
+        var endingDate = new Date($('#endingDate').html())
+        var daysInTour = (endingDate - startingDate) / (1000 * 60 * 60 * 24);
+        (daysInTour >= 0) ? $('#daysInTour').text(daysInTour) : $('#daysInTour').text('sorry... wrong dates');
 
         // Order status popovers
-        jQuery('#received').popover({placement: 'bottom', trigger: 'hover',
+        $('#received').popover({placement: 'bottom', trigger: 'hover',
             content: 'The order was received and now is in the waiting list.'});
 
-        accepted.hasClass('gray') ? jQuery('#accepted').popover({placement: 'bottom', trigger: 'hover',
+        accepted.hasClass('gray') ? $('#accepted').popover({placement: 'bottom', trigger: 'hover',
             content: 'Our agent will call you to explain some details.'}) :
-            jQuery('#accepted').popover({placement: 'bottom', trigger: 'hover',
-            content: 'The order is processed by the agent. Awaiting for prepayment.'});
+            $('#accepted').popover({placement: 'bottom', trigger: 'hover',
+                content: 'The order is processed by the agent. Awaiting for prepayment.'});
 
-        confirmed.hasClass('gray') ? jQuery('#confirmed').popover({placement: 'bottom', trigger: 'hover',
+        confirmed.hasClass('gray') ? $('#confirmed').popover({placement: 'bottom', trigger: 'hover',
             content: 'After the prepayment will be done the preparation of documents will start.'}) :
-            jQuery('#confirmed').popover({placement: 'bottom', trigger: 'hover',
-            content: 'The prepayment was made. Preparing documents for the tour. Awaiting for full payment.'});
+            $('#confirmed').popover({placement: 'bottom', trigger: 'hover',
+                content: 'The prepayment was made. Preparing documents for the tour. Awaiting for full payment.'});
 
-        completed.hasClass('gray') ? jQuery('#completed').popover({placement: 'bottom', trigger: 'hover',
+        completed.hasClass('gray') ? $('#completed').popover({placement: 'bottom', trigger: 'hover',
             content: 'After the full payment will be done you will receive all needed documents.'}) :
-            jQuery('#completed').popover({placement: 'bottom', trigger: 'hover',
-            content: 'Full payment was made. All documents was received by the client.'});
+            $('#completed').popover({placement: 'bottom', trigger: 'hover',
+                content: 'Full payment was made. All documents was received by the client.'});
 
-        cancelled.hasClass('gray') ? jQuery('#cancelled').popover({placement: 'bottom', trigger: 'hover',
+        cancelled.hasClass('gray') ? $('#cancelled').popover({placement: 'bottom', trigger: 'hover',
             content: 'This status is set if the order is cancelled for some reason.'}) :
-            jQuery('#cancelled').popover({placement: 'bottom', trigger: 'hover',
-            content: 'The order was cancelled for some reason.'});
+            $('#cancelled').popover({placement: 'bottom', trigger: 'hover',
+                content: 'The order was cancelled for some reason.'});
 
         // Star rating popovers
-        jQuery('#overallRating').popover({placement: 'top', trigger: 'hover',
+        $('#overallRating').popover({placement: 'top', trigger: 'hover',
             content: 'Overall rating for this tour'});
 
-        jQuery('#customerRating').popover({placement: 'bottom', trigger: 'hover',
+        $('#customerRating').popover({placement: 'bottom', trigger: 'hover',
             content: 'Tour rating from customer for this particular order'});
 
         // Tour photo display in original size on click
-        jQuery('#tourPhoto').click(function() {
-            var thumbnail=$(this).parent();
-            var url=thumbnail.find('img').attr('src');
-            var html='<a href="#" title="Click to close" class="originalSize"><img src="'+url+'" /></a>';
-            jQuery('#showPicture').append(html);
-            jQuery('.originalSize').click(function () {
+        $('#tourPhoto').click(function () {
+            var thumbnail = $(this).parent();
+            var url = thumbnail.find('img').attr('src');
+            var html = '<a href="#" title="Click to close" class="originalSize"><img src="' + url + '" /></a>';
+            $('#showPicture').append(html);
+            $('.originalSize').click(function () {
                 $(this).remove();
             });
         });
 
         // Manage order form validation
-        jQuery("#manageOrderForm").validate({
+        $("#manageOrderForm").validate({
             rules: {
                 numberOfAdults: {
                     required: true,
@@ -125,11 +146,11 @@ jQuery(document).ready(
                     discountRange: true
                 }
             },
-            messages:{
-                numberOfAdults:{
+            messages: {
+                numberOfAdults: {
                     required: "This field can not be empty!"
                 },
-                numberOfChildren:{
+                numberOfChildren: {
                     required: "This field can not be empty!"
                 },
                 discount: {
@@ -137,31 +158,31 @@ jQuery(document).ready(
                     discountRange: "Discount value must be between 0 and 100!"
                 }
             },
-            errorPlacement: function(error, element) {
-                if (element.attr("name") == "numberOfAdults") error.insertAfter(jQuery("select[name=numberOfAdults]"));
-                if (element.attr("name") == "numberOfChildren") error.insertAfter(jQuery("select[name=numberOfChildren]"));
-                if (element.attr("name") == "discount") error.insertAfter(jQuery("input[name=discount]"));
+            errorPlacement: function (error, element) {
+                if (element.attr("name") == "numberOfAdults") error.insertAfter($("select[name=numberOfAdults]"));
+                if (element.attr("name") == "numberOfChildren") error.insertAfter($("select[name=numberOfChildren]"));
+                if (element.attr("name") == "discount") error.insertAfter($("input[name=discount]"));
             }
         });
 
-        jQuery.validator.addMethod("discountRange", function(){
+        $.validator.addMethod("discountRange", function () {
                 var isCorrect = (discount.val() >= 0) && (discount.val() <= 100) ? true : false;
                 return isCorrect;
             }, ""
         );
 
-        jQuery.validator.addMethod("nameIsCorrect",function(value,element){
+        $.validator.addMethod("nameIsCorrect", function (value, element) {
                 return this.optional(element) || /^[а-яА-ЯІіЇїЄєa-zA-Z]+$/i.test(value);
-            },""
+            }, ""
         );
 
-        jQuery.validator.addMethod("phoneIsCorrect",function(value,element){
+        $.validator.addMethod("phoneIsCorrect", function (value, element) {
                 return this.optional(element) || /^\+?\d+(-\d+)*$/i.test(value);
-            },"Only numbers, '+' at the beginning and '-' as separate symbol are allowed."
+            }, "Only numbers, '+' at the beginning and '-' as separate symbol are allowed."
         );
 
         // Create order form validation
-        jQuery("#createOrderForm").validate({
+        $("#createOrderForm").validate({
             rules: {
                 numberOfAdults: {
                     required: true,
@@ -193,56 +214,69 @@ jQuery(document).ready(
                     maxlength: 25
                 }
             },
-            messages:{
-                numberOfAdults:{
+            messages: {
+                numberOfAdults: {
                     required: "This field can not be empty!",
                     min: "Please enter a value greater than 0."
                 },
-                numberOfChildren:{
+                numberOfChildren: {
                     required: "This field can not be empty!"
                 },
-                name:{
+                name: {
                     required: "This field can not be empty!",
                     nameIsCorrect: "Name must contain only letters with no spaces."
                 },
-                surname:{
+                surname: {
                     required: "This field can not be empty!",
                     nameIsCorrect: "Surname must contain only letters with no spaces."
                 },
-                email:{
+                email: {
                     required: "This field can not be empty!"
                 },
-                phone:{
+                phone: {
                     required: "This field can not be empty!"
                 }
             },
-            errorPlacement: function(error, element) {
-                if (element.attr("name") == "numberOfAdults") error.insertAfter(jQuery("select[name=numberOfAdults]"));
-                if (element.attr("name") == "numberOfChildren") error.insertAfter(jQuery("select[name=numberOfChildren]"));
-                if (element.attr("name") == "name") error.insertAfter(jQuery("input[name=name]"));
-                if (element.attr("name") == "surname") error.insertAfter(jQuery("input[name=surname]"));
-                if (element.attr("name") == "email") error.insertAfter(jQuery("input[name=email]"));
-                if (element.attr("name") == "phone") error.insertAfter(jQuery("input[name=phone]"));
+            errorPlacement: function (error, element) {
+                if (element.attr("name") == "numberOfAdults") error.insertAfter($("select[name=numberOfAdults]"));
+                if (element.attr("name") == "numberOfChildren") error.insertAfter($("select[name=numberOfChildren]"));
+                if (element.attr("name") == "name") error.insertAfter($("input[name=name]"));
+                if (element.attr("name") == "surname") error.insertAfter($("input[name=surname]"));
+                if (element.attr("name") == "email") error.insertAfter($("input[name=email]"));
+                if (element.attr("name") == "phone") error.insertAfter($("input[name=phone]"));
             }
         });
 
         // Comments saving from "Comments" textarea
-        jQuery('#comments').focus(function(){
-            jQuery('#saveComments').css('visibility', 'visible');
+        $('#comments').focus(function () {
+            $('#saveComments').css('visibility', 'visible');
         });
 
-        jQuery('#saveComments').click(function(){
-            jQuery.post('/orders/comments',{orderId: jQuery('#orderId').val(), comments: jQuery('#comments').val()});
-            jQuery('#saveComments').css('visibility', 'hidden');
+        $('#saveComments').click(function () {
+            $.post('/orders/comments', {orderId: $('#orderId').val(), comments: $('#comments').val()});
+            $('#saveComments').css('visibility', 'hidden');
         });
+
         //Recalculate discount policies
+
+        var numOfChildren = $('#numberOfChildren');
+        var numOfAdults = $('#numberOfAdults');
+        var discountPolicies = $('#discountPolicies');
         $("#calculateDiscount").click(function () {
             var currentUrl = window.location.href;
             var tourInfoId = currentUrl.substr(currentUrl.lastIndexOf("/") + 1, currentUrl.length);
             var cutUrl = currentUrl.substr(0, currentUrl.lastIndexOf("/"));
             var url = cutUrl.substr(0, cutUrl.lastIndexOf("/")) + "/orders/calculate_discount";
             var data = {numberOfChildren: numOfChildren.val(), numberOfAdults: numOfAdults.val(), tourId: tourInfoId};
+            console.log("Data ", data);
 
+            var tourDiscount = $("#tourDiscount").text();
+            var totalDiscount = Number(tourDiscount.substr(0, tourDiscount.length - 1));
+            var companyDiscount = $("#companyDiscount");
+            if (companyDiscount.length > 0) {
+                var companyDiscountString = companyDiscount.text();
+                totalDiscount += Number(companyDiscountString.substr(0, companyDiscountString.length - 1));
+            }
             $.ajax({
                 url: url,
                 dataType: "json",
@@ -250,25 +284,24 @@ jQuery(document).ready(
                 data: data,
                 success: function (data, textStatus) {
                     console.log(data.length);
-                    if (data.length > 0) {
+                    if (data.discountPolicies.length > 0) {
+                        discountPolicies.html("");
 
-                    }
-                    discountPolicies.html("");
-
-                    $.each(data, function (i, item) {
-                        var discountPolicy = $('<div class="row">\
+                        $.each(data.discountPolicies, function (i, item) {
+                            var discountPolicy = $('<div class="row">\
                         <div class="col-sm-9 discountPolicyName"\
                         data-content="' + item.description + '">' + item.name + '</div>\
                             <div class="col-sm-3">' + item.formula + '%</div>\
                         </div>\
-                        <div class="row text-center">+</div>\
                         ');
-                        console.log("Discount policy ", discountPolicy.html());
-                        discountPolicies.append(discountPolicy);
+                            console.log("Discount policy ", discountPolicy.html());
+                            discountPolicies.append(discountPolicy);
 
-                    });
-                    $(".discountPolicyName").popover({placement: 'left', trigger: 'hover', html: true});
-
+                        });
+                        $(".discountPolicyName").popover({placement: 'left', trigger: 'hover', html: true});
+                    }
+                    totalDiscount += Number(data.discount);
+                    $("#discount").val(totalDiscount).trigger("change");
                 }
             });
         });

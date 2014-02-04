@@ -65,22 +65,19 @@ public class OrdersService {
                 new Sort(sortOrder)));
     }
 
-    public Order findByCompanyId(int id, int orderId) {
-        return orderRepository.findByCompanyId(id, orderId);
-    }
 
     public Order findById(User activeUser, int id) {
 
         switch (activeUser.getRole()) {
             case admin:
-                return orderRepository.findById(id);
+                return orderRepository.findOne(id);
             case agent:
-                return orderRepository.findByCompanyId(getCompanyForUser(activeUser).getId(), id);
+                return orderRepository.findByCompanyId(getCompanyForUser(activeUser).getCompanyId(), id);
             case user:
-                return orderRepository.findByUserId(activeUser.getId(), id);
+                return orderRepository.findByUserId(activeUser.getUserId(), id);
         }
 
-        return orderRepository.findById(id);
+        return orderRepository.findOne(id);
     }
 
     public Page<Order> findAll(int pageNumber, Sort.Order sortOrder) {
@@ -99,50 +96,48 @@ public class OrdersService {
     }
 
     public Page<Order> findActiveOrdersByCompanyId(Company company, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findActiveOrdersByCompanyId(company.getId(),
+        return orderRepository.findActiveOrdersByCompanyId(company.getCompanyId(),
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findByStatusAndCompanyId(String status, Company company, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByStatusAndCompanyId(status, company,
+        return orderRepository.findByStatusAndCompany(status, company,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findActiveOrdersByUserId(User activeUser, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findActiveOrdersByUserId(activeUser.getId(),
+        return orderRepository.findActiveOrdersByUserId(activeUser.getUserId(),
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findByStatusAndUserId(String status, User activeUser, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByStatusAndUserId(status, activeUser,
+        return orderRepository.findByStatusAndUser(status, activeUser,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Long countByCompanyId(Company company) {
-        return orderRepository.countByCompanyId(company.getId());
+        return orderRepository.countByCompanyId(company.getCompanyId());
     }
 
     public Long countByUserId(User activeUser) {
-        return orderRepository.countByUserId(activeUser.getId());
+        return orderRepository.countByUserId(activeUser.getUserId());
     }
 
     public Long countByCompanyIdAndStatus(Company company, String status) {
-        return orderRepository.countByCompanyIdAndStatus(company.getId(), status);
+        return orderRepository.countByCompanyIdAndStatus(company.getCompanyId(), status);
     }
 
     public Long countByUserIdAndStatus(User activeUser, String status) {
-        return orderRepository.countByUserIdAndStatus(activeUser.getId(), status);
+        return orderRepository.countByUserIdAndStatus(activeUser.getUserId(), status);
     }
 
     public Company getCompanyForUser(User activeUser) {
         String companyCode = activeUser.getCompanyCode();
-        Company company = companyService.findByCompanyCode(companyCode);
-
-        return company;
+        return companyService.findByCompanyCode(companyCode);
     }
 
     /*
@@ -151,8 +146,12 @@ public class OrdersService {
     public Sort.Order sortByValue(String value, String direction) {
 
         String sortValue = SORT_VALUES.contains(value) ? value : "id";
-        Sort.Order sortOrder = direction.equalsIgnoreCase("desc") ? new Sort.Order(Sort.Direction.DESC, sortValue) :
-                new Sort.Order(Sort.Direction.ASC, sortValue);
+        Sort.Order sortOrder;
+        if ("desc".equalsIgnoreCase(direction)) {
+            sortOrder = new Sort.Order(Sort.Direction.DESC, sortValue);
+        } else {
+            sortOrder = new Sort.Order(Sort.Direction.ASC, sortValue);
+        }
 
         return sortOrder;
     }
@@ -169,10 +168,10 @@ public class OrdersService {
                 break;
             case agent:
                 Company company = getCompanyForUser(activeUser);
-                orders = findByCompanyId(company.getId(), pageNumber, sortOrder);
+                orders = findByCompanyId(company.getCompanyId(), pageNumber, sortOrder);
                 break;
             case user:
-                orders = findByUserId(activeUser.getId(), pageNumber, sortOrder);
+                orders = findByUserId(activeUser.getUserId(), pageNumber, sortOrder);
                 break;
         }
 
@@ -263,7 +262,7 @@ public class OrdersService {
 
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
         String userName = SecurityContextHolder.getContext().getAuthentication().getName();
-        Order existingOrder = this.findById(usersService.getCurrentUser(), order.getId());
+        Order existingOrder = this.findById(usersService.getCurrentUser(), order.getOrderId());
 
         existingOrder.setNumberOfAdults(order.getNumberOfAdults());
         existingOrder.setNumberOfChildren(order.getNumberOfChildren());
@@ -276,44 +275,44 @@ public class OrdersService {
             case Order.STATUS_ACCEPTED:
                 existingOrder.setAcceptedDate(currentTimestamp);
 
-                logger.debug("For order[" + order.getId() + "] set status [" + Order.STATUS_ACCEPTED + "] "
+                logger.debug("For order[" + order.getOrderId() + "] set status [" + Order.STATUS_ACCEPTED + "] "
                         + currentTimestamp + " by User[" + userName + "]");
                 break;
             case Order.STATUS_CONFIRMED:
                 existingOrder.setConfirmedDate(currentTimestamp);
-                logger.debug("For order[" + order.getId() + "] set status [" + Order.STATUS_CONFIRMED + "] "
+                logger.debug("For order[" + order.getOrderId() + "] set status [" + Order.STATUS_CONFIRMED + "] "
                         + currentTimestamp + " by User[" + userName + "]");
                 break;
             case Order.STATUS_COMPLETED:
                 existingOrder.setCompletedDate(currentTimestamp);
-                logger.debug("For order[" + order.getId() + "] set status [" + Order.STATUS_COMPLETED + "] "
+                logger.debug("For order[" + order.getOrderId() + "] set status [" + Order.STATUS_COMPLETED + "] "
                         + currentTimestamp + " by User[" + userName + "]");
                 break;
             case Order.STATUS_CANCELLED:
                 existingOrder.setCancelledDate(currentTimestamp);
-                logger.debug("For order[" + order.getId() + "] set status [" + Order.STATUS_CANCELLED + "] "
+                logger.debug("For order[" + order.getOrderId() + "] set status [" + Order.STATUS_CANCELLED + "] "
                         + currentTimestamp + " by User[" + userName + "]");
                 break;
             default:
-                logger.error("Invalid status [" + order.getStatus() + "] for order [" + order.getId() + "]");
+                logger.error("Invalid status [" + order.getStatus() + "] for order [" + order.getOrderId() + "]");
         }
 
         orderRepository.saveAndFlush(existingOrder);
         logger.info("[" + currentTimestamp + "] Order: ID [" + "] was edited by [" + userName + "].");
 
         if (sendEmail) {
-            logger.debug("send e-mail to user [" + existingOrder.getUserId().getName()
-                    + "] to address[" + existingOrder.getUserId().getEmail() + "]");
+            logger.debug("send e-mail to user [" + existingOrder.getUser().getName()
+                    + "] to address[" + existingOrder.getUser().getEmail() + "]");
 
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes()).getRequest();
 
             SimpleMailMessage message = new SimpleMailMessage();
 
             message.setFrom(SYSTEM_EMAIL);
-            message.setTo(existingOrder.getUserId().getEmail());
-            message.setSubject("Changed status of your order[" + order.getId() + "] " + existingOrder.getTourInfoId().getTour().getName()
-                    + " on date " + existingOrder.getTourInfoId().getStartDate());
-            message.setText("For order[" + order.getId() + "] set status[" + order.getStatus() + "] "
+            message.setTo(existingOrder.getUser().getEmail());
+            message.setSubject("Changed status of your order[" + order.getOrderId() + "] " + existingOrder.getTourInfo().getTour().getName()
+                    + " on date " + existingOrder.getTourInfo().getStartDate());
+            message.setText("For order[" + order.getOrderId() + "] set status[" + order.getStatus() + "] "
                     + currentTimestamp + " by User[" + userName + "]" + "\nFor more info please visit " + request.getRequestURL());
             mailSender.send(message);
 
@@ -335,15 +334,15 @@ public class OrdersService {
             orderRepository.saveAndFlush(existingOrder);
 
             SimpleMailMessage message = new SimpleMailMessage();
-            String email = existingOrder.getTourInfoId().getTour().getCompany().getContactEmail();
+            String email = existingOrder.getTourInfo().getTour().getCompany().getContactEmail();
             message.setFrom(SYSTEM_EMAIL);
             message.setTo(email);
             message.setSubject("Changed comments in order: '" +
-                    existingOrder.getTourInfoId().getTour().getName() + "' ID: '" + orderId +
-                    "' on " + existingOrder.getTourInfoId().getStartDate());
+                    existingOrder.getTourInfo().getTour().getName() + "' ID: '" + orderId +
+                    "' on " + existingOrder.getTourInfo().getStartDate());
             message.setText("On " + currentTimestamp + " comments was changed by user '" + userName +
-                    "'.\nOrder ID: " + orderId + "\nTour name: '" + existingOrder.getTourInfoId().getTour().getName() +
-                    "'\nTour starting date: " + existingOrder.getTourInfoId().getStartDate());
+                    "'.\nOrder ID: " + orderId + "\nTour name: '" + existingOrder.getTourInfo().getTour().getName() +
+                    "'\nTour starting date: " + existingOrder.getTourInfo().getStartDate());
             mailSender.send(message);
 
             logger.info("[" + currentTimestamp + "] Changed comments in order: ID [" + orderId + "]" +
@@ -367,10 +366,10 @@ public class OrdersService {
 
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
 
-        order.setCompanyId(company);
-        order.setTourInfoId(tourInfo);
-        if (order.getUserId() == null) { //if user was not set in controller
-            order.setUserId(activeUser);
+        order.setCompany(company);
+        order.setTourInfo(tourInfo);
+        if (order.getUser() == null) { //if user was not set in controller
+            order.setUser(activeUser);
         }
         order.setOrderDate(currentTimestamp);
         order.setPrice(tour.getPrice().multiply(new BigDecimal(order.getNumberOfAdults().toString())));
@@ -401,8 +400,8 @@ public class OrdersService {
     public void createValidationLink(User user) {
 
         ValidationLink link = new ValidationLink();
-        link.setUserId(userService.findByLogin(user.getLogin()).getId());
-        link.setValidationLink("localhost:/login/" + user.getLogin());
+        link.setUserId(userService.findByLogin(user.getLogin()).getUserId());
+        link.setUrl("localhost:/login/" + user.getLogin());
         validationService.addValidationLink(link);
 
     }

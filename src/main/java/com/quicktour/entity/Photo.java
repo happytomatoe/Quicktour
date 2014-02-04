@@ -1,28 +1,26 @@
 package com.quicktour.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Entity
-@Table(name = "photos", schema = "", catalog = "quicktour")
+@Table(name = "photos")
 public class Photo {
 
-    private int id;
+    @Column(name = "photo_id")
+    @Id
+    @GeneratedValue
+    private int photoId;
+    @Column(name = "url")
     private String url;
 
-    @Column(name = "ID")
-    @Id
-    public int getId() {
-        return id;
+    public int getPhotoId() {
+        return photoId;
     }
 
-    public void setId(int id) {
-        this.id = id;
+    public void setPhotoId(int id) {
+        this.photoId = id;
     }
 
-    @Column(name = "url")
     public String getUrl() {
         return url;
     }

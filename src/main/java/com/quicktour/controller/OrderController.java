@@ -3,7 +3,6 @@ package com.quicktour.controller;
 import com.quicktour.dto.DiscountPoliciesResult;
 import com.quicktour.entity.*;
 import com.quicktour.repository.TourRepository;
-import com.quicktour.repository.UserRepository;
 import com.quicktour.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -33,11 +32,13 @@ public class OrderController {
     @Autowired
     private OrdersService ordersService;
     @Autowired
-    private UserRepository userRepository;
-    @Autowired
     private UsersService usersService;
     @Autowired
     private TourRepository tourRepository;
+    @Autowired
+    ToursService toursService;
+    @Autowired
+    private CompanyService companyService;
     @Autowired
     private DiscountPolicyService discountPolicyService;
 
@@ -121,10 +122,7 @@ public class OrderController {
     @PreAuthorize("hasAnyRole('user','admin','agent')")
     @RequestMapping(value = "/orders/filter/{orderStatusFilter}", method = RequestMethod.GET)
     public String filterOrdersByStatus(@PathVariable("orderStatusFilter") String orderStatusFilter) {
-
-        String link = MessageFormat.format("redirect:/orders/filter/{0}/id/asc/0", orderStatusFilter);
-
-        return link;
+        return MessageFormat.format("redirect:/orders/filter/{0}/id/asc/0", orderStatusFilter);
     }
 
     @PreAuthorize("!(hasRole('agent'))")
@@ -133,24 +131,37 @@ public class OrderController {
                               Model model) {
 
 
+        DiscountPoliciesResult discountPoliciesResult;
+        BigDecimal totalDiscount;
         User activeUser = userService.getCurrentUser();
-        if (activeUser == null) {
-            activeUser = new User();
-        }
-
         TourInfo tourInfo = tourRepository.findOne(tourId);
         Tour tour = tourInfo.getTour();
-        DiscountPoliciesResult discountPoliciesResult = discountPolicyService.calculateDiscount(tour.getDiscountPolicies());
-        tour.setDiscount(discountPoliciesResult.getDiscount());
-        List<DiscountPolicy> activeDiscountPolicies =
-                discountPolicyService.getActivePolicies(discountPoliciesResult.getDiscountPolicies());
-        tour.setDiscountPolicies(activeDiscountPolicies);
-        logger.debug("Discount based on discount policies {}  .TourInfo discount {}", discountPoliciesResult.getDiscountPolicies(),
-                tourInfo.getDiscount());
-        model.addAttribute("totalDiscount", tour.getDiscount().add(new BigDecimal(tourInfo.getDiscount().toString())));
-        model.addAttribute("ordersService", ordersService);
+        BigDecimal companyDiscount = null;
+        List<DiscountPolicy> activeDiscountPolicies;
+        if (activeUser == null) {
+            activeUser = new User();
+            tour.setDiscountPolicies(null);
+        } else {
+            discountPoliciesResult = discountPolicyService.calculateDiscount(tour.getDiscountPolicies());
+            tour.setDiscount(discountPoliciesResult.getDiscount());
+            logger.debug("Discount policies {}\n", discountPoliciesResult.getDiscountPolicies());
+            activeDiscountPolicies = discountPolicyService.getActivePolicies(discountPoliciesResult.getDiscountPolicies());
+            logger.debug("Active discount policies {}", activeDiscountPolicies);
+            tour.setDiscountPolicies(activeDiscountPolicies);
+            companyDiscount = companyService.getCompanyDiscount(activeUser);
+            logger.debug("Discount based on discount policies {}  .TourInfo discount {}\nCompany:{}.\nUser: {}", tour.getDiscountPolicies(),
+                    tourInfo.getDiscount(), companyService.getCompanyByUserId(activeUser.getUserId()), activeUser);
+        }
+        totalDiscount = tour.getDiscount().add(new BigDecimal(tourInfo.getDiscount().toString()));
+        if (companyDiscount != null && companyDiscount.doubleValue() > 0) {
+            totalDiscount = totalDiscount.add(companyDiscount);
+        }
+        logger.info("Total discount {}.Discount company {}", totalDiscount, companyDiscount);
+        model.addAttribute("totalDiscount", totalDiscount);
         model.addAttribute("user", activeUser);
-        model.addAttribute("tour", tourInfo);
+        model.addAttribute("companyDiscount", companyDiscount);
+        model.addAttribute("tourInfo", tourInfo);
+        model.addAttribute("tour", tour);
         model.addAttribute("company", tour.getCompany());
 
         return "create-order";
@@ -178,7 +189,7 @@ public class OrderController {
                 return "ordererror";
             }
 
-            order.setUserId(userService.saveAnonymousCustomer(user));
+            order.setUser(userService.saveAnonymousCustomer(user));
             ordersService.createValidationLink(user);
         }
 
@@ -197,7 +208,7 @@ public class OrderController {
             return "redirect:/orders";
         }
 
-        TourInfo tour = tourRepository.findOne(order.getTourInfoId().getTourId());
+        TourInfo tour = tourRepository.findOne(order.getTourInfo().getTourInfoId());
         model.addAttribute("tour", tour);
         model.addAttribute("user", usersService.getCurrentUser());
         model.addAttribute("order", order);
@@ -226,14 +237,13 @@ public class OrderController {
             return "manage-order";
         }
 
-        Boolean notifyUserByEmail;
-
-        notifyUserByEmail = (sendEmail == null) ? false : sendEmail.equals("yes");
-        order.setId(orderId);
+        boolean notifyUserByEmail = sendEmail != null && sendEmail.equals("yes");
+        order.setOrderId(orderId);
         ordersService.edit(order, notifyUserByEmail);
 
         return "redirect:/orders";
     }
+
 
     @PreAuthorize("hasRole('user')")
     @RequestMapping(value = "/orders/rate", method = RequestMethod.POST)
@@ -242,13 +252,12 @@ public class OrderController {
     String rateOrder(@RequestParam(value = "order", required = false) Integer order,
                      @RequestParam(value = "score", required = false) Integer score) {
 
-        score = score == null ? 0 : score;
+        int orderScore = score == null ? 0 : score;
         logger.debug("order = [" + order + "], score = [" + score + "]");
-        ordersService.addVote(order, score);
+        ordersService.addVote(order, orderScore);
 
         return "OK";
     }
-
 
     @PreAuthorize("hasRole('user')")
     @RequestMapping(value = "/orders/comments", method = RequestMethod.POST)
@@ -260,5 +269,13 @@ public class OrderController {
         ordersService.saveComments(orderId, comments);
         return "OK";
     }
+
+    @RequestMapping(value = "/orders/calculate_discount", method = RequestMethod.POST)
+    @ResponseBody
+    public DiscountPoliciesResult recalculateDiscount(Order order, Integer tourId) {
+        logger.debug("Recalculate discount .Order {}\nTourId {}", order, tourId);
+        return discountPolicyService.calculateDiscount(toursService.findOne(tourId).getDiscountPolicies(), order);
+    }
+
 
 }

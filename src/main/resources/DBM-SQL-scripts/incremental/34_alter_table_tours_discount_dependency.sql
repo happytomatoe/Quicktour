@@ -1,1 +1,0 @@
-ALTER TABLE `discount_dependency` DROP `basedOn`;

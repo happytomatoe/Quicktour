@@ -9,6 +9,7 @@
 </script>
 <script src="https://ssl.panoramio.com/wapi/wapi.js?v=1"></script>
 <script src="<c:url value="/resources/js/bootstrap-select.js"/>"></script>
+<script src="<c:url value="/resources/js/jquery.raty.js"/>"></script>
 <link href="<c:url value="/resources/css/bootstrap-select.css"/>" rel="stylesheet">
 <script src="<c:url value="/resources/js/places.js"/>"></script>
 <script src="<c:url value="/resources/ckeditor/ckeditor.js"/>"></script>
@@ -41,17 +42,10 @@
 </div>
 <div class="row">
     <div class="col-md-4">
-        <c:choose>
-            <c:when test="${fn:contains(tour.photo.url,'http')}">
-                <img src="${tour.photo.url}"
-                     style="height: 300px" class="img-thumbnail">
-            </c:when>
-            <c:otherwise>
-                <img src="<c:url value="/images/${tour.photo.url}"/>"
-                     style="height: 300px" class="img-thumbnail">
 
-            </c:otherwise>
-        </c:choose>
+        <img src="${tour.photo.url}"
+             style="height: 300px" class="img-thumbnail">
+
     </div>
     <div class="col-md-3">
         <sec:authorize access="!(hasRole('agent'))">
@@ -64,10 +58,10 @@
                 </button>
                 <ul class="dropdown-menu" role="menu">
                     <li role="presentation" class="dropdown-header">Please, select tour start date</li>
-                    <c:forEach items="${tour.tourInfo}" var="date">
+                    <c:forEach items="${tour.tourInfo}" var="tourInfo">
                         <li>
-                            <a href="/createOrder/${date.tourId}"><strong>${date.startDate}
-                                Price: ${date.tour.price-date.tour.price*date.discount/100}$</strong></a>
+                            <a href="<c:url value="/createOrder/${tourInfo.tourInfoId}"/>"><strong>${tourInfo.startDate}
+                                Price: ${tourInfo.tour.price-tourInfo.tour.price*tourInfo.discount/100}$</strong></a>
                         </li>
                     </c:forEach>
                 </ul>
@@ -75,7 +69,7 @@
         </sec:authorize>
     </div>
     <div class="col-md-2 pull-right">
-        <img class="img-thumbnail" src="<c:url value="/images/"/><c:url value="${tour.company.photosId.url}"/>"
+        <img class="img-thumbnail" src="<c:url value="${tour.company.photo.url}"/>"
              width="150px"/>
 
         <p></p>
@@ -115,19 +109,13 @@
 <div class="row">
     <div class="panel panel-default">
         <div class="panel-body">
-            <table class="table">
-                <thead>
-                <th><h3>Price Includes:</h3></th>
-                </thead>
-                <tbody>
-                <c:forEach items="${tour.priceIncludes}" var="priceIncludes">
-                    <tr class="success">
-                        <td><span class="glyphicon glyphicon-ok"></span></td>
-                        <td>${priceIncludes}</td>
-                    </tr>
-                </c:forEach>
-                </tbody>
-            </table>
+            <h3 class="text-center">Price Includes:</h3>
+            <c:forEach items="${tour.priceIncludes}" var="priceIncludes">
+                <div class="row success">
+                    <span class="glyphicon glyphicon-ok"></span>
+                        ${priceIncludes.description}
+                </div>
+            </c:forEach>
         </div>
     </div>
 </div>
@@ -149,7 +137,7 @@
                 <div class="panel panel-default">
                     <div class="panel-body">
                         <div class="col-md-10">
-                        <div id="photoWidget">
+                            <div id="photoWidget">
                             </div>
                         </div>
                     </div>

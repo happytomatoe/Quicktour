@@ -2,20 +2,24 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <!-- Headliner -->
+<script type="text/javascript" src="<c:url value="/resources/js/jquery.inputmask-multi.js"/> "></script>
+<script type="text/javascript" src="<c:url value="/resources/js/jquery.bind-first-0.2.2.min.js"/> "></script>
+<script type="text/javascript" src="<c:url value="/resources/js/jquery.inputmask.js"/> "></script>
 <div class="row">
     <div class="col-sm-12">
         <div class="breadcrumb row">
             <div class="col-sm-5">
-                <span class="tour-name"><a href="/tour/${tour.tour.tourId}" target="_blank">${tour.tour.name}</a></span>
+                <span class="tour-name"><a href="/tour/${tour.tourId}" target="_blank">${tour.name}</a></span>
             </div>
 
             <div class="col-sm-3"></div>
 
             <div class="col-sm-4">
                 <div class="pull-right"><span class="price-old">$ </span>
-                    <span id="oldPrice" class="price-old">${tour.tour.price}</span>&nbsp;&nbsp;&nbsp;
-                    <span id="priceWithDiscount" class="price-new">$ ${tour.tour.price}</span>
+                    <span id="oldPrice" class="price-old">${tour.price}</span>&nbsp;&nbsp;&nbsp;
+                    <span id="priceWithDiscount" class="price-new">$ </span>
                 </div>
             </div>
         </div>
@@ -27,207 +31,242 @@
 
 <!-- Accordion -->
 <div class="row">
-    <div class="col-sm-12">
-        <div class="panel-group" id="accordion2">
+<div class="col-sm-12">
+<div class="panel-group" id="accordion2">
 
-            <!-- Panel TourInfo Details -->
-            <div class="panel">
-                <div class="panel-heading">
-                    <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
-                        <span class="panel-title"><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;Tour Details</span>
-                    </a>
-                </div>
-                <div id="collapseOne" class="height0 panel-collapse collapse in">
-                    <div class="panel-body">
+<!-- Panel TourInfo Details -->
+<div class="panel">
+    <div class="panel-heading">
+        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseOne">
+            <span class="panel-title"><span
+                    class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;Tour Details</span>
+        </a>
+    </div>
+    <div id="collapseOne" class="height0 panel-collapse collapse in">
+        <div class="panel-body">
 
-                        <div class="col-sm-3 no_margin_left">
-                            <a href="#" id="tourPhoto"><img src="/img/${tour.tour.mainPhotoUrl}" class="img-thumbnail"></a><p>
-                        </div>
+            <div class="col-sm-3 no_margin_left">
+                <c:choose>
+                <c:when test="${fn:contains(tour.photo.url,'http')}">
+                <a href="#" id="tourPhoto"><img src="${tour.photo.url}" class="img-thumbnail"></a>
 
-                        <div class="col-sm-3 pt-10">
+                <p>
+                    </c:when>
+                    <c:otherwise>
+                    <a href="#" id="tourPhoto"><img src="<c:url value="/images/${tour.photo.url}"/>"
+                                                    class="img-thumbnail"></a>
 
-                            <div class="form-group">
-                                <label>Tour starts on:</label>&nbsp;&nbsp;
-                                <span id="startingDate">${tour.startDate}</span>
-                            </div>
+                <p>
+                    </c:otherwise>
+                    </c:choose>
 
-                            <div class="form-group">
-                                <label>Tour ends on:</label>&nbsp;&nbsp;
-                                <span id="endingDate">${tour.endDate}</span>
-                            </div>
-
-                            <div class="form-group">
-                                <label>Days in tour:</label>&nbsp;&nbsp;
-                                <span id="daysInTour"></span>
-                            </div>
-
-                            <div id="overallRating" rel="popover" class="form-group">
-                                <label>Rating:</label>&nbsp;&nbsp;
-                                <span id="rateTour"></span>
-                            </div>
-
-                            <script type="text/javascript">
-                                jQuery('#rateTour').raty({
-                                    readOnly: true,
-                                    scoreName: 'Tour.ratio',
-                                    score:     ${ordersService.getRatio(tour.tour.tourId)},
-                                    number:    5
-                                });
-                            </script>
-
-                        </div>
-
-                        <c:set var="description" value="${tour.tour.description}"/>
-                        <c:if test="${fn:length(description) > 500}">
-                            <c:set var="description" value="${fn:substring(description, 0, 500)}"/>
-                        </c:if>
-                        <div class="col-sm-6 no_margin_left pt-10">
-                            ${description}...
-                            <a href="/tour/${tour.tour.tourId}" target="_blank" title="More..."
-                               class="btn btn-default btn-xs">&raquo;</a>
-                        </div>
-
-                    </div>
-                </div>
             </div>
-            <!-- /Panel TourInfo Details -->
 
-            <!-- Form Enter Registration Information -->
-            <c:url var="saveUrl" value="/createOrder/${tour.tourId}"/>
-            <form:form role="form" method="post" modelAttribute="order" id="createOrderForm" action="${saveUrl}">
-                <!-- Panel Enter Registration Information -->
-                <div class="panel mt">
-                    <div class="panel-heading">
-                        <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
-                            <span class="panel-title"><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;Enter Registration Information</span>
-                        </a>
+            <div class="col-sm-3 pt-10">
+
+                <div class="form-group">
+                    <label>Tour starts on:</label>&nbsp;&nbsp;
+                    <span id="startingDate">${tourInfo.startDate}</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Tour ends on:</label>&nbsp;&nbsp;
+                    <span id="endingDate">${tourInfo.endDate}</span>
+                </div>
+
+                <div class="form-group">
+                    <label>Days in tour:</label>&nbsp;&nbsp;
+                    <span id="daysInTour"></span>
+                </div>
+
+                <div id="overallRating" rel="popover" class="form-group">
+                    <label>Rating:</label>&nbsp;&nbsp;
+                    <span id="rateTour"></span>
+                </div>
+
+                <c:if test="${tour.rateCount>0}">
+                    <div class="form-group col-md-12 text-center">
+                        <span id="rateTour_${tour.tourId}"></span>
+                        <span><i>(${tour.rateCount})</i></span>
+                        <script type="text/javascript">
+                            jQuery('#rateTour_${tour.tourId}').raty({
+                                readOnly: true,
+                                path: "<c:url value="/resources"/>",
+                                scoreName: 'Tour.ratio',
+                                score:     ${tour.rate},
+                                number: 5
+                            });
+                        </script>
+                        <!-- /Star rating -->
                     </div>
-                    <div id="collapseTwo" class="height0 panel-collapse collapse in">
-                        <div class="panel-body">
-                            <div class="col-sm-6 no_margin_left">
+                </c:if>
 
-                                <fieldset>
-                                    <legend>Required Personal Details</legend>
-                                    <div class="form-group">
-                                        <label for="firstName">Name</label>
-                                        <input id="firstName" name="name" value="${user.name}"
-                                           placeholder="Enter your name" class="form-control" type="text" required>
-                                    </div>
+            </div>
 
-                                    <div class="form-group">
-                                        <label for="surname">Surname</label>
-                                        <input id="surname" name="surname" value="${user.surname}"
-                                           placeholder="Enter your surname" class="form-control" type="text" required>
-                                    </div>
+            <c:set var="description" value="${tour.description}"/>
+            <c:if test="${fn:length(description) > 500}">
+                <c:set var="description" value="${fn:substring(description, 0, 500)}"/>
+            </c:if>
+            <div class="col-sm-6 no_margin_left pt-10">
+                ${description}...
+                <a href="/tour/${tour.tourId}" target="_blank" title="More..."
+                   class="btn btn-default btn-xs">&raquo;</a>
+            </div>
 
-                                    <div class="form-group">
+        </div>
+    </div>
+</div>
+<!-- /Panel TourInfo Details -->
 
-                                        <label for="email">Email Address</label>
-                                        <input id="email" name="email" value="${user.email}"
-                                           placeholder="Enter email address" class="form-control" type="email" required>
+<!-- Form Enter Registration Information -->
+<c:url var="saveUrl" value="/createOrder/${tourInfo.id}"/>
+<form:form role="form" method="post" modelAttribute="order" id="createOrderForm" action="${saveUrl}">
+    <!-- Panel Enter Registration Information -->
+    <div class="panel mt">
+        <div class="panel-heading">
+            <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
+                <span class="panel-title"><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;Enter Registration Information</span>
+            </a>
+        </div>
+        <div id="collapseTwo" class="height0 panel-collapse collapse in">
+            <div class="panel-body">
+                <div class="col-sm-6 no_margin_left">
 
-                                    </div>
+                    <fieldset>
+                        <legend>Required Personal Details</legend>
+                        <div class="form-group">
+                            <label for="firstName">Name</label>
+                            <input id="firstName" name="name" value="${user.name}"
+                                   placeholder="Enter your name" class="form-control" type="text" required>
+                        </div>
 
-                                    <div class="form-group">
-                                        <label for="phone">Phone</label>
-                                        <input id="phone" name="phone" value="${user.phone}"
-                                           placeholder="Enter your phone number" class="form-control" type="text" required>
-                                    </div>
+                        <div class="form-group">
+                            <label for="surname">Surname</label>
+                            <input id="surname" name="surname" value="${user.surname}"
+                                   placeholder="Enter your surname" class="form-control" type="text" required>
+                        </div>
 
-                                </fieldset>
-                                <p>&nbsp;</p>
-                            </div>
+                        <div class="form-group">
 
-                            <div class="col-sm-6">
-                                <legend>Additional Information</legend>
-                                <div class="row">
-                                    <div class="col-sm-4">
-                                        <fieldset>
-                                            <div class="form-group">
-                                                <label for="numberOfAdults">Number of adults:</label>
+                            <label for="email">Email Address</label>
+                            <input id="email" name="email" value="${user.email}"
+                                   placeholder="Enter email address" class="form-control" type="email" required>
 
-                                                <select id="numberOfAdults" name="numberOfAdults" class="form-control num" required>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                </select>
-                                                <form:errors path="numberOfAdults" cssClass="alert-danger"/>
-                                            </div>
-                                            <div class="form-group">
-                                                <label for="numberOfChildren">Number of children:</label>
+                        </div>
+                        <div class="form-group">
+                            <label for="phone">Phone</label>
+                            <input id="phone" name="phone" value="${user.phone}" size="25"
+                                   placeholder=+___(__)___-__-__" class="form-control " type="text" required>
 
-                                                <select id="numberOfChildren" name="numberOfChildren"
-                                                        class="form-control num" required>
-                                                    <option value="0">0</option>
-                                                    <option value="1">1</option>
-                                                    <option value="2">2</option>
-                                                    <option value="3">3</option>
-                                                    <option value="4">4</option>
-                                                    <option value="5">5</option>
-                                                </select>
-                                                <form:errors path="numberOfChildren" cssClass="alert-danger"/>
-                                            </div>
-                                        </fieldset>
-                                    </div>
-                                    <div class="col-sm-8">
-                                        <fieldset>
-                                            <label>Discount information:</label>
-                                            <div class="form-group">
+                        </div>
 
-                                                <!-- Discount information -->
-                                                <div id="discountPolicies">
-                                                    <c:forEach items="${tour.tour.discountPolicies}" var="discountPolicy">
-                                                        <div class="row">
-                                                            <div class="col-sm-9 discountPolicyName"
-                                                                 data-content="${discountPolicy.description}">${discountPolicy.name}</div>
-                                                            <div class="col-sm-3">${discountPolicy.formula}%</div>
-                                                        </div>
-                                                    </c:forEach>
-                                                </div>
-                                                <div class="row">
-                                                    <div class="col-sm-9">Tour discount:</div>
-                                                    <div class="col-sm-3" id="tourDiscount">${tour.discount}%</div>
-                                                </div>
-                                                <hr>
-                                                <div class="row">
-                                                    <div class="col-sm-9 green"><b>Total discount:</b></div>
-                                                    <div class="col-sm-3 green" id="totalDiscount"><b>${discount}%</b></div>
-                                                </div><!-- /Discount information -->
+                    </fieldset>
+                    <p>&nbsp;</p>
+                </div>
 
-                                            </div>
-                                        </fieldset>
-                                    </div>
+                <div class="col-sm-6">
+                    <legend>Additional Information</legend>
+                    <div class="row">
+                        <div class="col-sm-4">
+                            <fieldset>
+                                <div class="form-group">
+                                    <label for="numberOfAdults">Number of adults:</label>
+
+                                    <select id="numberOfAdults" name="numberOfAdults" class="form-control num" required>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    <form:errors path="numberOfAdults" cssClass="alert-danger"/>
                                 </div>
+                                <div class="form-group">
+                                    <label for="numberOfChildren">Number of children:</label>
 
-                                <input name="discount" id="discount" value="${discount}" hidden="true" disabled>
-
-                                <fieldset>
-                                    <div class="form-group">
-                                        <label for="comments">Comments:</label>
-                                        <textarea id="comments" name="userInfo" rows="4"
-                                                  class="form-control">User_info</textarea>
-                                    </div>
+                                    <select id="numberOfChildren" name="numberOfChildren"
+                                            class="form-control num" required>
+                                        <option value="0">0</option>
+                                        <option value="1">1</option>
+                                        <option value="2">2</option>
+                                        <option value="3">3</option>
+                                        <option value="4">4</option>
+                                        <option value="5">5</option>
+                                    </select>
+                                    <form:errors path="numberOfChildren" cssClass="alert-danger"/>
+                                </div>
+                                <sec:authorize access="hasAnyRole('admin', 'agent', 'user')">
                                     <button type="button" id="calculateDiscount" class="btn btn-primary btn-sm">
-                                        Calculate discount
+                                        Calculate
                                     </button>
+                                </sec:authorize>
+                            </fieldset>
+                        </div>
+                        <div class="col-sm-8">
+                            <fieldset>
+                                <label>Discount information:</label>
+
+                                <div class="form-group">
+
+                                    <!-- Discount information -->
+                                    <div id="discountPolicies">
+                                        <c:forEach items="${tour.discountPolicies}" var="discountPolicy">
+                                            <div class="row">
+                                                <div class="col-sm-9 discountPolicyName"
+                                                     data-content="${discountPolicy.description}">${discountPolicy.name}</div>
+                                                <div class="col-sm-3">${discountPolicy.formula}%</div>
+                                            </div>
+                                        </c:forEach>
+                                    </div>
+                                    <div class="row">
+                                        <div class="col-sm-9">Tour discount:</div>
+                                        <div class="col-sm-3" id="tourDiscount">${tourInfo.discount}%</div>
+                                    </div>
+                                    <c:if test="${companyDiscount>0}">
+                                        <div class="row">
+                                            <div class="col-sm-9">Company discount:</div>
+                                            <div class="col-sm-3" id="companyDiscount">${companyDiscount}%</div>
+                                        </div>
+                                    </c:if>
+                                    <hr>
+                                    <div class="row">
+
+                                        <div class="col-sm-9 green"><b>Total discount:</b></div>
+                                        <div class="col-sm-3 green" id="totalDiscount"><b><c:out
+                                                value="${totalDiscount}"/></b></div>
+
+                                    </div>
+                                    <!-- /Discount information -->
+
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+
+                    <input name="discount" id="discount" value="${totalDiscount}" hidden="true">
+
+                    <fieldset>
+                        <div class="form-group">
+                            <label for="comments">Comments:</label>
+                            <textarea id="comments" name="userInfo" rows="4"
+                                      class="form-control">User_info</textarea>
+                        </div>
                                     <span class="pull-right">
                                         <input type="submit" value="Confirm Order" class="btn btn-success btn-sm">
                                         <a class="btn btn-default btn-sm" href="/">Cancel</a>
                                     </span>
-                                </fieldset>
-                                <p>&nbsp;</p>
-                            </div>
-
-                        </div>
-                    </div>
+                    </fieldset>
+                    <p>&nbsp;</p>
                 </div>
-                <!-- /Panel Enter Registration Information -->
 
-            </form:form><!-- /Form Enter Registration Information -->
+            </div>
         </div>
     </div>
+    <!-- /Panel Enter Registration Information -->
+
+</form:form><!-- /Form Enter Registration Information -->
+</div>
+</div>
 </div>
 <!-- /Accordion -->
 
@@ -245,3 +284,29 @@
         </footer>
     </div>
 </div>
+<script>
+    var maskList = $.masksSort($.masksLoad("../resources/js/phone-codes.json"), ['#'], /[0-9]|#/, "mask");
+    var maskOpts = {
+        inputmask: {
+            definitions: {
+                '#': {
+                    validator: "[0-9]",
+                    cardinality: 1
+                }
+            },
+            //clearIncomplete: true,
+            showMaskOnHover: false,
+            autoUnmask: true
+        },
+        match: /[0-9]/,
+        replace: '#',
+        list: maskList,
+        listKey: "mask"
+
+    };
+    var $phone = $('#phone');
+    $phone.inputmasks(maskOpts);
+    if ($phone.val() == undefined) {
+        $phone.val("7");
+    }
+</script>

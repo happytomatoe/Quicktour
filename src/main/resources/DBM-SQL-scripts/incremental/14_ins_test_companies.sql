@@ -1,5 +1,0 @@
-USE quicktour;
-
-INSERT INTO companies VALUES (0, 'Default Company', 'Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec', 'Ivano-Frankivsk', '0123456789', 'default@comp.com', 'default', 10, 'company license', 12345678987654321, 3);
-
-INSERT INTO companies VALUES (0, 'Default Agency', 'Aenean commodo ligula eget dolor. Aenean massa. Cum sociis natoque penatibus et magnis dis parturient montes, nascetur ridiculus mus. Donec quam felis, ultricies nec, pellentesque eu, pretium quis, sem. Nulla consequat massa quis enim. Donec pede justo, fringilla vel, aliquet nec', 'Ivano-Frankivsk', '0123456798', 'default@agent.com', 'agency', 0, 'company license', 12345678985554321, 3);

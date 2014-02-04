@@ -54,7 +54,7 @@
                 </p>
 
                 <p><label name="avatar">Avatar:</label>
-                    <img src="/images/<c:out value='${user.photosId.url}'/>" alt="No avatar"
+                    <img src="/images/<c:out value='${user.photo.url}'/>" alt="No avatar"
                          style='width:auto; height:100px'>
                     <input name="avatar" type="file"/>
                 </p>

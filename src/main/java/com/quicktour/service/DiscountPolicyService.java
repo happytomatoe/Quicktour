@@ -13,9 +13,11 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.PersistenceException;
 import javax.persistence.Query;
+import java.lang.reflect.Field;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.ListIterator;
 import java.util.regex.Pattern;
@@ -31,6 +33,8 @@ public class DiscountPolicyService {
     private static final String AND = "AND";
     private static final String CONTAINS = "contains";
     private static final String OR = "OR";
+    private static final String DB_NULL = "NULL";
+
     final Logger logger = LoggerFactory.getLogger(DiscountPolicyService.class);
     @Autowired
     DiscountPolicyRepository discountPoliciesRepository;
@@ -58,7 +62,9 @@ public class DiscountPolicyService {
      */
     public DiscountPolicy addDiscountPolicy(DiscountPolicy discountPolicy) {
         User user = usersService.getCurrentUser();
-        discountPolicy.setCompany(companyService.getCompanyByUserId(user.getId()));
+        discountPolicy.setCompany(companyService.getCompanyByUserId(user.getUserId()));
+        String convertedFormula = discountDependencyService.convertFormula(discountPolicy.getFormula());
+        discountPolicy.setFormula(convertedFormula);
         return discountPoliciesRepository.saveAndFlush(discountPolicy);
     }
 
@@ -68,12 +74,12 @@ public class DiscountPolicyService {
      * @return amount of discount policy in %
      */
     private BigDecimal calculateDiscountPolicy(String formula) {
-        if (formula.contains("/0")) {
+        if (formula.contains("/0") || formula.contains(ORDERS)) {
             return BigDecimal.ZERO;
         }
         String discount = ZERO;
         User user = usersService.getCurrentUser();
-        String sql = constructFormulaQuery(formula, user.getId());
+        String sql = "SELECT " + formula + " from users  WHERE users.user_id=" + user.getUserId();
         logger.debug("formula sql {}", sql);
         Query query = entityManager.createNativeQuery(sql);
         Object result = query.getResultList().get(0);
@@ -84,52 +90,22 @@ public class DiscountPolicyService {
         return new BigDecimal(discount);
     }
 
-    /**
-     * Construct query  for discount policy formula
-     *
-     * @param formula discount policy's formula
-     * @param userId  id of user whose data we will retrieve
-     * @return query
-     */
-    private String constructFormulaQuery(String formula, int userId) {
-        String query = "SELECT " + formula + " from Users ";
-        if (formula.toLowerCase().contains(ORDERS)) {
-            query += " LEFT JOIN Orders ON Users.id=orders.users_id ";
-        }
-        query += " WHERE Users.id=" + userId;
-        ;
-        return query;
-    }
 
     /**
      * Tests if formula has correct syntax
      */
-    public boolean testFormula(String formula) {
+    public boolean formulaIsNotValid(String formula) {
+        logger.debug("Test formula: {}", formula);
         String sql = "SELECT " + formula;
         Query query = entityManager.createNativeQuery(sql);
         try {
             query.getResultList();
         } catch (PersistenceException e) {
-            return false;
+            return true;
         }
-        return true;
+        return false;
     }
 
-    /**
-     * Construct query  for discount policy condition
-     *
-     * @param condition discount policy's condition
-     * @param userId    id of user whose data we will retrieve
-     * @return query
-     */
-    private String constructConditionQuery(String condition, int userId) {
-        StringBuilder sql = new StringBuilder("SELECT Users.id from Users ");
-        if (condition.toLowerCase().contains(ORDERS)) {
-            sql.append(" LEFT JOIN Orders ON Users.id=orders.users_id ");
-        }
-        sql.append(" WHERE Users.id=").append(userId).append(" AND (").append(condition).append(")");
-        return sql.toString();
-    }
 
     /**
      * Calculates tour discount based on tour's discount policies
@@ -138,7 +114,7 @@ public class DiscountPolicyService {
         BigDecimal discount = BigDecimal.ZERO;
         User user = usersService.getCurrentUser();
         if (user == null) {
-            return new DiscountPoliciesResult(BigDecimal.ZERO, null);
+            return new DiscountPoliciesResult(discount, null);
         }
         Date currentDate = new Date(System.currentTimeMillis());
         List<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
@@ -152,15 +128,14 @@ public class DiscountPolicyService {
                     continue;
                 }
                 //check condition
-                String sql = constructConditionQuery(condition, user.getId());
+                String sql = "SELECT 1 from users WHERE users.user_id=" + user.getUserId() + " AND (" + condition + ")";
                 logger.debug("Condition {}", sql);
                 Query query = entityManager.createNativeQuery(sql);
                 if (query.getResultList().size() == 0) {
                     continue;
-                } else {
-                    discountPolicy.setActive(true);
                 }
             }
+            discountPolicy.setActive(true);
 
             //check if discount policy's formula has tags or operators and calculate policy's discount
             Pattern pattern = Pattern.compile("[a-zA-z*/+-]");
@@ -175,8 +150,7 @@ public class DiscountPolicyService {
             logger.debug("Add to discount {}", formula);
 
         }
-        DiscountPoliciesResult result = new DiscountPoliciesResult(discount, discountPolicies);
-        return result;
+        return new DiscountPoliciesResult(discount, discountPolicies);
     }
 
     /**
@@ -196,10 +170,9 @@ public class DiscountPolicyService {
      * Finds discount policies by current user's company
      */
     public List<DiscountPolicy> findByCompany() {
-        Company company = companyService.getCompanyByUserId(usersService.getCurrentUser().getId());
+        Company company = companyService.getCompanyByUserId(usersService.getCurrentUser().getUserId());
         List<DiscountPolicy> discountPolicies = discountPoliciesRepository.findByCompany(company);
-        List<DiscountPolicy> policies = changeView(discountPolicies);
-        return policies;
+        return changeView(discountPolicies);
     }
 
     /**
@@ -211,7 +184,7 @@ public class DiscountPolicyService {
             String condition = discountPolicy.getCondition();
             if (condition != null) {
                 discountPolicy.setCondition(condition.replace("users.", "User's ").replace("orders.", "Order's ").
-                        replace("LIKE", "CONTAINS").replace("%", "").replace("'", "").replace("WEEKDAY(NOW())",DiscountPolicy.DAYOFWEEK));
+                        replace("LIKE", "CONTAINS").replace("%", "").replace("'", "").replace("WEEKDAY(NOW())", DiscountPolicy.DAYOFWEEK));
             }
             String formula = discountPolicy.getFormula();
             if (formula.matches(".*[a-zA-Z].*")) {
@@ -264,22 +237,24 @@ public class DiscountPolicyService {
                     m = condition.length();
                 }
             }
-            if (DiscountPolicy.DAYOFWEEK.equals(conditions[i])) {
-                condition.append("WEEKDAY(NOW())=").append(params[i]);
-                continue;
-            } else if (DiscountPolicy.USERS_SEX.equals(conditions[i])) {
-                condition.append(conditions[i]).append("=");
-
-            } else {
-                condition.append(conditions[i]);
-                if (CONTAINS.equals(signs[j].toLowerCase())) {
-                    condition.append(" LIKE '%").append(params[i]).append("%' ");
-                    j++;
+            switch (conditions[i]) {
+                case DiscountPolicy.DAYOFWEEK:
+                    condition.append("WEEKDAY(NOW())=").append(params[i]);
                     continue;
-                } else {
-                    condition.append(signs[j]);
-                    j++;
-                }
+                case DiscountPolicy.USERS_SEX:
+                    condition.append(conditions[i]).append("=");
+                    break;
+                default:
+                    condition.append(conditions[i]);
+                    if (CONTAINS.equals(signs[j].toLowerCase())) {
+                        condition.append(" LIKE '%").append(params[i]).append("%' ");
+                        j++;
+                        continue;
+                    } else {
+                        condition.append(signs[j]);
+                        j++;
+                    }
+                    break;
             }
             condition.append("'").append(params[i]).append("'");
         }
@@ -306,8 +281,7 @@ public class DiscountPolicyService {
         for (Tour tour : tours) {
             tour.setDiscountPolicies(discountPolicies);
         }
-        toursService.saveTours(tours);
-        return tours;
+        return toursService.prepareTour(false, toursService.saveTours(tours));
     }
 
     /**
@@ -316,41 +290,9 @@ public class DiscountPolicyService {
      * @param policyIds ids of discount policy
      */
     private List<DiscountPolicy> getDiscountPolicies(Integer[] policyIds) {
-        List<DiscountPolicy> discountPolicies = new ArrayList<DiscountPolicy>();
-        if (policyIds != null) {
-            for (int id : policyIds) {
-                discountPolicies.add(discountPoliciesRepository.findOne(id));
-            }
-        }
-        return discountPolicies;
+        return discountPoliciesRepository.findByDiscountPolicyIdIn(Arrays.asList(policyIds));
     }
 
-
-
-    /**
-     * Replaces order parts (order.number_of_adults) in discount policy's condition and formula
-     * with {@link com.quicktour.entity.Order} values
-     *
-     * @return transformed list of discount policies
-     */
-    private List<DiscountPolicy> transformCondition(List<DiscountPolicy> discountPolicies, Order order) {
-        String numberOfAdults = order.getNumberOfAdults().toString();
-        String numberOfChildren = order.getNumberOfChildren().toString();
-        List<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
-        for (DiscountPolicy discountPolicy : policies) {
-            String condition = discountPolicy.getCondition();
-            String formula = discountPolicy.getFormula();
-            if (condition != null && condition.contains(ORDERS)) {
-                condition = condition.replace(Order.NUMBER_OF_ADULTS, numberOfAdults)
-                        .replace(Order.NUMBER_OF_CHILDREN, numberOfChildren);
-            }
-            formula = formula.replace(Order.NUMBER_OF_ADULTS, numberOfAdults)
-                    .replace(Order.NUMBER_OF_CHILDREN, numberOfChildren);
-            discountPolicy.setFormula(formula);
-            discountPolicy.setCondition(condition);
-        }
-        return policies;
-    }
 
     /**
      * Removes discount policies from list whose condition is false or  formula==0 or formula
@@ -362,11 +304,64 @@ public class DiscountPolicyService {
             DiscountPolicy discountPolicy = iterator.next();
             String formula = discountPolicy.getFormula();
 
-            if (discountPolicy.isActive() || ZERO.equals(formula) || formula.contains(ORDERS)) {
+            if (!discountPolicy.isActive() || ZERO.equals(formula) || formula.contains(ORDERS)) {
+                logger.debug("Delete discount policy {} because {} {} {}", discountPolicy.getName(), !discountPolicy.isActive(), ZERO.equals(formula), formula.contains(ORDERS));
                 iterator.remove();
             }
         }
         return discountPolicies;
     }
+
+
+    public DiscountPoliciesResult calculateDiscount(List<DiscountPolicy> discountPolicies, Order order) {
+        if (usersService.getCurrentUser() == null) {
+            return new DiscountPoliciesResult(BigDecimal.ZERO, new ArrayList<DiscountPolicy>());
+        }
+        ArrayList<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
+        for (DiscountPolicy discountPolicy : policies) {
+            String replacedFormula = replaceOrderInFormula(discountPolicy.getFormula(), order);
+            discountPolicy.setFormula(replacedFormula);
+            String condition = discountPolicy.getCondition();
+            if (condition != null) {
+                String replacedCondition = replaceOrderInCondition(condition, order);
+                discountPolicy.setCondition(replacedCondition);
+            }
+        }
+        DiscountPoliciesResult discountPoliciesResult = calculateDiscount(policies);
+        logger.debug("Discount policies :{}", discountPoliciesResult.getDiscountPolicies());
+        discountPoliciesResult.setDiscountPolicies(getActivePolicies(policies));
+
+        return discountPoliciesResult;
+    }
+
+    private String replaceOrder(String toReplace, Order order) {
+        String result = toReplace;
+        if (toReplace.contains(ORDERS)) {
+            for (Field f : Order.class.getDeclaredFields()) {
+                String propertyName = f.getName();
+                f.setAccessible(true);
+                Object o = null;
+                try {
+                    o = f.get(order);
+                } catch (IllegalAccessException e) {
+                    logger.error("Cant access  property {} in Order.{}", propertyName, e);
+                }
+                if (o == null) {
+                    o = DB_NULL;
+                }
+                result = result.replace(ORDERS + "." + propertyName, o.toString());
+            }
+        }
+        return result;
+    }
+
+    private String replaceOrderInFormula(String formula, Order order) {
+        return replaceOrder(formula, order);
+    }
+
+    private String replaceOrderInCondition(String condition, Order order) {
+        return replaceOrder(condition, order);
+    }
+
 }
 
