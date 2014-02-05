@@ -2,12 +2,20 @@ package com.quicktour.service;
 
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
-import com.quicktour.repository.PhotoRepository;
 import com.quicktour.repository.UserRepository;
 import com.quicktour.repository.ValidationLinksRepository;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import javax.annotation.PostConstruct;
+import javax.servlet.http.HttpServletRequest;
+import java.math.BigInteger;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 
 /**
  * Contains all functional logic connected with validation links
@@ -18,18 +26,31 @@ import org.springframework.transaction.annotation.Transactional;
 @Service
 @Transactional
 public class ValidationService {
-
+    @Autowired
+    StandardPasswordEncoder passwordEncoder;
+    Logger logger = LoggerFactory.getLogger(ValidationService.class);
     @Autowired
     private UsersService userService;
 
     @Autowired
     private ValidationLinksRepository validationLinksRepository;
-
+    MessageDigest md5;
     @Autowired
     private UserRepository userRepository;
-
+    private
     @Autowired
-    private PhotoRepository photoRepository;
+    HttpServletRequest request;
+    private static String baseUrl;
+
+    @PostConstruct
+    private void init() {
+        try {
+            md5 = md5.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Cannot find md5 algorithm.{}", e);
+        }
+
+    }
 
     /**
      * Every 5 minutes checks database for links that are more than 2 hours old and, if there are
@@ -48,21 +69,12 @@ public class ValidationService {
 //            }
 //        }
 //    }
-    public boolean addValidationLink(ValidationLink link) {
-        validationLinksRepository.saveAndFlush(link);
-        return true;
+    public ValidationLink save(ValidationLink link) {
+        return validationLinksRepository.saveAndFlush(link);
     }
 
-    /**
-     * Deletes validation link from database after user activates his profile
-     *
-     * @param userLogin - login of the user who activates his profile
-     * @return true if operation was successful
-     */
-    public boolean clearLink(String userLogin) {
-        validationLinksRepository.delete(validationLinksRepository.findByUserId(
-                userRepository.findByLogin(userLogin).getUserId()).getValidationLinkId());
-        return true;
+    public ValidationLink findByUser(User user) {
+        return validationLinksRepository.findByUserId(user.getUserId());
     }
 
     /**
@@ -70,19 +82,34 @@ public class ValidationService {
      *
      * @param user - object of User class which represents newly registered user
      */
-    public void createValidationLink(User user) {
+    public ValidationLink createValidationLink(User user) {
         ValidationLink link = new ValidationLink();
-        link.setUserId(userService.findByLogin(user.getLogin()).getUserId());
-        link.setUrl("localhost:/login/" + user.getLogin());
-        addValidationLink(link);
+        String hash = generateMD5(user.getUserId(), user.getEmail());
+        link.setUserId(user.getUserId());
+        link.setUrl(hash);
+        return save(link);
     }
 
-    public void resolveLink(String validationLink) {
-        ValidationLink link = validationLinksRepository.findByUrl("localhost:/login/" + validationLink);
+    private String generateMD5(int userId, String email) {
+        String stringToEncode = userId + "" + email;
+        md5.update(stringToEncode.getBytes(), 0, stringToEncode.length());
+        String result = new BigInteger(1, md5.digest()).toString(16);
+        if (result.length() < 32) {
+            result = "0" + result;
+        }
+        return result;
+    }
+
+
+    public boolean resolveLink(String validationLink) {
+        ValidationLink link = validationLinksRepository.findByUrl(validationLink);
         if (link != null) {
             User user = userService.findOne(link.getUserId());
-            userService.setUserActive(user);
-            clearLink(validationLink);
+            userService.activate(user);
+            validationLinksRepository.delete(link);
+            return true;
         }
+        return false;
     }
+
 }

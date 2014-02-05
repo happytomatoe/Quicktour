@@ -1,7 +1,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <link rel="stylesheet" href="<c:url value="/resources/css/login.css"/>"/>
-
+<script src="<c:url value="/resources/js/login.js"/> "></script>
 
 <div class="row">
     <div class="col-md-4 col-md-offset-4">
@@ -13,6 +13,23 @@
                 <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
                       method="post">
                     <fieldset>
+                        <c:if test="${validationSuccess!=null}">
+                            <c:choose>
+                                <c:when test="${validationSuccess==true}">
+                                    <div class="form-group text-success text-center">
+                                        Congratualations!You activated your account!
+                                    </div>
+                                </c:when>
+                                <c:otherwise>
+                                    <div class="form-group text-success text-center">
+                                        Sorry, we can't find such link
+                                    </div>
+                                </c:otherwise>
+                            </c:choose>
+
+
+                        </c:if>
+
                         <c:if test="${param.fail eq true}">
                             <div class="form-group text-danger text-center">
                                 <h3> Your login attempt was not successful, try again.<br/> Caused :

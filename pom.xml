@@ -22,7 +22,7 @@
         <db.password>root</db.password>
         <db.url>jdbc:mysql://localhost:3306/</db.url>
         <dbmaintain-maven-plugin.driverClassName>com.mysql.jdbc.Driver</dbmaintain-maven-plugin.driverClassName>
-        <db.name>quicktour2</db.name>
+        <db.name>quicktour</db.name>
         <c3p0.version>0.9.2.1</c3p0.version>
         <spring.data.jpa.version>1.1.1.RELEASE</spring.data.jpa.version>
         <hibernate.jpa-api.version>2.0-cr-1</hibernate.jpa-api.version>

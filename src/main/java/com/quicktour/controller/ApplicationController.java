@@ -59,7 +59,6 @@ public class ApplicationController {
     @RequestMapping(value = "/page/{page}", method = RequestMethod.GET)
     public String showPage(ModelMap map,
                            @PathVariable("page") int pageNum) {
-
         addSidebarAttributes(map);
         Page page = toursService.findAllToursAndCut(pageNum);
 

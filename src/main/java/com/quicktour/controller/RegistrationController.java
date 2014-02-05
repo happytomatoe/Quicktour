@@ -2,10 +2,8 @@ package com.quicktour.controller;
 
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
-import com.quicktour.service.CompanyService;
-import com.quicktour.service.PhotoService;
-import com.quicktour.service.UsersService;
-import com.quicktour.service.ValidationService;
+import com.quicktour.entity.ValidationLink;
+import com.quicktour.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,8 +17,11 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.context.request.RequestContextHolder;
+import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
@@ -44,6 +45,8 @@ public class RegistrationController {
     @Autowired
     private ValidationService validationService;
 
+    @Autowired
+    private EmailService emailService;
     @Autowired
     private CompanyService companyService;
     @Value("${maxImageSize}")
@@ -82,21 +85,37 @@ public class RegistrationController {
                                    MultipartFile image) {
         String type = image.getContentType().split("/")[0];
         logger.debug("Content type {}.Type {}", image.getContentType(), type);
-        if (!type.equalsIgnoreCase("image")) {
+        if (usersService.findByEmail(user.getEmail()) != null) {
+            bindingResult.rejectValue("email", "email.invalid", "User with such email already exists");
+        }
+        if (usersService.findByLogin(user.getLogin()) != null) {
+            bindingResult.rejectValue("login", "login.invalid", "User with such login already exists");
+        }
+        if (user.getLogin().trim().equals(user.getPassword().trim())) {
+            bindingResult.rejectValue("password", "password.invalid", "Password can't match login ");
+        }
+
+        if (!image.isEmpty() && !type.equalsIgnoreCase("image")) {
             bindingResult.rejectValue("photo", "photo.type", "Uploaded file is not image");
         }
         if (image.getSize() > maxImageSize) {
             bindingResult.rejectValue("photo", "photo.invalid", "Maximum upload size of " + maxImageSize + " bytes exceeded ");
         }
-        String avatarName = user.getLogin() + ".jpg";
+        logger.debug("BindingResult :{}", bindingResult);
         if (bindingResult.hasErrors()) {
             return "registration";
         }
-        user.setPhoto(photoService.saveImage(avatarName, image));
-        if (usersService.registrateNewUser(user)) {
-            validationService.createValidationLink(user);
-            return "registrationsuccess-tile";
-        } else return "registration";
+        if (!image.isEmpty()) {
+            String avatarName = user.getLogin() + ".jpg";
+            user.setPhoto(photoService.saveImage(avatarName, image));
+        }
+        User newUser = usersService.registrateNewUser(user);
+        ValidationLink validationLink = validationService.createValidationLink(newUser);
+        ServletRequestAttributes sra = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
+        HttpServletRequest request = sra.getRequest();
+        emailService.sendRegistrationEmail(user, request, validationLink);
+        return "registrationsuccess-tile";
+
     }
 
     /**
@@ -149,8 +168,10 @@ public class RegistrationController {
      * @return redirects user to the login page
      */
     @RequestMapping(value = "/login/{validationLink}")
-    public String validationResolve(@PathVariable("validationLink") String validationLink) {
-        validationService.resolveLink(validationLink);
+    public String validationResolve(@PathVariable("validationLink") String validationLink, Model model) {
+        boolean success = validationService.resolveLink(validationLink);
+        model.addAttribute("validationSuccess", success);
+        logger.debug("Validation link {}.{}", validationLink, success);
         return "login";
     }
 
@@ -176,7 +197,8 @@ public class RegistrationController {
      */
     @RequestMapping(value = "/passwordrecovery", method = RequestMethod.POST)
     public String passwordRecovery(@Valid User user, BindingResult bindingResult) {
-        usersService.setNewPassword(user);
+        //  usersService.setNewPassword(user);
+        //TODO:change
         return "login";
     }
 }

@@ -189,8 +189,8 @@ public class OrderController {
                 return "ordererror";
             }
 
-            order.setUser(userService.saveAnonymousCustomer(user));
-            ordersService.createValidationLink(user);
+//            order.setUser(userService.saveAnonymousCustomer(user));
+//            ordersService.createValidationLink(user);
         }
 
         ordersService.add(order, tourId);

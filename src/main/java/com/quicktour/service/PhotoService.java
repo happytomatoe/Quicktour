@@ -21,6 +21,7 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import org.xml.sax.SAXException;
 
+import javax.annotation.PostConstruct;
 import java.io.IOException;
 
 
@@ -54,7 +55,7 @@ public class PhotoService {
     private String accessTokenSecret;
     private static Flickr flickr;
 
-    //    @PostConstruct
+    @PostConstruct
     private void init() {
         if (flickr == null) {
             flickr = new Flickr(apiKey, secret, new REST());

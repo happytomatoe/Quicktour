@@ -402,7 +402,7 @@ public class OrdersService {
         ValidationLink link = new ValidationLink();
         link.setUserId(userService.findByLogin(user.getLogin()).getUserId());
         link.setUrl("localhost:/login/" + user.getLogin());
-        validationService.addValidationLink(link);
+        validationService.save(link);
 
     }
 
