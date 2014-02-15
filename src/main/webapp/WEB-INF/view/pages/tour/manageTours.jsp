@@ -2,16 +2,19 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
-<link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/screen.css"/>">
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
+<link rel="stylesheet"
+      href="<c:url value="/resources/jquery-ui-bootstrap/css/custom-theme/jquery-ui-1.10.0.custom.css"/>"/>
 <script src="<c:url value="/resources/js/jasny-bootstrap.min.js"/> "></script>
 <script src="<c:url value="/resources/ckeditor/ckeditor.js" />"></script>
+<script src="<c:url value="/resources/js/jquery.validate.js" />"></script>
+<script src="<c:url value="/resources/js/manageTours.js"/> "></script>
+<script src="<c:url value="/resources/jquery-ui-bootstrap/js/jquery-ui-1.9.2.custom.min.js"/> "></script>
 
 <script type="text/javascript"
         src="http://maps.google.com/maps/api/js?key=AIzaSyDIB3fP0FaICwh-ysdOd-Ut2xCFpH2DcVc&sensor=false&language=en">
 </script>
 
-<script src="<c:url value="/resources/js/manageTours.js"/> "></script>
 
 <form:form role="form" method="post" modelAttribute="toursInfo" id="manageTourForm" enctype="multipart/form-data">
     <div class="panel-group" id="accordion">
@@ -88,7 +91,15 @@
                             Price Includes:
                         </form:label>
                         <br/>
-                        <form:checkboxes path="priceIncludes" element="div" items="${prIncludes}"/>
+                        <c:forEach items="${prIncludes}" var="priceInclude">
+                            <div class="checkbox">
+                                <label>
+                                    <input type="checkbox" name="priceIncludes.id"
+                                           value="${priceInclude.priceDescriptionId}"/>
+                                        ${priceInclude.description}
+                                </label>
+                            </div>
+                        </c:forEach>
                     </div>
                     <hr/>
                     <div class="row">
@@ -123,7 +134,7 @@
                                         <div class="form-group">
                                             <form:label path="tourInfo[${i.index}].discount">Discount</form:label>
                                             <form:input path="tourInfo[${i.index}].discount" type="text"
-                                                        number="true" required="true" class="form-control"/>
+                                                        number="true" required="true" cssClass="form-control "/>
                                         </div>
                                     </div>
                                 </c:forEach>

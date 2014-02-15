@@ -99,7 +99,7 @@ public class DiscountPolicy {
     @ManyToOne()
     @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "companies_id", insertable = false, updatable = false)
+    @JoinColumn(name = "companies_id")
     public Company getCompany() {
         return company;
     }

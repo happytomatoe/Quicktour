@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.dto.JTableResponse;
 import com.quicktour.entity.DiscountPolicy;
 import com.quicktour.entity.Tour;
 import com.quicktour.service.DiscountPolicyService;
@@ -15,9 +16,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Controller that performs read,update,delete operations for tour-discount policy relations
@@ -36,55 +35,51 @@ public class ApplyDiscountPolicyController {
 
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> add(@RequestParam(required = false) Integer[] discount_policies,
-                                   @RequestParam(required = false) Integer[] tours) {
-        Map<String, Object> map = new HashMap<String, Object>(3);
-        boolean error = false;
+    public JTableResponse add(@RequestParam(required = false) Integer[] discount_policies,
+                              @RequestParam(required = false) Integer[] tours) {
+        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
         if (tours == null || tours.length == 0) {
-            map.put("Result", "ERROR");
-            map.put("Message", "Please select tour");
-            error = true;
+            jTableResponse.setResult(JTableResponse.Results.ERROR);
+            jTableResponse.addMessage("Please select tour");
         }
         if (discount_policies == null || discount_policies.length == 0) {
-            map.put("Result", "ERROR");
-            map.put("Message", "Please select policy");
-            error = true;
+            jTableResponse.setResult(JTableResponse.Results.ERROR);
+            jTableResponse.addMessage("Please select policy");
         }
-        if (error) {
-            return map;
+        if (jTableResponse.getResult() == JTableResponse.Results.ERROR) {
+            return jTableResponse;
         }
         logger.debug("Apply discount policies: {} \nto Tours\n{}", discount_policies, tours);
         List<Tour> changedTours = discountPolicyService.applyDiscount(tours, discount_policies);
-        map.put("Result", "OK");
-        map.put("Record", changedTours.get(0));
-        map.put("Records", changedTours);
-        return map;
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        jTableResponse.setRecord(changedTours.get(0));
+        jTableResponse.setRecords(changedTours);
+        return jTableResponse;
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public Map delete(@RequestParam(value = "tourId", required = false) Integer id) {
-        Map<String, Object> map = new HashMap<String, Object>(3);
+    public JTableResponse delete(@RequestParam(value = "tourId", required = false) Integer id) {
+        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
         if (id == null) {
-            map.put("Result", "ERROR");
-            map.put("Message", "Id of element is not found");
-            return map;
+            jTableResponse.setResult(JTableResponse.Results.ERROR);
+            jTableResponse.setMessage("Id of element is not found");
+            return jTableResponse;
         }
         Tour tour = toursService.findOne(id);
         tour.setDiscountPolicies(new ArrayList<DiscountPolicy>());
         toursService.saveTour(tour);
-        map.put("Result", "OK");
-        return map;
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        return jTableResponse;
     }
 
     @RequestMapping(value = "/getAllRecords", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> applyDiscount() {
-        Map<String, Object> map = new HashMap<String, Object>(3);
-        boolean empty = false;
-        map.put("Result", "OK");
-        map.put("Records", toursService.findAgencyToursWithDiscountPoliciesAreEmpty(empty));
-        return map;
+    public JTableResponse applyDiscount() {
+        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        jTableResponse.setRecords(toursService.findAgencyToursWithNotEmptyDiscountPolicies());
+        return jTableResponse;
 
     }
 

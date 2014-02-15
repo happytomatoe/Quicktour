@@ -9,7 +9,7 @@
     <c:forEach items="${companies}" var="company">
         <div class="row featurette">
             <div class="col-md-2">
-                <img src="/images/<c:out value='${company.photo.url}'/>" style='width:auto; height:100px'>
+                <img src="${company.photo.url}" style='width:auto; height:100px'>
             </div>
             <div class="col-md-7">
                 <h2 class="featurette-heading">
@@ -20,12 +20,20 @@
                 <p class="lead">Company code: ${company.companyCode}</p>
             </div>
             <div class="col-md-3">
+                <br>
+                <br>
                 <a href="<c:url value="/editcompany/${company.companyId}"/>" class="btn btn-warning">
-                    Details
+                    Edit
+                </a>
+                <a href="<c:url value="/delete/${company.companyId}"/>" class="btn btn-warning">
+                    Delete
                 </a>
             </div>
         </div>
     </c:forEach>
+    <a href="<c:url value="/company/add"/>" class="btn btn-warning">
+        Add
+    </a>
 </div>
 </body>
 </html>

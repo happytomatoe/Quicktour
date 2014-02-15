@@ -5,8 +5,7 @@ import com.quicktour.entity.Tour;
 import com.quicktour.entity.User;
 import com.quicktour.repository.CommentRepository;
 import com.quicktour.repository.ToursRepository;
-import org.kefirsf.bb.BBProcessorFactory;
-import org.kefirsf.bb.TextProcessor;
+import com.quicktour.utils.HTMLUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -22,7 +21,6 @@ import org.springframework.transaction.annotation.Transactional;
 @Transactional
 public class CommentService {
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
-    final TextProcessor processor = BBProcessorFactory.getInstance().createFromResource("org/kefirsf/bb/safehtml.xml");
     @Autowired
     CommentRepository commentRepository;
     @Autowired
@@ -30,12 +28,6 @@ public class CommentService {
     @Autowired
     UsersService usersService;
 
-    /**
-     * Method returns page of comments we are intersted in
-     *
-     * @param pageNumber - number of required page
-     * @return necessary page with comments
-     */
     public Page<Comment> findAllComments(int tourId, int pageNumber, int numberOfRecordsPerPage) {
         PageRequest pageRequest = new PageRequest(pageNumber, numberOfRecordsPerPage);
         Tour tour = new Tour();
@@ -68,8 +60,9 @@ public class CommentService {
         User currentUser = usersService.getCurrentUser();
         String commentText = comment.getContent();
         String commentUpdated = commentText.replace("\n", "<br/>");
-        String commentTextForSave = processor.process(commentUpdated);
+        String commentTextForSave = HTMLUtils.cleanHTML(commentUpdated);
         if (commentTextForSave.isEmpty()) {
+            throw new IllegalArgumentException("Comment is empty when saving comment");
         } else {
             comment.setContent(commentTextForSave);
             comment.setUser(currentUser);

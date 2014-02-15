@@ -18,12 +18,15 @@
             <h1>Sorry can't find tours for your request</h1>
         </c:if>
         <c:forEach items="${page.content}" var="tour" varStatus="status">
+            <c:if test="${status.index%2==0}">
+                <div class="row">
+            </c:if>
             <c:if test="${tour.active}">
                 <s:url value="/tour/{id}" var="torsPageUrl">
                     <s:param name="id" value="${tour.tourId}"/>
                 </s:url>
                 <div class="col-md-6">
-                    <div class="panel panel-default" style="height: 535px">
+                    <div class="panel panel-default">
                         <div class="panel-body">
                             <!-- Star rating -->
                             <div class="row">
@@ -49,21 +52,18 @@
                                 <img src="<c:url value="/resources/img/discount_icon.png"/>" class="icon">
                                 <span class="discount">-${tour.discount}%</span>
                             </c:if>
-                            <c:choose>
-                                <c:when test="${fn:contains(tour.photo.url,'http')}">
-                                    <img src="${tour.photo.url}"
-                                         style="height: 300px" class="img-thumbnail">
-                                </c:when>
-                                <c:otherwise>
-                                    <img src="<c:url value="/images/${tour.photo.url}"/>"
-                                         style="height: 300px" class="img-thumbnail">
+                            <img src="${tour.photo.url}"
+                                 style="height: 300px" class="img-thumbnail">
 
-                                </c:otherwise>
-                            </c:choose>
                             <div class="row">
-                                <div class="col-md-12 pull-left">
+                                <div class="col-md-6">
                                     <h3>${tour.name}</h3>
                                 </div>
+                                <div class="col-md-6 text-right ">
+                                    <h3>${tour.price}$</h3>
+                                </div>
+                            </div>
+                            <div class="row">
                                 <div class="col-md-12">
                                         ${tour.description}
                                 </div>
@@ -101,6 +101,10 @@
                     </div>
                 </div>
             </c:if>
+            <c:if test="${status.index%2==1}">
+                </div >
+            </c:if>
+
         </c:forEach>
     </div>
     <div class="row">

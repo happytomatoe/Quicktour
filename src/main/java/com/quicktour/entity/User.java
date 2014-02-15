@@ -90,7 +90,7 @@ public class User {
         this.login = login;
     }
 
-    @Size(min = 4, message = "Password must be at least 4 characters long.")
+    @Size(min = 8, message = "Password must be at least 8 characters long.")
     @Column(name = "password")
     public String getPassword() {
         return password;

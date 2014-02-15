@@ -1,3 +1,6 @@
+//Function that makes work select2 in jquery dialog
+var ui_dialog_interaction; // moves outside function scope in order to keep persistent value
+
 
 var availableTours;
 var availableDiscounts;
@@ -21,16 +24,18 @@ function downloadAvailableTours() {
         }
     });
 }
-function findIndexById(data,id){
-    var foundId=-1;
-    $.each(data,function(i,tourName){
-       if(i===id){
-           foundId=i;
-       }
+function findIndexById(data, id) {
+    var foundId = -1;
+    $.each(data, function (i, tourName) {
+        if (i === id) {
+            foundId = i;
+        }
     });
     return foundId;
 }
 $(document).ready(function () {
+
+
     //Get agency discount policies
     $.ajax({
         url: cutUrl + "/discount_policy/getAllDiscounts",
@@ -68,7 +73,7 @@ $(document).ready(function () {
                 title: "Discount policy(-ies)",
                 width: "50%",
                 display: function (data) {
-                    console.log(discountPolicies );
+                    console.log(discountPolicies);
                     var discountPolicies = data.record.discountPolicies;
                     var str = "";
                     $.each(discountPolicies, function (index, element) {
@@ -79,8 +84,8 @@ $(document).ready(function () {
                 }
             }
         }, formCreated: function (event, data) {
-            console.log("Events",$._data( $('.jtable-toolbar-item-add-record'), "events" ));
-            if(Object.keys(availableTours).length==0&&data.formType=='create'){
+            console.log("Events", $._data($('.jtable-toolbar-item-add-record'), "events"));
+            if (Object.keys(availableTours).length == 0 && data.formType == 'create') {
 
                 openDialog("Not found tours to add");
                 data.form.parent().parent().find("span:contains(Cancel)").parent().click();
@@ -99,9 +104,10 @@ $(document).ready(function () {
                 }));
             });
             if (data.formType == "edit") {
-
+                console.log("Edit disc pol", data.record.discountPolicies);
                 $.each(data.record.discountPolicies, function (i, discountPolicy) {
-                    discountInput.find('[value=' + discountPolicy.id + ']').attr('selected', true);
+                    discountInput.find('[value=' + discountPolicy.discountPolicyId + ']').attr('selected', true);
+                    console.log("Disc pol id", '[value=' + discountPolicy.discountPolicyId + ']');
                 });
                 tourInput.append($('<option>', {
                     value: data.record.tourId,
@@ -109,7 +115,7 @@ $(document).ready(function () {
                 }));
                 tourInput.val(data.record.tourId);
 
-            }else{
+            } else {
                 $.each(availableTours, function (value, text) {
                     tourInput.append($('<option>', {
                         value: value,
@@ -120,8 +126,8 @@ $(document).ready(function () {
             }
 
 
-
             $(".select2").select2({width: "300px"});
+
         }, formSubmitting: function (data) {
             var submit = true;
             var message = "";
@@ -140,22 +146,22 @@ $(document).ready(function () {
         },
         //Register to selectionChanged event to hanlde events
         recordAdded: function (event, data) {
-            console.log("Available tours add 1 ",availableTours);
-            $.each(data.serverResponse.Records,function(i,tour){
-                var tourId=tour.tourId;
+            console.log("Available tours add 1 ", availableTours);
+            $.each(data.serverResponse.Records, function (i, tour) {
+                var tourId = tour.tourId;
                 delete availableTours[tourId];
                 console.log(tour);
-                if(i>0){
-                    $('#records').jtable('addRecord',{record:tour,clientOnly:true});
+                if (i > 0) {
+                    $('#records').jtable('addRecord', {record: tour, clientOnly: true});
                 }
             });
 
-            console.log("Available tours add 2 ",availableTours);
+            console.log("Available tours add 2 ", availableTours);
 
 
         }, recordDeleted: function (event, data) {
-            var deletedTour=data.record;
-                availableTours[deletedTour.tourId]=deletedTour.name;
+            var deletedTour = data.record;
+            availableTours[deletedTour.tourId] = deletedTour.name;
             console.log(availableTours)
         }
 
@@ -163,12 +169,7 @@ $(document).ready(function () {
     $('#records').jtable('load');
 
 
-
 });
-
-
-
-
 
 
 function openDialog(message) {

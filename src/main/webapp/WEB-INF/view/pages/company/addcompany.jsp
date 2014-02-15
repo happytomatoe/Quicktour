@@ -2,6 +2,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script src="<c:url value="/resources/js/jasny-bootstrap.min.js"/> "></script>
+<link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
 <script type="text/javascript">
     function generate() {
         var text = "";
@@ -51,12 +52,12 @@
                                     placeholder="Input company contact phone" required="true"/>
                         <form:errors path="contactPhone" cssClass="alert-danger"/></p>
 
-                    <p><form:label name="discountAmount" path="discountAmount"
+                    <p><form:label name="discount" path="discount"
                                    cssClass="form-signin-heading">Discount:*</form:label>
-                        <form:input name="discountAmount" id="discountAmount" path="discountAmount" size="30"
+                        <form:input name="discount" id="discount" path="discount" size="30"
                                     maxlength="30" cssClass="form-control"
                                     placeholder="Input company discount amount" type="number"/>
-                        <form:errors path="discountAmount" cssClass="alert-danger"/></p>
+                        <form:errors path="discount" cssClass="alert-danger"/></p>
 
                     <p>
                         <form:label name="companyCode" path="companyCode" cssClass="form-signin-heading">Company

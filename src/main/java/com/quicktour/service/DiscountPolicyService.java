@@ -35,18 +35,18 @@ public class DiscountPolicyService {
     private static final String OR = "OR";
     private static final String DB_NULL = "NULL";
 
-    final Logger logger = LoggerFactory.getLogger(DiscountPolicyService.class);
+    private final Logger logger = LoggerFactory.getLogger(DiscountPolicyService.class);
     @Autowired
-    DiscountPolicyRepository discountPoliciesRepository;
+    private DiscountPolicyRepository discountPoliciesRepository;
     @Autowired
-    UsersService usersService;
+    private UsersService usersService;
     @Autowired
-    DiscountDependencyService discountDependencyService;
+    private DiscountDependencyService discountDependencyService;
     @Autowired
-    CompanyService companyService;
+    private CompanyService companyService;
     @Autowired
-    ToursService toursService;
-    EntityManager entityManager;
+    private ToursService toursService;
+    private EntityManager entityManager;
 
 
     @PersistenceContext
@@ -156,13 +156,13 @@ public class DiscountPolicyService {
     /**
      * Deletes discount policy
      */
-    public void delete(Integer id) {
+    public void delete(DiscountPolicy discountPolicy) {
         User currentUser = usersService.getCurrentUser();
         if (currentUser != null) {
-            logger.info("Delete discount policy with id {} by user {}", id, currentUser.getLogin());
+            logger.info("Delete discount policy with id {} by user {}", discountPolicy, currentUser.getLogin());
         }
-        if (id != null) {
-            discountPoliciesRepository.delete(discountPoliciesRepository.findOne(id));
+        if (discountPolicy != null) {
+            discountPoliciesRepository.delete(discountPolicy);
         }
     }
 

@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.dto.Country;
 import com.quicktour.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -12,10 +13,9 @@ import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Controller that handles all activity on main page
@@ -34,6 +34,10 @@ public class ApplicationController {
     private ToursService toursService;
     @Autowired
     private PlaceService placeService;
+    @Autowired
+    EmailService emailService;
+    @Autowired
+    HttpServletRequest httpServletRequest;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -61,11 +65,10 @@ public class ApplicationController {
                            @PathVariable("page") int pageNum) {
         addSidebarAttributes(map);
         Page page = toursService.findAllToursAndCut(pageNum);
-
         map.addAttribute("page", page);
-
         return "index-extended";
     }
+
 
     /**
      * run when user select one of the country on sidebar
@@ -119,6 +122,11 @@ public class ApplicationController {
                          @RequestParam("minPrice") Integer minPrice,
                          @RequestParam("maxPrice") Integer maxPrice,
                          ModelMap map) {
+        if (pageNum == 0 && country.isEmpty() && place.isEmpty() &&
+                minDate == null && maxDate == null &&
+                minPrice == null && maxPrice == null) {
+            return "redirect:/page/0";
+        }
         map.addAttribute("page", toursService.extendFilter(country, place, minDate, maxDate,
                 minPrice, maxPrice, pageNum));
         addSidebarAttributes(map);
@@ -131,22 +139,12 @@ public class ApplicationController {
         return "login";
     }
 
-    @RequestMapping(value = "/placesByCountry")
-    @ResponseBody
-    private Map<String, List<String>> getPlacesByCountry(@RequestParam("country") String country) {
-        Map<String, List<String>> map = new HashMap<String, List<String>>();
-        logger.debug("Trying to find places by country {}.{}", country, placeService);
-        List<String> places = placeService.findPlacesByCountry(country);
-        logger.debug("Found {}", places);
-        map.put("places", places);
-        return map;
-    }
 
     private void addSidebarAttributes(ModelMap map) {
-        map.addAttribute("countries", placeService.findCountries());
 
-        map.addAttribute("places", placeService.findPlacesNames());
-
+        List<Country> countriesWithPlaces = placeService.findCountriesWithPlaces();
+        map.addAttribute("countriesWithPlaces", countriesWithPlaces);
+        map.addAttribute("places", placeService.extractPlaces(countriesWithPlaces));
         map.addAttribute("famousTours", toursService.findFamousTours());
     }
 

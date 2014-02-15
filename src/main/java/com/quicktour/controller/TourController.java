@@ -5,6 +5,7 @@ import com.quicktour.entity.Place;
 import com.quicktour.entity.Tour;
 import com.quicktour.entity.User;
 import com.quicktour.service.CommentService;
+import com.quicktour.service.PlaceService;
 import com.quicktour.service.ToursService;
 import com.quicktour.service.UsersService;
 import org.slf4j.Logger;
@@ -36,6 +37,8 @@ public class TourController {
     private CommentService commentService;
     @Autowired
     private UsersService usersService;
+    @Autowired
+    private PlaceService placeService;
 
     /**
      * Method get information about current tour, it's min price,

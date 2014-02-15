@@ -13,27 +13,10 @@
                 <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
                       method="post">
                     <fieldset>
-                        <c:if test="${validationSuccess!=null}">
-                            <c:choose>
-                                <c:when test="${validationSuccess==true}">
-                                    <div class="form-group text-success text-center">
-                                        Congratualations!You activated your account!
-                                    </div>
-                                </c:when>
-                                <c:otherwise>
-                                    <div class="form-group text-success text-center">
-                                        Sorry, we can't find such link
-                                    </div>
-                                </c:otherwise>
-                            </c:choose>
-
-
-                        </c:if>
 
                         <c:if test="${param.fail eq true}">
                             <div class="form-group text-danger text-center">
-                                <h3> Your login attempt was not successful, try again.<br/> Caused :
-                                        ${sessionScope["SPRING_SECURITY_LAST_EXCEPTION"].message}</h3>
+                                <h3> Your login attempt was not successful, try again</h3>
                             </div>
                         </c:if>
                         <div class="form-group">
@@ -53,9 +36,6 @@
                         <input class="btn btn-lg btn-success btn-block" type="submit" value="Login">
                     </fieldset>
                 </form>
-                <hr/>
-                <center><h4>OR</h4></center>
-                <input class="btn btn-lg btn-facebook btn-block" type="submit" value="Login via facebook">
             </div>
         </div>
     </div>

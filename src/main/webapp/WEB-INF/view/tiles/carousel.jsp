@@ -12,10 +12,10 @@
                 <form action="<c:url value="/filter/results/0"/>" method="post">
                     <div class="form-group">
                         <label for="country">Country</label>
-
-                        <select type="text" class="form-control" id="country" name="country" list="countries">
-                            <c:forEach items="${countries}" var="country">
-                                <option value="${country}"> ${country}</option>
+                        <select type="text" class="form-control" id="country" name="country">
+                            <option selected></option>
+                            <c:forEach items="${countriesWithPlaces}" var="country">
+                                <option value="${country.name}"> ${country.name}</option>
                             </c:forEach>
                         </select>
 
@@ -24,9 +24,13 @@
                         <label for="place">Place</label>
 
                         <select class="form-control" id="place" name="place">
-                            <c:forEach items="${places}" var="place">
+                            <option selected></option>
+                            <c:forEach items="${countriesWithPlaces}" var="country">
+                            <optgroup label="${country.name}">
+                                <c:forEach items="${country.places}" var="place">
                                 <option value="${place}">${place}</option>
-                            </c:forEach>
+                                </c:forEach>
+                                </c:forEach>
                         </select>
                     </div>
                     <div class="row">
@@ -70,17 +74,9 @@
                         <c:set var="itemClass" value="item active"/>
                     </c:if>
                     <div class="${itemClass}">
-                        <c:choose>
-                            <c:when test="${fn:contains(tour.photo.url,'http')}">
-                                <img src="${tour.photo.url}"
-                                     style="height: 500px; width: 100%">
-                            </c:when>
-                            <c:otherwise>
-                                <img src="<c:url value="/images/${tour.photo.url}"/>"
-                                     style="height: 500px; width: 100%">
+                        <img src="${tour.photo.url}"
+                             style="height: 500px; width: 100%">
 
-                            </c:otherwise>
-                        </c:choose>
                         <div class="container">
                             <div class="carousel-caption">
                                 <h1>${tour.name}</h1>

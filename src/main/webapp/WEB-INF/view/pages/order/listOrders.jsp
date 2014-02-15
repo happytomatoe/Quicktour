@@ -37,29 +37,26 @@
             </ul>
         </div>
     </div>
-    <div class="row">
-        <div class="col col-md-6">
-            <hr>
-        </div>
-    </div>
+    <br>
 </div>
 
 <div class="container">
-<table class="table table-striped table-condensed table-hover">
+<table class="table table-striped table-hover table-bordered ">
     <thead>
     <tr>
         <c:if test="${user.role !='user'}">
             <th>
-                <a href="<c:url value="/orders/${filterLink}id/asc/${page.number}"/>"
-                   id="sortByIdAsc" title="Sort by order ID" class="asc">
-                    ID
+                <a href="<c:url value="/orders/${filterLink}orderId/asc/${page.number}"/>"
+                   title="Sort by order ID" class="asc">
+                ID
                 </a>
 
-                &nbsp;
-                <span id="spaceId" class="glyphicon glyphicon-sort-by-attributes space"></span>
-                <span id="idAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-                <span id="idDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+
+                <span id="idAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+                <span id="idDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
+
             </th>
+            &nbsp;
         </c:if>
 
         <th>
@@ -68,15 +65,17 @@
                id="sortByTourNameDesc" title="Sort by tour name" class="desc">
                 Tour name
             </a>
-            &nbsp;
-            <span id="spaceTourName" class="glyphicon glyphicon-sort-by-attributes space"></span>
-            <span id="tourNameAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-            <span id="tourNameDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+
+            <span id="tourNameAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+            <span id="tourNameDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
         </th>
+        &nbsp;
 
         <th>
             <c:out value="${user.role != 'user' ? 'Rated by customer': 'Rate this tour'}"/>
+            &nbsp;
         </th>
+        &nbsp;
 
         <th>
 
@@ -84,16 +83,19 @@
                id="sortByPriceDesc" title="Sort by tour price" class="desc">
                 Price
             </a>
-            &nbsp;
-            <span id="spacePrice" class="glyphicon glyphicon-sort-by-attributes space"></span>
-            <span id="priceAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-            <span id="priceDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+
+            <span id="priceAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+            <span id="priceDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
+
         </th>
+        &nbsp;
 
         <c:if test="${user.role =='user' }">
             <th>Starting date</th>
+            &nbsp;
 
             <th>Ending date</th>
+            &nbsp;
         </c:if>
 
         <th>
@@ -102,11 +104,13 @@
                id="sortByOrderDateDesc" title="Sort by order date" class="desc">
                 Order date
             </a>
+
+            <span id="orderDateAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+            <span id="orderDateDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
             &nbsp;
-            <span id="spaceOrderDate" class="glyphicon glyphicon-sort-by-attributes space"></span>
-            <span id="orderDateAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-            <span id="orderDateDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+            &nbsp;
         </th>
+        &nbsp;
 
         <th>
 
@@ -114,11 +118,14 @@
                id="sortByOrderStatusDesc" title="Sort by order status" class="desc">
                 Status
             </a>
-            &nbsp;
-            <span id="spaceStatus" class="glyphicon glyphicon-sort-by-attributes space"></span>
-            <span id="statusAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-            <span id="statusDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+
+            <span id="statusAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+            <span id="statusDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
+
         </th>
+        &nbsp;
+        &nbsp;
+        &nbsp;
 
         <c:if test="${user.role !='user' }">
             <th>
@@ -127,16 +134,19 @@
                    id="sortByNextPaymentDateDesc" title="Sort by next payment date" class="desc">
                     Next payment on
                 </a>
-                &nbsp;
-                <span id="spacePayment" class="glyphicon glyphicon-sort-by-attributes space"></span>
-                <span id="paymentAscIcon" class="glyphicon glyphicon-sort-by-attributes sort-icon"></span>
-                <span id="paymentDescIcon" class="glyphicon glyphicon-sort-by-attributes-alt sort-icon"></span>
+
+                <span id="paymentAscIcon" class="glyphicon glyphicon-arrow-up sort-icon"></span>
+                <span id="paymentDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
             </th>
+
         </c:if>
-
-        <th></th>
-
+        &nbsp;
+        <th> &nbsp;</th>
+        <sec:authorize access="!hasRole('user')">
+            <th> Discount information</th>
+        </sec:authorize>
     </tr>
+
     </thead>
 
     <tbody>
@@ -194,13 +204,17 @@
                     <c:out value="${user.role!= 'user' ? 'Manage': 'View order'}"/>
                 </a>
             </td>
+            <td>
+                <sec:authorize access="!hasRole('user')">
+                    ${order.discountInformation}
+                </sec:authorize>
+            </td>
         </tr>
 
     </c:forEach>
 
     </tbody>
 </table>
-<hr>
 
 <!-- Pagination: page numbers and buttons -->
 <div>

@@ -26,7 +26,7 @@ public class DiscountDependencyService {
     UsersService usersService;
     @Value("${dbname}")
     private String dbName;
-    private Logger logger = LoggerFactory.getLogger(DiscountDependencyService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DiscountDependencyService.class);
 
     public List<DiscountDependency> findAllDependencies() {
         return discountDependenciesRepository.findAll();
@@ -45,8 +45,8 @@ public class DiscountDependencyService {
         return tags;
     }
 
-    public void delete(Integer id) {
-        discountDependenciesRepository.delete(id);
+    public void delete(DiscountDependency discountDependency) {
+        discountDependenciesRepository.delete(discountDependency);
     }
 
     /**

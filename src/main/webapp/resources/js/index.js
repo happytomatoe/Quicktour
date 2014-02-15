@@ -3,8 +3,10 @@ var placeInput = $("#place");
 var baseUrl;
 $(document).ready(function () {
     baseUrl = $("input#baseUrl").val();
-    country.select2();
-    placeInput.select2();
+    country.select2({ placeholder: "Select a country",
+        allowClear: true});
+    placeInput.select2({ placeholder: "Select a place",
+        allowClear: true});
 
 });
 
@@ -30,42 +32,20 @@ jQuery(function () {
 })
 country.on("change", function () {
     console.log("Change");
+    placeInput.select2("val", "");
     getPlacesForCountry()
 });
 
 function getPlacesForCountry() {
-    jQuery.ajax({
-        url: baseUrl + "placesByCountry",
-        data: {country: country.select2("val")},
-        type: "POST",
-        timeout: 4000,
-        success: function (map) {
-
-            console.log(map);
-            var places = map.places;
-            var placeUl = document.getElementById("placesDropDown");
-            while (placeUl.firstChild) {
-                placeUl.removeChild(placeUl.firstChild);
-            }
-            places.forEach(function (place) {
-                setPlacesList(place);
-            })
-        },
-        error: function (xhr, status) {
-        },
-        complete: function (data) {
-        }
-    })
-}
-
-function setPlacesList(place) {
-    var placeUl = document.getElementById("placesDropDown");
-    var li = document.createElement("li");
-    var a = document.createElement("a");
-    a.textContent = place;
-    a.onclick = function () {
-        placeInput.value = this.textContent;
+    if (typeof  temp != 'undefined') {
+        placeInput.append(temp);
     }
-    li.appendChild(a);
-    placeUl.appendChild(li);
+    if (country.val() != "") {
+        var selector = "select#place>optgroup[label!='" + country.val() + "']";
+        console.log("Selector", selector);
+        temp = $(selector);
+        $(selector).remove();
+        console.log(temp);
+    }
 }
+

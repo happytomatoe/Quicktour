@@ -9,10 +9,8 @@
         <fieldset>
             <div class="form-group">
                 <p>
-                    <form:label name="login" path="login" cssClass="form-signin-heading">Login*</form:label>
-                        <form:input name="login" id="login" path="login" size="30" maxlength="30"
-                                    cssClass="form-control"
-                                    readonly="true"/>
+                    <label cssClass="form-signin-heading">Login*:</label>
+                        ${user.login}
 
                 <p>
                     <form:label name="name" path="name" cssClass="form-signin-heading">Name*</form:label>
@@ -48,9 +46,17 @@
                                     cssClass="form-control"/>
 
                 <p><form:label name="sex" path="sex" cssClass="form-signin-heading">Sex:</form:label>
-                    <form:radiobutton path="sex" value="Other" checked="true"/>Other
-                    <form:radiobutton path="sex" value="Male"/>Male
-                    <form:radiobutton path="sex" value="Female"/>Female
+                    <select name="sex" class="form-control input-lg">
+                        <option value="" disabled selected>
+                            Gender
+                        </option>
+                        <option value="Male">
+                            Male
+                        </option>
+                        <option value="Female">
+                            Female
+                        </option>
+                    </select>
                 </p>
 
                 <p><label name="avatar">Avatar:</label>

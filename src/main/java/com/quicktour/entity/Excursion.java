@@ -50,7 +50,7 @@ public class Excursion {
     }
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "places_id", insertable = false, updatable = false)
+    @JoinColumn(name = "places_id")
     public Place getPlace() {
         return place;
     }

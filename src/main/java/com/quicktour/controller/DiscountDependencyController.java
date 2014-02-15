@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.dto.JTableResponse;
 import com.quicktour.entity.DiscountDependency;
 import com.quicktour.service.DiscountDependencyService;
 import org.slf4j.Logger;
@@ -12,13 +13,10 @@ import org.springframework.validation.BindingResult;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.ResponseBody;
 
 import javax.validation.Valid;
-import java.util.HashMap;
 import java.util.List;
-import java.util.Map;
 
 /**
  * Controller that performs CRUD operations on discount dependency
@@ -36,11 +34,11 @@ public class DiscountDependencyController {
     @PreAuthorize("hasAnyRole('admin','agent')")
     @RequestMapping(value = "/getAllDependencies")
     @ResponseBody
-    public Map<String, Object> getAllDependencies() {
-        Map<String, Object> map = new HashMap<String, Object>(3);
-        map.put("Result", "OK");
-        map.put("Records", dependenciesService.findAllDependencies());
-        return map;
+    public JTableResponse getAllDependencies() {
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        jTableResponse.setRecords(dependenciesService.findAllDependencies());
+        return jTableResponse;
     }
 
     @PreAuthorize("hasRole('admin')")
@@ -54,40 +52,36 @@ public class DiscountDependencyController {
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> add(@Valid DiscountDependency discountDependency, BindingResult bindingResult) {
+    public JTableResponse add(@Valid DiscountDependency discountDependency, BindingResult bindingResult) {
         logger.debug("Save discount dependency {}", discountDependency);
-        Map<String, Object> map = new HashMap<String, Object>(3);
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
         if (bindingResult.hasErrors()) {
-            map.put("Result", "ERROR");
-            StringBuilder message = new StringBuilder();
-            List<FieldError> errors = bindingResult.getFieldErrors();
-            for (FieldError error : errors) {
-                message.append(error.getDefaultMessage()).append("<br>");
+            jTableResponse.setResult(JTableResponse.Results.ERROR);
+            for (FieldError error : bindingResult.getFieldErrors()) {
+                jTableResponse.addMessage(error.getDefaultMessage());
             }
-            map.put("Message", message);
-            return map;
+            return jTableResponse;
         }
         discountDependency = dependenciesService.saveAndFlush(discountDependency);
-        map.put("Result", "OK");
-        map.put("Record", discountDependency);
-        return map;
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        jTableResponse.setRecord(discountDependency);
+        return jTableResponse;
     }
 
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public Map delete(@RequestParam(value = "id", required = false) Integer id) {
-        Map<String, String> map = new HashMap<String, String>(2);
-        dependenciesService.delete(id);
-        map.put("Result", "OK");
-        return map;
+    public JTableResponse delete(DiscountDependency discountDependency) {
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
+        dependenciesService.delete(discountDependency);
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        return jTableResponse;
     }
 
     @PreAuthorize("hasRole('admin')")
     @RequestMapping(value = "/getAvailableFields", method = RequestMethod.GET)
     @ResponseBody
     public List<String> getColumnNames() {
-
         return dependenciesService.findAvailableColumns();
     }
 }

@@ -9,9 +9,9 @@ import java.util.List;
  * @author Roman Lukash
  */
 public class DiscountPoliciesResult {
-    BigDecimal discount;
+    private BigDecimal discount;
 
-    List<DiscountPolicy> discountPolicies;
+    private List<DiscountPolicy> discountPolicies;
 
     public void setDiscountPolicies(List<DiscountPolicy> discountPolicies) {
         this.discountPolicies = discountPolicies;

@@ -80,7 +80,7 @@ public class Comment {
     @ManyToOne
     @JsonIgnore
     @LazyCollection(LazyCollectionOption.TRUE)
-    @JoinColumn(name = "tour_id", referencedColumnName = "tour_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "tour_id", referencedColumnName = "tour_id")
     public Tour getTour() {
         return tour;
     }
@@ -90,7 +90,7 @@ public class Comment {
     }
 
     @ManyToOne
-    @JoinColumn(name = "users_id", referencedColumnName = "user_id", nullable = false, insertable = false, updatable = false)
+    @JoinColumn(name = "users_id", referencedColumnName = "user_id")
     public User getUser() {
         return user;
     }
@@ -101,7 +101,7 @@ public class Comment {
 
     @ManyToOne
     @JsonIgnore
-    @JoinColumn(name = "next_comment_id", referencedColumnName = "comment_id", insertable = false, updatable = false)
+    @JoinColumn(name = "next_comment_id", referencedColumnName = "comment_id")
     public Comment getParent() {
         return parent;
     }
@@ -122,14 +122,6 @@ public class Comment {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Comment{");
-        sb.append("id=").append(commentId);
-        sb.append(", comment='").append(content).append('\'');
-        sb.append(", tour=").append(tour);
-        sb.append(", commentDate=").append(commentDate);
-        sb.append(", user=").append(user);
-        sb.append(", parent=").append(parent);
-        sb.append('}');
-        return sb.toString();
+        return "Comment{" + "content='" + content + '\'' + '}';
     }
 }

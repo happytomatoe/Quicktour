@@ -1,6 +1,6 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
-<%@ taglib prefix="s" uri="http://www.springframework.org/tags"%>
+<%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 
 <div class="panel-group" id="accordion">
@@ -11,12 +11,12 @@
         <div class="panel-body">
             <ul class="nav nav-pills nav-stacked">
                 <c:forEach var="i" begin="0" end="2">
-                    <c:if test="${countries[i] != null}">
+                    <c:if test="${countriesWithPlaces[i].name != null}">
                         <s:url value="/country/{country}/0" var="countryUrl">
-                            <s:param name="country" value="${countries[i]}" />
+                            <s:param name="country" value="${countriesWithPlaces[i].name}"/>
                         </s:url>
                         <li>
-                            <a href="${countryUrl}">${countries[i]}</a>
+                            <a href="${countryUrl}">${countriesWithPlaces[i].name}</a>
                         </li>
                     </c:if>
                 </c:forEach>
@@ -24,18 +24,18 @@
                 <li data-toggle="collapse" data-target="#demo">
                     <a>
                         More
-                        <span class="caret" />
+                        <span class="caret"/>
                     </a>
                 </li>
 
                 <div id="demo" class="col-md-12">
-                    <c:forEach var="i" begin="3" end="${countries.size()}">
-                        <c:if test="${countries[i] != null}">
+                    <c:forEach var="i" begin="3" end="${countriesWithPlaces.size()}">
+                        <c:if test="${countriesWithPlaces[i].name != null}">
                             <s:url value="/country/{country}/0" var="countryUrl">
-                                <s:param name="country" value="${countries[i]}" />
+                                <s:param name="country" value="${countriesWithPlaces[i].name}"/>
                             </s:url>
                             <li>
-                                <a href="${countryUrl}">${countries[i]}</a>
+                                <a href="${countryUrl}">${countriesWithPlaces[i].name}</a>
                             </li>
                         </c:if>
                     </c:forEach>
@@ -56,7 +56,7 @@
                 <c:forEach var="i" begin="0" end="2">
                     <c:if test="${places[i] != null}">
                         <s:url value="/place/{place}/0" var="placeUrl">
-                            <s:param name="place" value="${places[i]}" />
+                            <s:param name="place" value="${places[i]}"/>
                         </s:url>
                         <li>
                             <a href="${placeUrl}">${places[i]}</a>
@@ -67,7 +67,7 @@
                 <li data-toggle="collapse" data-target="#demo1">
                     <a>
                         More
-                        <span class="caret" />
+                        <span class="caret"/>
                     </a>
                 </li>
 
@@ -75,7 +75,7 @@
                     <c:forEach var="i" begin="3" end="${places.size()}">
                         <c:if test="${places[i] != null}">
                             <s:url value="/place/{place}/0" var="placeUrl">
-                                <s:param name="place" value="${places[i]}" />
+                                <s:param name="place" value="${places[i]}"/>
                             </s:url>
                             <li>
                                 <a href="${placeUrl}">${places[i]}</a>
@@ -86,23 +86,6 @@
                 <script>
                     jQuery("#demo1").collapse('hide');
                 </script>
-                <%--<c:forEach items="${places}" var="place" varStatus="i">
-                    <s:url value="/place/{place}/0" var="placeUrl">
-                        <s:param name="place" value="${place}" />
-                    </s:url>
-                    <c:choose>
-                        <c:when test="${i.index<3}">
-                            <li>
-                                <a href="${placeUrl}">${place}</a>
-                            </li>
-                        </c:when>
-                    </c:choose>
-                    &lt;%&ndash;<c:otherwise>&ndash;%&gt;
-                        &lt;%&ndash;<c:if test="${i.index==3}">&ndash;%&gt;
-
-                        &lt;%&ndash;</c:if>&ndash;%&gt;
-                    &lt;%&ndash;</c:otherwise>&ndash;%&gt;
-                </c:forEach>--%>
             </ul>
         </div>
     </div>
@@ -115,8 +98,8 @@
             <ul class="nav nav-pills nav-stacked">
                 <c:forEach varStatus="price" begin="0" end="5001" step="1000">
                     <s:url value="/price/{min}/{max}/0" var="priceUrl">
-                        <s:param name="min" value="${price.current}" />
-                        <s:param name="max" value="${price.current + price.step}" />
+                        <s:param name="min" value="${price.current}"/>
+                        <s:param name="max" value="${price.current + price.step}"/>
                     </s:url>
                     <li>
                         <a href="${priceUrl}">

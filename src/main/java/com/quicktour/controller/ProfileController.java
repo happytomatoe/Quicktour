@@ -39,7 +39,7 @@ public class ProfileController {
      * @param model - model that will be represented in the profile editing form
      * @return redirects user to the profile editing form
      */
-    @RequestMapping(value = "/myprofile", method = RequestMethod.GET)
+    @RequestMapping(value = "/profile", method = RequestMethod.GET)
     public String myProfileForm(Model model) {
         User user = usersService.getCurrentUser();
         model.addAttribute("user", user);
@@ -55,33 +55,30 @@ public class ProfileController {
      * @param image         - contains file uploaded by user if he wants to change his avatar
      * @return redirects user to main page
      */
-    @RequestMapping(value = "/myprofile", method = RequestMethod.POST)
+    @RequestMapping(value = "/profile", method = RequestMethod.POST)
     public String myProfileForm(@Valid User user, BindingResult bindingResult, Model model,
                                 @RequestParam(value = "avatar", required = false)
                                 MultipartFile image) {
-        String newAvatarName;
-        if (usersService.findByLogin(user.getLogin()).getPhoto() != null) {
-            newAvatarName = "@" + usersService.findByLogin(user.getLogin()).getPhoto().getUrl();
-
-        } else {
-            newAvatarName = user.getLogin() + ".jpg";
-        }
+        User currentUser = usersService.getCurrentUser();
+        user.setLogin(currentUser.getLogin());
+        user.setUserId(currentUser.getUserId());
+        user.setRole(currentUser.getRole());
+        String newAvatarName = user.getLogin() + ".jpg";
         if (bindingResult.hasErrors()) {
             model.addAttribute("user", user);
-            return "/myprofile";
+            return "/profile";
         }
-        if (image.isEmpty()) {
-            usersService.save(user);
-            return "redirect:/";
-        } else {
+        if (!image.isEmpty()) {
             Photo photo = photoService.saveImage(newAvatarName, image);
-            if (photo != null) {
-                user.setPhoto(photo);
-                usersService.save(user);
-                //TODO :test
-                return "redirect:/";
-            } else return "/myprofile";
+            if (photo == null) {
+                return "/profile";
+            }
+            user.setPhoto(photo);
         }
+        usersService.save(user);
+        return "redirect:/";
+
+
     }
 
     /**

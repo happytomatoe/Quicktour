@@ -19,7 +19,6 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-import org.xml.sax.SAXException;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
@@ -36,9 +35,11 @@ import java.io.IOException;
 public class PhotoService {
 
     private static final int DEFAULT_AVATAR_ID = 4;
-    private static final int DEFAULT_LOGO_ID = 5;
     private static final String FLICKR_COM = "flickr.com";
-    public final Logger logger = LoggerFactory.getLogger(PhotoService.class);
+    private final Logger logger = LoggerFactory.getLogger(PhotoService.class);
+    @Value("${flickRetryCount}")
+    private int retryCount;
+    private int tryCount;
     @Autowired
     private UsersService usersService;
     @Autowired
@@ -63,10 +64,6 @@ public class PhotoService {
                 authorize();
             } catch (FlickrException e) {
                 logger.error("Flickr exception while authorizing to Flickr. {}", e);
-            } catch (IOException e) {
-                logger.error("IOException while authorizing to Flickr.{}", e);
-            } catch (SAXException e) {
-                logger.error("SAXException while authorizing to Flickr.{}", e);
             }
         }
     }
@@ -83,7 +80,7 @@ public class PhotoService {
         if (image.isEmpty()) {
             return null;
         }
-        String photoId = null;
+        String photoId;
         User currentUser = usersService.getCurrentUser();
         Uploader uploader = flickr.getUploader();
         UploadMetaData metaData = new UploadMetaData();
@@ -100,10 +97,12 @@ public class PhotoService {
             if (company != null) {
                 title += company.toString() + ":";
             }
-            title += currentUser.getLogin();
+            if (currentUser != null) {
+                title += currentUser.getLogin();
+            }
         }
         metaData.setTitle(title);
-        com.flickr4java.flickr.photos.Photo info = null;
+        com.flickr4java.flickr.photos.Photo info;
         try {
             authorize();
             photoId = uploader.upload(image.getBytes(), metaData);
@@ -113,9 +112,6 @@ public class PhotoService {
             return null;
         } catch (IOException e) {
             logger.error("IOException while saving image .{}", e);
-            return null;
-        } catch (SAXException e) {
-            logger.error("IOException while authorize .{}", e);
             return null;
         }
         logger.info("Saved image.Response from Flickr:{}", photoId);
@@ -130,15 +126,32 @@ public class PhotoService {
         return photo;
     }
 
-    private void authorize() throws IOException, SAXException, FlickrException {
+    private void authorize() throws FlickrException {
         if (RequestContext.getRequestContext().getAuth() != null) {
             return;
         }
         logger.debug("Trying to auhorize on flickr");
-        Token accessToken2 = new Token(accessToken, accessTokenSecret);
-        Auth auth = flickr.getAuthInterface().checkToken(accessToken2);
-        flickr.setAuth(auth);
-        RequestContext.getRequestContext().setAuth(auth);
+        try {
+            Token accessToken2 = new Token(accessToken, accessTokenSecret);
+            Auth auth = flickr.getAuthInterface().checkToken(accessToken2);
+            flickr.setAuth(auth);
+            RequestContext.getRequestContext().setAuth(auth);
+
+        } catch (FlickrException e) {
+            if (tryCount > retryCount) {
+                throw e;
+            }
+            tryCount++;
+            try {
+                Thread.sleep(3000);
+            } catch (InterruptedException e1) {
+                logger.error("{}", e);
+            }
+            authorize();
+        } finally {
+            tryCount = 0;
+        }
+
     }
 
 

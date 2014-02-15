@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.dto.JTableResponse;
 import com.quicktour.entity.DiscountPolicy;
 import com.quicktour.service.DiscountDependencyService;
 import com.quicktour.service.DiscountPolicyService;
@@ -18,7 +19,6 @@ import org.springframework.web.bind.annotation.*;
 import javax.validation.Valid;
 import java.sql.Date;
 import java.util.HashMap;
-import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.regex.Pattern;
@@ -35,12 +35,6 @@ public class DiscountPolicyController {
 
     static final Logger logger = LoggerFactory.getLogger(DiscountDependencyController.class);
     private static final String ONE = "1";
-    private static final String RESULT = "Result";
-    private static final String ERROR = "ERROR";
-    private static final String MESSAGE = "Message";
-    private static final String OK = "OK";
-    private static final String RECORD = "Record";
-    private static final String RECORDS = "Records";
     private static final String POLICIES = "policies";
     private static final String POLICY = "policy";
     private static final String DAYOFWEEK = "dayofweek";
@@ -65,17 +59,14 @@ public class DiscountPolicyController {
 
     @RequestMapping(value = "/getAllPolicies", method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> getAllPolicies() {
-        Map<String, Object> map = new LinkedHashMap<String, Object>(3);
-        map.put(RESULT, OK);
-        map.put(RECORDS, discountPolicyService.findByCompany());
-        return map;
+    public JTableResponse getAllPolicies() {
+        return new JTableResponse<DiscountPolicy>(JTableResponse.Results.OK, discountPolicyService.findByCompany());
     }
 
     @RequestMapping("/getAllDiscounts")
     @ResponseBody
-    public Map<String, Object> getAllDiscounts() {
-        Map<String, Object> map = new HashMap<String, Object>();
+    public Map<String, String> getAllDiscounts() {
+        Map<String, String> map = new HashMap<String, String>();
         List<DiscountPolicy> discountPolicies = discountPolicyService.findByCompany();
         for (DiscountPolicy discountPolicy : discountPolicies) {
             map.put(String.valueOf(discountPolicy.getDiscountPolicyId()), discountPolicy.getName());
@@ -85,15 +76,14 @@ public class DiscountPolicyController {
 
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody
-    public Map<String, Object> save(
+    public JTableResponse save(
             @Valid DiscountPolicy discountPolicy,
             BindingResult bindingResult,
             @RequestParam(value = "relation", required = false) String[] relation,
             @RequestParam(value = "condition", required = false) String[] conditions,
             @RequestParam(value = "sign", required = false) String[] signs,
             @RequestParam(value = "param", required = false) String[] params) {
-        Map<String, Object> map = new HashMap<String, Object>(3);
-        StringBuilder message = new StringBuilder();
+        JTableResponse<DiscountPolicy> jTableResponse = new JTableResponse<DiscountPolicy>(JTableResponse.Results.OK);
         double amount = 0;
         boolean isFormula = false;
         Date startDate = discountPolicy.getStartDate();
@@ -152,13 +142,12 @@ public class DiscountPolicyController {
             }
         }
         if (bindingResult.hasErrors()) {
-            map.put(RESULT, ERROR);
+            jTableResponse.setResult(JTableResponse.Results.ERROR);
             List<FieldError> errors = bindingResult.getFieldErrors();
             for (FieldError error : errors) {
-                message.append(error.getDefaultMessage()).append("<br>");
+                jTableResponse.addMessage(error.getDefaultMessage());
             }
-            map.put(MESSAGE, message);
-            return map;
+            return jTableResponse;
         }
         if (conditions != null) {
             discountPolicy = discountPolicyService.addDiscountPolicy(discountPolicy, relation, conditions, signs, params);
@@ -168,19 +157,16 @@ public class DiscountPolicyController {
         if (isFormula) {
             discountPolicy.setFormula(discountDependencyService.convertFormula(discountPolicy.getFormula()));
         }
-        map.put(RESULT, OK);
-        map.put(RECORD, discountPolicy);
-        logger.info("Save discount policy {}", discountPolicy);
-        return map;
+        jTableResponse.setResult(JTableResponse.Results.OK);
+        jTableResponse.setRecord(discountPolicy);
+        return jTableResponse;
     }
 
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
-    public Map delete(@RequestParam(value = "id", required = false) Integer id) {
-        Map<String, Object> map = new HashMap<String, Object>(2);
-        discountPolicyService.delete(id);
-        map.put(RESULT, OK);
-        return map;
+    public JTableResponse delete(DiscountPolicy discountPolicy) {
+        discountPolicyService.delete(discountPolicy);
+        return new JTableResponse(JTableResponse.Results.OK);
     }
 
 

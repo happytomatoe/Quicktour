@@ -41,10 +41,10 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="<c:url value="/viewusers"/>">Users</a>
+                                <a href="<c:url value="/users"/>">Users</a>
                             </li>
                             <li>
-                                <a href="<c:url value="/viewcompanies"/>">Companies</a>
+                                <a href="<c:url value="/company"/>">Companies</a>
                             </li>
                         </ul>
                     </li>
@@ -55,7 +55,7 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="<c:url value="/addcompany"/>">Company</a>
+                                <a href="<c:url value="/company/add"/>">Company</a>
                             </li>
                             <li>
                                 <a href="<c:url value= "/registration"/>">User</a>
@@ -63,7 +63,7 @@
                         </ul>
                     </li>
                 </sec:authorize>
-                <sec:authorize access="hasAnyRole('admin', 'agent')">
+                <sec:authorize access="hasAnyRole( 'agent')">
                     <li>
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             Manage tours
@@ -95,11 +95,13 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="<c:url value="/myprofile"/>">Profile</a>
+                                <a href="<c:url value="/profile"/>">Profile</a>
                             </li>
-                            <li>
-                                <a href="<c:url value="/mycompany"/>">Company</a>
-                            </li>
+                            <sec:authorize access="!hasRole('admin')">
+                                <li>
+                                    <a href="<c:url value="/mycompany"/>">Company</a>
+                                </li>
+                            </sec:authorize>
                             <li>
                                 <a href="<c:url value="/j_spring_security_logout"/>">Logout</a>
                             </li>

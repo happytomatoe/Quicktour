@@ -8,6 +8,10 @@
         <error-code>404</error-code>
         <location>/404</location>
     </error-page>
+    <error-page>
+        <error-code>403</error-code>
+        <location>/403</location>
+    </error-page>
 
     <filter>
         <filter-name>charsetFilter</filter-name>
@@ -32,7 +36,6 @@
         <param-value>
             /WEB-INF/security-config.xml,
             /WEB-INF/data-source-config.xml,
-            /WEB-INF/service-config.xml,
             /WEB-INF/view-config.xml
         </param-value>
     </context-param>
@@ -65,7 +68,7 @@
         <init-param>
             <param-name>contextConfigLocation</param-name>
             <param-value>
-                /WEB-INF/security-config.xml,
+                /WEB-INF/security-config.xml
                 /WEB-INF/data-source-config.xml,
                 /WEB-INF/service-config.xml,
                 /WEB-INF/view-config.xml

@@ -6,11 +6,20 @@ var btnAddDateClicked = 0;
 
 //tourInfo places counter
 var placesCounter = 0;
+jQuery.validator.addMethod("greaterThan",
+    function (value, element, params) {
+        console.log("Dates", (Number(value), $(params).val()));
 
+        if (!/Invalid|NaN/.test(new Date(value))) {
+            return new Date(value) > new Date($(params).val());
+        }
+        return isNaN(value) && isNaN($(params).val())
+            || (Number(value) > Number($(params).val()));
+    }, 'Must be greater than start date.');
 window.onload = function () {
     btnAddDateClicked = document.forms[0].elements["tourInfoCount"].value;
     placesCounter = document.forms[0].elements["tourPlacesCount"].value;
-    var v = jQuery("#manageTourForm").validate();
+    var v = jQuery("#manageTourForm").validate({errorClass: "text-danger"});
     if (btnAddDateClicked == 0) {
         addTourInfo();
     }
@@ -28,29 +37,29 @@ window.onload = function () {
     var prev1 = document.getElementById("prev1");
     var prev2 = document.getElementById("prev2");
 
-    prev1.onclick = function() {
+    prev1.onclick = function () {
         $("#tourCommon").collapse('show');
         $("#collapseTwo").collapse('hide');
         $("#collapseThree").collapse('hide');
     }
 
-    next1.onclick = function() {
-        if(v.form()) {
+    next1.onclick = function () {
+        if (v.form()) {
             $("#tourCommon").collapse('hide');
             $("#collapseTwo").collapse('show');
             $("#collapseThree").collapse('hide');
         }
     }
 
-    next2.onclick = function() {
-        if(v.form()) {
+    next2.onclick = function () {
+        if (v.form()) {
             $("#tourCommon").collapse('hide');
             $("#collapseTwo").collapse('hide');
             $("#collapseThree").collapse('show');
         }
     }
 
-    prev2.onclick = function() {
+    prev2.onclick = function () {
         $("#tourCommon").collapse('hide');
         $("#collapseTwo").collapse('show');
         $("#collapseThree").collapse('hide');
@@ -71,22 +80,22 @@ window.onload = function () {
     }
 
     //add new tourInfo date
-    btnAddDate.onclick = function() {
+    btnAddDate.onclick = function () {
         addTourInfo();
     }
 
     //find place (button add place clicked)
-    btnGeocode.onclick = function() {
+    btnGeocode.onclick = function () {
         getCoordinates(addrInput.value);
     }
 
     //find place (click on map)
-    google.maps.event.addListener(map, 'click', function(event) {
+    google.maps.event.addListener(map, 'click', function (event) {
         getPlaceByCoordinates(event.latLng);
     });
 
     //click on save button
-    saveAllBtn.onclick = function() {
+    saveAllBtn.onclick = function () {
         if (v.form()) {
             $("#tourCommon").collapse('show');
             $("#collapseTwo").collapse('show');
@@ -187,7 +196,9 @@ function addTourInfo() {
     name = "tourInfo[" + btnAddDateClicked + "].discount"
     discountNode.setAttribute("id", id);
     discountNode.setAttribute("name", name);
-    discountNode.setAttribute("class", "form-control");
+    discountNode.setAttribute("class", "form-control ");
+    discountNode.setAttribute("range", "0,100");
+    discountNode.setAttribute("required", "true");
     discountNode.setAttribute("type", "text");
     discountNode.setAttribute("number", "true");
     discountNode.setAttribute("placeholder", "Tour discount");
@@ -200,23 +211,17 @@ function addTourInfo() {
         jQuery(document.getElementById(id)).datepicker({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
-            numberOfMonths: 1,
-            onClose: function( selectedDate ) {
-                $(document.getElementById("tourInfo" + btnAddDateClicked + ".endDate")).datepicker( "option",
-                    id, selectedDate );
-            }
+            numberOfMonths: 1
         });
     });
+    var id2 = id;
     id = "tourInfo" + btnAddDateClicked + ".endDate";
+    jQuery(document.getElementById(id)).attr("greaterThan", "#" + id2.replace(".", "\\."));
     jQuery(function () {
         jQuery(document.getElementById(id)).datepicker({
             dateFormat: "yy-mm-dd",
             changeMonth: true,
-            numberOfMonths: 1,
-            onClose: function( selectedDate ) {
-                $(document.getElementById("tourInfo" + btnAddDateClicked + ".startDate")).datepicker( "option",
-                    id, selectedDate );
-            }
+            numberOfMonths: 1
         });
     });
     btnAddDateClicked++;
@@ -325,7 +330,7 @@ function getCoordinates(address) {
             });
             markers.push(marker);
             var length = markers.length;
-            google.maps.event.addListener(markers[length - 1], 'click', function() {
+            google.maps.event.addListener(markers[length - 1], 'click', function () {
                 setMarkerAction(length - 1);
             });
             var data = results[0].address_components;
@@ -348,10 +353,10 @@ function getPlaceByCoordinates(location) {
     });
     markers.push(marker);
     var length = markers.length;
-    google.maps.event.addListener(markers[length - 1], 'click', function() {
+    google.maps.event.addListener(markers[length - 1], 'click', function () {
         setMarkerAction(length - 1);
     });
-    geocoder.geocode({'latLng': location}, function(results, status) {
+    geocoder.geocode({'latLng': location}, function (results, status) {
         if (status == google.maps.GeocoderStatus.OK) {
             if (results[1]) {
                 var data = results[1].address_components;
@@ -410,7 +415,7 @@ function setTourPlaces() {
         });
         markers.push(marker);
         var length = markers.length;
-        google.maps.event.addListener(markers[length - 1], 'click', function() {
+        google.maps.event.addListener(markers[length - 1], 'click', function () {
             setMarkerAction(length - 1);
         });
     }

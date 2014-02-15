@@ -1,5 +1,8 @@
 var availableFields;
+
 $(document).ready(function () {
+
+
     //setup the jtable that will display the results
     var currentUrl = window.location.href;
     var url = currentUrl + "/getAvailableFields";
@@ -11,7 +14,7 @@ $(document).ready(function () {
         }
     });
     $('#dependencies').jtable({
-        title: 'Discount policies',
+        title: 'Discount dependencies',
         actions: {
             listAction: currentUrl + '/getAllDependencies',
             createAction: currentUrl + '/add',
@@ -19,7 +22,7 @@ $(document).ready(function () {
             deleteAction: currentUrl + '/delete'
         },
         fields: {
-            id: {
+            discountDependencyId: {
                 title: 'id',
                 key: true,
                 list: false,
@@ -34,7 +37,8 @@ $(document).ready(function () {
                 options: availableFields
             }, description: {
                 title: "Description",
-                width: "60%"
+                width: "60%",
+                type: "textarea"
             }
         }, formCreated: function (event, data) {
             var $availableFieds = $('<select name="tableField" required="required"></select>');
@@ -44,7 +48,11 @@ $(document).ready(function () {
                     text: item
                 }));
             });
+            if (data.formType == "edit") {
+                $availableFieds.find("option:contains('" + data.record.tableField + "')").attr("selected", true);
+            }
             data.form.find("input[name=tableField]").replaceWith($availableFieds);
+
             $availableFieds.select2({width: "300px"});
 
         },

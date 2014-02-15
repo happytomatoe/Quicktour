@@ -1,5 +1,5 @@
 jQuery(document).ready(
-    function(){
+    function () {
 
         // Filter buttons usability
         var allBtn = jQuery('#buttonAll');
@@ -22,7 +22,7 @@ jQuery(document).ready(
             jQuery('#buttonActive a').removeAttr('href');
         }
 
-        if (completed == 0){
+        if (completed == 0) {
             completedBtn.addClass("disabled");
             jQuery('#buttonCompleted a').removeAttr('href');
         }
@@ -33,14 +33,14 @@ jQuery(document).ready(
         }
 
         // Disables buttons "First" and "Last" for first and last pages respectively
-        if (!(jQuery('#first').length > 0)){
+        if (!(jQuery('#first').length > 0)) {
             jQuery('#navFirst').addClass('disabled');
             jQuery('#navFirst a').removeAttr('href');
             jQuery('#navPrevious').addClass('disabled');
             jQuery('#navPrevious a').removeAttr('href');
         }
 
-        if (!(jQuery('#last').length > 0)){
+        if (!(jQuery('#last').length > 0)) {
             jQuery('#navNext').addClass('disabled');
             jQuery('#navNext a').removeAttr('href');
             jQuery('#navLast').addClass('disabled');
@@ -60,24 +60,24 @@ jQuery(document).ready(
         }
 
         // Sort order displaying in table head
-        if (url.contains('/id/asc/')) {
+        if (url.contains('/orderId/asc/')) {
             jQuery('#spaceId').removeAttr('class');
             jQuery('#sortByIdAsc').hide();
             jQuery('#sortByIdDesc').show();
             jQuery('#idAscIcon').show();
         }
-        if (url.contains('/id/desc/')) {
+        if (url.contains('/orderId/desc/')) {
             jQuery('#spaceId').removeAttr('class');
             jQuery('#sortByIdAsc').show();
             jQuery('#idDescIcon').show();
         }
-        if (url.contains('/tourInfoId/asc/')) {
+        if (url.contains('/tourInfo/asc/')) {
             jQuery('#spaceTourName').removeAttr('class');
             jQuery('#sortByTourNameAsc').hide();
             jQuery('#sortByTourNameDesc').show();
             jQuery('#tourNameAscIcon').show();
         }
-        if (url.contains('/tourInfoId/desc/')) {
+        if (url.contains('/tourInfo/desc/')) {
             jQuery('#spaceTourName').removeAttr('class');
             jQuery('#sortByTourNameAsc').show();
             jQuery('#tourNameDescIcon').show();
@@ -126,6 +126,20 @@ jQuery(document).ready(
             jQuery('#sortByNextPaymentDateAsc').show();
             jQuery('#paymentDescIcon').show();
         }
+
+        var selector = 'th>a[href="' + url + '"]';
+        console.log("Selector", selector);
+        var $currentSort = $(selector);
+        var href = $currentSort.attr("href");
+        console.log("currentSort", $currentSort);
+        if (href.contains("desc")) {
+            href = href.replace("desc", "asc");
+        } else {
+
+            href = href.replace("asc", "desc");
+        }
+        $currentSort.attr("href", href);
+
 
     }
 );

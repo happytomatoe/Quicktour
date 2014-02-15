@@ -119,7 +119,7 @@
 <!-- /Panel TourInfo Details -->
 
 <!-- Form Enter Registration Information -->
-<c:url var="saveUrl" value="/createOrder/${tourInfo.id}"/>
+<c:url var="saveUrl" value="/createOrder/${tourInfo.tourInfoId}"/>
 <form:form role="form" method="post" modelAttribute="order" id="createOrderForm" action="${saveUrl}">
     <!-- Panel Enter Registration Information -->
     <div class="panel mt">
@@ -135,29 +135,34 @@
                     <fieldset>
                         <legend>Required Personal Details</legend>
                         <div class="form-group">
-                            <label for="firstName">Name</label>
-                            <input id="firstName" name="name" value="${user.name}"
-                                   placeholder="Enter your name" class="form-control" type="text" required>
+                            <form:label path="user.name">Name</form:label>
+                            <form:input id="firstName" path="user.name" value="${user.name}"
+                                        placeholder="Enter your name" class="form-control" type="text" required=""/>
+                            <form:errors path="user.name" cssClass="text-error"/>
                         </div>
 
                         <div class="form-group">
-                            <label for="surname">Surname</label>
-                            <input id="surname" name="surname" value="${user.surname}"
-                                   placeholder="Enter your surname" class="form-control" type="text" required>
+                            <form:label path="user.surname">Surname</form:label>
+                            <form:input id="surname" path="user.surname"
+                                        placeholder="Enter your surname" class="form-control" type="text" required=""/>
+                            <form:errors path="user.surname" cssClass="text-error"/>
                         </div>
 
                         <div class="form-group">
 
-                            <label for="email">Email Address</label>
-                            <input id="email" name="email" value="${user.email}"
-                                   placeholder="Enter email address" class="form-control" type="email" required>
+                            <form:label path="user.email">Email Address</form:label>
+                            <form:input id="email" path="user.email"
+                                        placeholder="Enter email address" class="form-control" type="email"
+                                        required=""/>
+                            <form:errors path="user.email" cssClass="text-error"/>
+
 
                         </div>
                         <div class="form-group">
-                            <label for="phone">Phone</label>
-                            <input id="phone" name="phone" value="${user.phone}" size="25"
-                                   placeholder=+___(__)___-__-__" class="form-control " type="text" required>
-
+                            <form:label path="user.phone">Phone</form:label>
+                            <form:input id="phone" path="user.phone" size="25"
+                                        placeholder="+___(__)___-__-__" class="form-control " type="text" required=""/>
+                            <form:errors path="user.phone" cssClass="text-error"/>
                         </div>
 
                     </fieldset>
@@ -170,10 +175,11 @@
                         <div class="col-sm-4">
                             <fieldset>
                                 <div class="form-group">
-                                    <label for="numberOfAdults">Number of adults:</label>
+                                    <form:label path="numberOfAdults">Number of adults:</form:label>
 
-                                    <select id="numberOfAdults" name="numberOfAdults" class="form-control num" required>
-                                        <option value="1">1</option>
+                                    <select id="numberOfAdults" name="numberOfAdults" class="form-control num"
+                                            required=""/>
+                                    <option value="1">1</option>
                                         <option value="2">2</option>
                                         <option value="3">3</option>
                                         <option value="4">4</option>

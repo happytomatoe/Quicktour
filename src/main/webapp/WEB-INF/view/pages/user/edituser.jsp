@@ -1,6 +1,8 @@
+<%@ page import="com.quicktour.Roles" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 
 <form:form name="user" id="myProfileForm" modelAttribute="user" method="POST" cssClass="form-signin"
@@ -8,16 +10,19 @@
     <div>
         <fieldset>
             <div class="form-group">
-                <p>${user.login}
+                <p>Login:${user.login}
+                    <input type="hidden" name="login" value="${user.login}"/>
+                    <input type="hidden" name="userId" value="${user.userId}"/>
 
                 <p>
                     <form:label path="name" cssClass="form-signin-heading">Name*</form:label>
                         <form:input id="name" path="name" size="30" maxlength="30" cssClass="form-control"
-                                    placeholder="Enter your name" required="true"/>
+                                    placeholder="First name" required="true"/>
 
                 <p>
                     <form:label path="surname" cssClass="form-signin-heading">Surname*</form:label>
-                        <form:input id="surname" path="surname" size="30" maxlength="30" cssClass="form-control"
+                        <form:input id="surname" path="surname" size="30" maxlength="30"
+                                    placeholder="Second name" cssClass="form-control"
                                     required="true"/>
 
                 <p>
@@ -39,13 +44,17 @@
                         <form:input id="companyCode" path="companyCode" size="30" maxlength="30"
                                     cssClass="form-control"/>
 
-                <p><form:label path="sex" cssClass="form-signin-heading">Sex:</form:label>
-                    <form:radiobutton path="sex" value=""/>
-                    <form:radiobutton path="sex" value="Male"/>Male
-                    <form:radiobutton path="sex" value="Female"/>Female
-                </p>
-
                 <p>
+                    <% pageContext.setAttribute("sexes", new String[]{"", "Male", "Female"}); %>
+                    <form:label path="sex" clas="form-signin-heading">Sex:</form:label>
+                    <form:select path="sex" items="${sexes}"/>
+                </p>
+                <form:label path="role" clas="form-signin-heading">Role:</form:label>
+                <c:if test="${user.role !='admin'}">
+                <% pageContext.setAttribute("roles", Roles.values()); %>
+                <form:select path="role" items="${roles}"/>
+                <p>
+                    </c:if>
 
                 <p> * - required fields.</p>
 

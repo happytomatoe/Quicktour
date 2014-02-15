@@ -2,8 +2,7 @@ package com.quicktour.service;
 
 import com.quicktour.entity.*;
 import com.quicktour.repository.ToursRepository;
-import org.jsoup.Jsoup;
-import org.jsoup.safety.Whitelist;
+import com.quicktour.utils.HTMLUtils;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -43,11 +42,7 @@ public class ToursManageService {
 
 
     /**
-     * change tour active state to state preset in activeState parameter
-     *
-     * @param tourId
-     * @param activeState
-     * @return true if success
+     * Change tour active state to state preset in activeState parameter
      */
     public boolean changeActiveStage(int tourId, boolean activeState) {
         Tour tour = toursRepository.findOne(tourId);
@@ -69,7 +64,7 @@ public class ToursManageService {
      * @param mainPhoto        file which contains main photo of the tour
      */
     public void saveCombineTours(CompleteTourInfo completeTourInfo, MultipartFile mainPhoto) {
-        int price = 0;
+        int price;
         //TODO:inspect and rework
         cleanTourUnsafeHTML(completeTourInfo.getTour());
         Tour tour = saveTour(completeTourInfo);
@@ -91,7 +86,7 @@ public class ToursManageService {
         tour.setToursPlaces(completeTourInfo.getPlaces());
         tour.setPrice(new BigDecimal(price));
         tourService.saveTour(completeTourInfo.getTourInfo());
-        placeService.savePlases(completeTourInfo.getPlaces());
+        placeService.savePlaces(completeTourInfo.getPlaces());
         toursService.saveTour(tour);
         logger.debug("Tour {} saved successfully", tour.getTourId());
     }
@@ -163,18 +158,16 @@ public class ToursManageService {
     }
 
     private void cleanTourUnsafeHTML(Tour tour) {
-        tour.setName(Jsoup.clean(tour.getName(), Whitelist.basic()));
-        tour.setDescription(Jsoup.clean(tour.getDescription(),
-                Whitelist.basic()));
-        tour.setTransportDesc(Jsoup.clean(tour.getTransportDesc(),
-                Whitelist.basic()));
+        tour.setName(HTMLUtils.cleanHTML(tour.getName()));
+        tour.setDescription(HTMLUtils.cleanHTML(tour.getDescription()));
+        tour.setTransportDesc(HTMLUtils.cleanHTML(tour.getTransportDesc()));
     }
 
     private void cleanPlacesUnsafeHTML(List<Place> places) {
         if (places != null) {
             for (Place place : places) {
-                place.setName(Jsoup.clean(place.getName(), Whitelist.basic()));
-                place.setDescription(Jsoup.clean(place.getDescription(), Whitelist.basic()));
+                place.setName(HTMLUtils.cleanHTML(place.getName()));
+                place.setDescription(HTMLUtils.cleanHTML(place.getDescription()));
             }
         }
     }

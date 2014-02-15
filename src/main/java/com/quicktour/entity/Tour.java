@@ -26,10 +26,12 @@ public class Tour {
     private String description;
     private String transportDesc;
     private Photo photo;
-    private Boolean isActive;
+    private Boolean active;
     private BigDecimal discount = BigDecimal.ZERO;
     private String travelType;
     private Double rate;
+
+    private Long rateCount;
 
     @Formula("(SELECT AVG( orders.vote ) FROM orders " +
             "INNER JOIN tour_info ON orders.tour_info_id = tour_info.tour_info_id " +
@@ -41,8 +43,6 @@ public class Tour {
     public Double getRate() {
         return rate;
     }
-
-    private Long rateCount;
 
     public void setRate(Double rate) {
         this.rate = rate;
@@ -63,7 +63,7 @@ public class Tour {
 
     @ManyToOne()
     @JoinColumn(name = "companies_id")
-    @LazyCollection(LazyCollectionOption.TRUE)
+    @LazyCollection(LazyCollectionOption.FALSE)
     @JsonIgnore
     public Company getCompany() {
         return company;
@@ -112,6 +112,16 @@ public class Tour {
         this.tourInfo = tourInfo;
     }
 
+    @Column(name = "active")
+    public Boolean getActive() {
+        return active;
+    }
+
+    public void setActive(Boolean active) {
+        this.active = active;
+    }
+
+
     @ManyToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "tours_places",
             joinColumns = @JoinColumn(name = "tours_id"),
@@ -125,7 +135,7 @@ public class Tour {
         this.toursPlaces = toursPlaces;
     }
 
-    @OneToMany(fetch = FetchType.EAGER)
+    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinTable(name = "tours_price_includes",
             joinColumns = @JoinColumn(name = "tours_id"),
             inverseJoinColumns = @JoinColumn(name = "price_includes_id"))
@@ -178,14 +188,6 @@ public class Tour {
         this.transportDesc = transportDesc;
     }
 
-    @Column(name = "active")
-    public Boolean getActive() {
-        return isActive;
-    }
-
-    public void setActive(Boolean active) {
-        isActive = active;
-    }
 
     @Transient
     public BigDecimal getDiscount() {

@@ -231,7 +231,7 @@ $(document).ready(function () {
             deleteAction: window.location.href + '/delete'
         },
         fields: {
-            id: {
+            discountPolicyId: {
                 title: 'id',
                 key: true,
                 list: false,
@@ -242,7 +242,9 @@ $(document).ready(function () {
             condition: {title: "Condition", width: '20%',
                 input: function (data) {
                     //replace condition's input with add condition button
-                    return '<div id="conditionAndButton"><button type="button" class="btn btn-primary" onclick="addCondition()">Add condition</button><div id="condition" ></div></div>';
+                    return '<div id="conditionAndButton"><button type="button" ' +
+                        'class="btn btn-primary" onclick="addCondition()">Add condition' +
+                        '</button><div id="condition" ></div></div>';
 
                 }}, description: {title: 'Description', width: '20%', type: 'textarea'},
             startDate: {title: "Start date", width: '10%', type: 'date'
@@ -269,6 +271,11 @@ $(document).ready(function () {
 
                 }
             });
+
+            var date = data.form.find("input[name='startDate'],input[name='endDate']");
+            console.log("Date", date);
+            date.attr("readonly", "true");
+
 
             var formulaInput = $('input[name="formula"]');
             formulaInput.popover({html: true, trigger: 'focus'});
@@ -302,6 +309,7 @@ $(document).ready(function () {
             if (data.formType == 'edit' && data.record.condition != null) {
                 parseCondition(data.record.condition);
             }
+
         },
         recordAdded: function (event, data) {
             policies.jtable('load');

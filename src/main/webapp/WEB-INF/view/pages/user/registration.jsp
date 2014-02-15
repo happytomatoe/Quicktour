@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/register.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/passfield.min.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
-
+<%@ page import="com.quicktour.Roles" %>
 
 <div class="row">
     <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
@@ -118,7 +118,17 @@
             </div>
             <form:errors path="photo" cssClass="alert-danger"/>
         </div>
+        <sec:authorize access="hasRole('admin')">
+            <div class="form-group">
+                <% pageContext.setAttribute("roles", Roles.values()); %>
+                <select name="role" class="form-control input-lg">
+                    <c:forEach items="${roles}" var="role">
+                        <option value="${role}">${role}</option>
+                    </c:forEach>
 
+                </select>
+            </div>
+        </sec:authorize>
         <hr class="colorgraph">
         <div class="row">
             <input type="submit" value="Register"

@@ -139,7 +139,7 @@ function addNewComment() {
     var fieldValue = editor.getData();
     var urlSplitted = window.location.pathname.split("/");
     var tourId = urlSplitted[urlSplitted.length - 1];
-    var data = { comment: fieldValue};
+    var data = { content: fieldValue};
     var commentIdVal = $("input#commentId").val();
     var parentIdVal = $("input#parent").val();
     if (commentIdVal !== "") {
@@ -224,7 +224,7 @@ function displayComment(content, commentBox) {
                 </div>\
                 <div class="col-md-10">\
                     <div class="comment_content" id="comment' + comment.id + '">\
-                    ' + comment.comment + '\
+                    ' + comment.content + '\
                     </div>';
         if (comment.user.login === login) {
             selector += '<a href="javascript:void(0)" onclick="editComment(' + comment.id + ')"><span class="glyphicon glyphicon-edit"></span> </a>' +

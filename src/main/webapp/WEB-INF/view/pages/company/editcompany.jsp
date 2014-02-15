@@ -20,9 +20,10 @@
         <div>
             <fieldset>
                 <div class="form-group">
-                    <p><form:label name="name" path="name" cssClass="form-signin-heading">Name*</form:label>
+                    <form:hidden path="companyId"/>
+                    <p><label name="name" path="name" cssClass="form-signin-heading">Name*</label>
                         <form:input name="name" id="name" path="name" size="30" maxlength="30" cssClass="form-control"
-                                    placeholder="Enter your name" required="true" readonly="true"/>
+                                    placeholder="Company name" required="true"/>
                         <form:errors path="name" cssClass="alert-danger"/></p>
 
                     <p><form:label name="address" path="address" cssClass="form-signin-heading">Address*</form:label>
@@ -51,12 +52,12 @@
                                     placeholder="Input company contact phone" required="true"/>
                         <form:errors path="contactPhone" cssClass="alert-danger"/></p>
 
-                    <p><form:label name="discountAmount" path="discountAmount"
+                    <p><form:label name="discount" path="discount"
                                    cssClass="form-signin-heading">Discount:*</form:label>
-                        <form:input name="discountAmount" id="discountAmount" path="discountAmount" size="30"
+                        <form:input name="discount" id="discount" path="discount" size="30"
                                     maxlength="30" cssClass="form-control"
                                     placeholder="Input company discount amount" type="number"/>
-                        <form:errors path="discountAmount" cssClass="alert-danger"/></p>
+                        <form:errors path="discount" cssClass="alert-danger"/></p>
 
                     <p>
                         <form:label name="companyCode" path="companyCode" cssClass="form-signin-heading">Company

@@ -1,5 +1,6 @@
 package com.quicktour.service;
 
+import com.quicktour.dto.Country;
 import com.quicktour.entity.Place;
 import com.quicktour.repository.PlaceRepository;
 import org.slf4j.LoggerFactory;
@@ -7,6 +8,9 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.HashSet;
 import java.util.List;
 
 /**
@@ -24,21 +28,27 @@ public class PlaceService {
     private PlaceRepository placeRepository;
     private org.slf4j.Logger logger = LoggerFactory.getLogger(PhotoService.class);
 
-    public List<String> findCountries() {
-        return placeRepository.findCountries();
+    public List<Country> findCountriesWithPlaces() {
+        List<Object[]> result = placeRepository.findCountriesWithPlaces();
+        ArrayList<Country> countries = new ArrayList<Country>();
+        for (Object[] countryWithPlaces : result) {
+            countries.add(new Country((String) countryWithPlaces[0], new HashSet<String>(Arrays.asList(((String) countryWithPlaces[1]).split(",")))));
+        }
+        return countries;
     }
 
-    public List<String> findPlacesNames() {
-        return placeRepository.findPlaceNames();
-    }
 
-    public List<String> findPlacesByCountry(String country) {
-        logger.debug("This {}", placeRepository);
-        return placeRepository.findPlacesByCountry(country);
-    }
-
-    public List<Place> savePlases(List<Place> places) {
+    public List<Place> savePlaces(List<Place> places) {
         return placeRepository.save(places);
     }
 
+    public List<String> extractPlaces(List<Country> countriesWithPlaces) {
+        ArrayList<String> places = new ArrayList<String>();
+        for (Country country : countriesWithPlaces) {
+            for (String place : country.getPlaces()) {
+                places.add(place);
+            }
+        }
+        return places;
+    }
 }

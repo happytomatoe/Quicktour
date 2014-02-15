@@ -2,9 +2,11 @@ package com.quicktour.service;
 
 import com.quicktour.Roles;
 import com.quicktour.entity.User;
+import com.quicktour.entity.ValidationLink;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
@@ -27,7 +29,7 @@ import java.util.List;
 @Service
 @Transactional
 public class UsersService {
-    public static final String TOUR_AGENCY = "Tour Agency";
+    private static final String TOUR_AGENCY = "Tour Agency";
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
     @Autowired
     StandardPasswordEncoder passwordEncoder;
@@ -35,6 +37,20 @@ public class UsersService {
     private UserRepository userRepository;
     @Autowired
     private CompanyRepository companyRepository;
+    @Autowired
+    ValidationService validationService;
+    @Autowired
+    EmailService emailService;
+
+
+    /**
+     * Finds and deletes users that wasn't activated for 2 days every 2 minutes
+     */
+    @Scheduled(cron = "0 0 0/2 * * *")
+    public void deleteExpiredNotActiveUsers() {
+        logger.debug("Checking users");
+        userRepository.deleteExpiredNotActiveUsers();
+    }
 
 
     /**
@@ -42,12 +58,12 @@ public class UsersService {
      *
      * @param user - user that has to be registrated
      */
-    public User registrateNewUser(User user) {
+    public User registerUser(User user) {
         user.setActive(false);
-            user.setPassword(passwordEncoder.encode(user.getPassword()));
-            if (user.getRole() == null) {
-                user.setRole(updateRoleByCode(user));
-            }
+        user.setPassword(passwordEncoder.encode(user.getPassword()));
+        if (user.getRole() == null) {
+            user.setRole(updateRoleByCode(user));
+        }
         User savedUser = userRepository.saveAndFlush(user);
         logger.info("New user saved: {} with role {}", user.getLogin(), user.getRole());
         return savedUser;
@@ -84,16 +100,14 @@ public class UsersService {
     }
 
 
-
     /**
      * Activates user's profile so he can log into the system
      *
      * @param user -  user to be activated
-     * @return true if user is activated and false in case when something goes wrong
      */
     public void activate(User user) {
         user.setActive(true);
-            userRepository.saveAndFlush(user);
+        userRepository.saveAndFlush(user);
 
     }
 
@@ -112,28 +126,14 @@ public class UsersService {
                 + user.getCompanyCode() + "'");
     }
 
-//    /**
-//     * Generates login and password for anonymous who has ordered the tour in the system.
-//     * Login and password are based on part of the user's mail before '@'.
-//     * After this, sets user's role to user and avatar to default , encodes his password to md5
-//     * and saves him to database.
-//     *
-//     * @param user - object of User class which comes from order form
-//     * @return - object of User class which was recently saved to database
-//     */
-//    public User saveAnonymousCustomer(User user) {
-//        String login = user.getEmail().split("@")[0];
-//        String password = login;
-//        user.setRole(Roles.user);
-//        user.setLogin(login);
-//        user.setPassword(password);
-//        user.setPhoto(photoService.getDefaultAvatar());
-//        sendRegistrationEmail(user);
-//        user.setPassword(passwordEncoder.encode(password));
-//        userRepository.saveAndFlush(user);
-//        logger.info("Anonymous user with email {} has ordered a tour", user.getEmail());
-//        return userRepository.findByEmail(user.getEmail());
-//    }
+    public void changePassword(String newPassword, int userId) {
+        User user = userRepository.findOne(userId);
+        user.setPassword(passwordEncoder.encode(newPassword));
+
+        userRepository.saveAndFlush(user);
+        emailService.sendPasswordSuccessRecoveryEmail(user);
+    }
+
 
     public User findByEmail(String email) {
         return userRepository.findByEmail(email);
@@ -155,5 +155,16 @@ public class UsersService {
         return userRepository.saveAndFlush(user);
     }
 
+
+    public void recoverPassword(User user) {
+        validationService.delete(user);
+        ValidationLink passwordChangeLink = validationService.createPasswordChangeLink(user);
+        emailService.sendPasswordRecoveryEmail(user, passwordChangeLink);
+
+    }
+
+    public void delete(User user) {
+        userRepository.delete(user);
+    }
 
 }

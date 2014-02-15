@@ -7,8 +7,6 @@ import com.quicktour.repository.UserRepository;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
-import org.springframework.mail.MailSender;
-import org.springframework.mail.SimpleMailMessage;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,15 +20,14 @@ import java.util.List;
 @Service
 @Transactional
 public class CompanyService {
-    final Logger logger = org.slf4j.LoggerFactory.getLogger(CompanyService.class);
-    @Autowired
-    private MailSender mailSender;
-
+    private final Logger logger = org.slf4j.LoggerFactory.getLogger(CompanyService.class);
     @Autowired
     UserRepository userRepository;
 
     @Autowired
     CompanyRepository companyRepository;
+    @Autowired
+    EmailService emailService;
 
     public List<Company> findAll() {
         return companyRepository.findAll();
@@ -52,9 +49,6 @@ public class CompanyService {
         return companyRepository.findByCompanyCode(code);
     }
 
-    public Company findByName(String name) {
-        return companyRepository.findByName(name);
-    }
 
     /**
      * Returns Company object that represents company that is connected with user by company code
@@ -76,13 +70,13 @@ public class CompanyService {
      * Sends registration message to the email that was input during company registration
      * and saves company to the database
      *
-     * @param company - company that has to be registrated
+     * @param company - company that has to be registered
      * @return - true if all is OK. and false if saving fails
      */
     public boolean addNewCompany(Company company) {
         try {
             companyRepository.saveAndFlush(company);
-            sendRegistrationalEmail(company);
+            emailService.sendRegistrationEmail(company);
         } catch (MailException me) {
             logger.warn(me.getMessage());
             return true;
@@ -90,27 +84,6 @@ public class CompanyService {
         return false;
     }
 
-    /**
-     * Creates and sends registrational email to the new company
-     *
-     * @param company - contains all information about company which will be used in email creating
-     */
-    private void sendRegistrationalEmail(Company company) {
-        SimpleMailMessage message = new SimpleMailMessage();
-
-        message.setFrom("TourServe123@gmail.com");
-        message.setTo(company.getContactEmail());
-        message.setSubject("Registration");
-        message.setText("Congratulations,"
-                + company.getName() + "!\n"
-                + "Your company have been registrated in TourServe!\n"
-                + "Your company code " + company.getCompanyCode() + "\n"
-                + "Your discount amount: " + company.getDiscount() + "\n"
-                + "Spread company code among your employee and they will obtain discount by it in our system :3\n");
-        mailSender.send(message);
-        logger.debug(message.getTo()[0]);
-        logger.debug(message.getText());
-    }
 
     public BigDecimal getCompanyDiscount(User user) {
         BigDecimal result = BigDecimal.ZERO;

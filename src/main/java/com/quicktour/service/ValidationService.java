@@ -7,15 +7,18 @@ import com.quicktour.repository.ValidationLinksRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import javax.annotation.PostConstruct;
-import javax.servlet.http.HttpServletRequest;
+import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
+import java.util.List;
+import java.util.UUID;
 
 /**
  * Contains all functional logic connected with validation links
@@ -26,56 +29,51 @@ import java.security.NoSuchAlgorithmException;
 @Service
 @Transactional
 public class ValidationService {
+    private static final Logger logger = LoggerFactory.getLogger(ValidationService.class);
     @Autowired
     StandardPasswordEncoder passwordEncoder;
-    Logger logger = LoggerFactory.getLogger(ValidationService.class);
     @Autowired
     private UsersService userService;
 
     @Autowired
     private ValidationLinksRepository validationLinksRepository;
-    MessageDigest md5;
+    private MessageDigest md5;
     @Autowired
     private UserRepository userRepository;
-    private
-    @Autowired
-    HttpServletRequest request;
-    private static String baseUrl;
+
 
     @PostConstruct
     private void init() {
         try {
-            md5 = md5.getInstance("MD5");
+            md5 = MessageDigest.getInstance("MD5");
         } catch (NoSuchAlgorithmException e) {
             logger.error("Cannot find md5 algorithm.{}", e);
         }
 
     }
 
+
     /**
      * Every 5 minutes checks database for links that are more than 2 hours old and, if there are
      * ones, cleans database from user who didn't activate his profile and his avatar.
      */
-//    @Scheduled(cron="0 0 0 0/1 * ?")
-//    public void checkExpiredValidationLinks() {
-//        Timestamp time = new Timestamp(System.currentTimeMillis());
-//        List<ValidationLink> links = validationLinksRepository.findAll();
-//        for (ValidationLink link : links) {
-//            if (time.getTime() - link.getTimeRegistered().getTime() > 7200000) {
-//                photoRepository.delete(photoRepository.findOne
-//                        (userRepository.findOne(link.getUserId()).getPhotosId().getId()));
-//                userRepository.delete(link.getUserId());
-//                validationLinksRepository.delete(link.getId());
-//            }
-//        }
-//    }
+    @Scheduled(cron = "0 0 0 0/2 * *")
+    public void deleteExpiredValidationLinks() {
+        logger.debug("Checking links");
+        validationLinksRepository.deleteExpiredLinks();
+
+    }
+
+
+    public ValidationLink findByUrl(String url) {
+        return validationLinksRepository.findByUrl(url);
+
+    }
+
     public ValidationLink save(ValidationLink link) {
         return validationLinksRepository.saveAndFlush(link);
     }
 
-    public ValidationLink findByUser(User user) {
-        return validationLinksRepository.findByUserId(user.getUserId());
-    }
 
     /**
      * Creates a validation link for newly registered user
@@ -90,9 +88,43 @@ public class ValidationService {
         return save(link);
     }
 
+    public ValidationLink createPasswordChangeLink(User user) {
+        ValidationLink link = new ValidationLink();
+        link.setUserId(user.getUserId());
+        link.setUrl(generateMD5(UUID.randomUUID().toString()));
+        return save(link);
+    }
+
+    public User checkPasswordChangeLink(String link) {
+        User user = null;
+        ValidationLink validationLink = validationLinksRepository.findByUrl(link);
+        if (validationLink != null) {
+            user = userRepository.findOne(validationLink.getUserId());
+        }
+        return user;
+    }
+
+
     private String generateMD5(int userId, String email) {
         String stringToEncode = userId + "" + email;
-        md5.update(stringToEncode.getBytes(), 0, stringToEncode.length());
+        try {
+            md5.update(stringToEncode.getBytes("utf-8"), 0, stringToEncode.length());
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unsuported encoding while generating md5 . {}", e);
+        }
+        String result = new BigInteger(1, md5.digest()).toString(16);
+        if (result.length() < 32) {
+            result = "0" + result;
+        }
+        return result;
+    }
+
+    private String generateMD5(String stringToEncode) {
+        try {
+            md5.update(stringToEncode.getBytes("utf-8"), 0, stringToEncode.length());
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unsuported encoding while generating md5 . {}", e);
+        }
         String result = new BigInteger(1, md5.digest()).toString(16);
         if (result.length() < 32) {
             result = "0" + result;
@@ -110,6 +142,15 @@ public class ValidationService {
             return true;
         }
         return false;
+    }
+
+    public void delete(User user) {
+        List<ValidationLink> validationLinks = validationLinksRepository.findByUserId(user.getUserId());
+        validationLinksRepository.delete(validationLinks);
+    }
+
+    public void delete(ValidationLink validationLink) {
+        validationLinksRepository.delete(validationLink);
     }
 
 }

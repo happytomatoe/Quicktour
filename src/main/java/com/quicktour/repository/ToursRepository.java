@@ -38,7 +38,7 @@ public interface ToursRepository extends JpaRepository<Tour, Integer> {
 
 
     @Query("select distinct t from Tour as t " +
-            "inner join t.tourInfo as ti inner join ti.orders as o " +
+            "inner join t.tourInfo as ti inner join ti.orders as o WHERE t.active=true " +
             "group by ti.tour order by avg(o.vote) desc")
     Page<Tour> findFamousTours(Pageable pageable);
 }

@@ -39,4 +39,114 @@
     </security:authentication-manager>
 
 
+    <!-- See 15.3.2 Built-In Expression @http://static.springsource.org/spring-security/site/docs/3.0.x/reference/el-access.html#el-permission-evaluator -->
+    <!--<bean id="expressionHandler"-->
+    <!--class="org.springframework.security.access.expression.method.DefaultMethodSecurityExpressionHandler">-->
+    <!--&lt;!&ndash; To use hasPermission() in expressions, configure a PermissionEvaluator &ndash;&gt;-->
+    <!--<property name="permissionEvaluator" ref="permissionEvaluator"/>-->
+    <!--<property name="roleHierarchy" ref="roleHierarchy"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; Declare a custom PermissionEvaluator-->
+    <!--We'll rely on the standard AclPermissionEvaluator implementation &ndash;&gt;-->
+    <!--<bean class="org.springframework.security.acls.AclPermissionEvaluator" id="permissionEvaluator">-->
+    <!--<constructor-arg ref="jdbcUserService"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; Declare an acl service &ndash;&gt;-->
+    <!--<bean id="jdbcUserService"-->
+    <!--class="org.springframework.security.core.userdetails.jdbc.JdbcDaoImpl">-->
+    <!--<property name="dataSource" ref="dataSource"/>-->
+    <!--<property name="enableGroups" value="true"/>-->
+    <!--<property name="enableAuthorities" value="false"/>-->
+    <!--<property name="usersByUsernameQuery">-->
+    <!--<value>-->
+    <!--select login, password, enabled-->
+    <!--from users where login=?-->
+    <!--</value>-->
+    <!--</property>-->
+    <!--<property name="authoritiesByUsernameQuery">-->
+    <!--<value>-->
+    <!--select users.login, users.role-->
+    <!--from users where login=?-->
+    <!--</value>-->
+    <!--</property>-->
+    <!--<property name="groupAuthoritiesByUsernameQuery">-->
+    <!---->
+    <!--<value>-->
+    <!---->
+    <!--SELECT g.group_id, g.group_name, ga.authority-->
+    <!--FROM login_group g, login_user_group gm, group_authorities ga-->
+    <!--WHERE gm.login_id = ( select user_id-->
+    <!--from users where login=? ) AND g.group_id =-->
+    <!--ga.group_id AND g.group_id = gm.group_id-->
+    <!--</value>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+
+    <!-- Declare a lookup strategy-->
+    <!--<bean id="lookupStrategy" class="org.springframework.security.acls.jdbc.BasicLookupStrategy">-->
+    <!--<constructor-arg ref="dataSource"/>-->
+    <!--<constructor-arg ref="aclCache"/>-->
+    <!--<constructor-arg ref="aclAuthorizationStrategy"/>-->
+    <!--<constructor-arg ref="auditLogger"/>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; Declare a datasource &ndash;&gt;-->
+    <!--<bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource"-->
+    <!--destroy-method="close"-->
+    <!--p:driverClass="com.mysql.jdbc.Driver"-->
+    <!--p:jdbcUrl="jdbc:mysql://localhost/acl"-->
+    <!--p:user="root"-->
+    <!--p:password=""-->
+    <!--p:acquireIncrement="5"-->
+    <!--p:idleConnectionTestPeriod="60"-->
+    <!--p:maxPoolSize="100"-->
+    <!--p:maxStatements="50"-->
+    <!--p:minPoolSize="10"/>-->
+
+    <!--&lt;!&ndash; Declare an acl cache&ndash;&gt;-->
+    <!--<bean id="aclCache" class="org.springframework.security.acls.domain.EhCacheBasedAclCache">-->
+    <!--<constructor-arg>-->
+    <!--<bean class="org.springframework.cache.ehcache.EhCacheFactoryBean">-->
+    <!--<property name="cacheManager">-->
+    <!--<bean class="org.springframework.cache.ehcache.EhCacheManagerFactoryBean"/>-->
+    <!--</property>-->
+    <!--<property name="cacheName" value="aclCache"/>-->
+    <!--</bean>-->
+    <!--</constructor-arg>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; Declare an acl authorization strategy&ndash;&gt;-->
+    <!--<bean id="aclAuthorizationStrategy" class="org.springframework.security.acls.domain.AclAuthorizationStrategyImpl">-->
+    <!--<constructor-arg>-->
+    <!--<list>-->
+    <!--<bean class="org.springframework.security.core.authority.GrantedAuthorityImpl">-->
+    <!--<constructor-arg value="ROLE_ADMIN"/>-->
+    <!--</bean>-->
+    <!--<bean class="org.springframework.security.core.authority.GrantedAuthorityImpl">-->
+    <!--<constructor-arg value="ROLE_ADMIN"/>-->
+    <!--</bean>-->
+    <!--<bean class="org.springframework.security.core.authority.GrantedAuthorityImpl">-->
+    <!--<constructor-arg value="ROLE_ADMIN"/>-->
+    <!--</bean>-->
+    <!--</list>-->
+    <!--</constructor-arg>-->
+    <!--</bean>-->
+
+    <!--&lt;!&ndash; Declare an audit logger&ndash;&gt;-->
+    <!--<bean id="auditLogger" class="org.springframework.security.acls.domain.ConsoleAuditLogger"/>-->
+
+    <!--&lt;!&ndash; http://static.springsource.org/spring-security/site/docs/3.0.x/apidocs/org/springframework/security/access/hierarchicalroles/RoleHierarchyImpl.html &ndash;&gt;-->
+    <!--<bean id="roleHierarchy" class="org.springframework.security.access.hierarchicalroles.RoleHierarchyImpl">-->
+    <!--<property name="hierarchy">-->
+    <!--<value>-->
+    <!--ROLE_ADMIN > ROLE_USER-->
+    <!--ROLE_USER > ROLE_VISITOR-->
+    <!--</value>-->
+    <!--</property>-->
+    <!--</bean>-->
+
+
 </beans>

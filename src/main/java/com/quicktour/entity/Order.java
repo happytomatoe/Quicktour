@@ -6,7 +6,6 @@ import javax.persistence.*;
 import javax.validation.constraints.Max;
 import javax.validation.constraints.Min;
 import javax.validation.constraints.NotNull;
-import javax.validation.constraints.Pattern;
 import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
@@ -19,11 +18,10 @@ import java.sql.Timestamp;
 @Entity
 @Table(name = "orders")
 public class Order {
+    final public static String ID = "orderId";
 
-    final public static String STATUS_ACCEPTED = "Accepted";
-    final public static String STATUS_CONFIRMED = "Confirmed";
-    final public static String STATUS_COMPLETED = "Completed";
-    final public static String STATUS_CANCELLED = "Cancelled";
+    public enum Status {RECEIVED, ACCEPTED, CONFIRMED, COMPLETED, CANCELLED}
+
     private int orderId;
     private TourInfo tourInfo;
     private Timestamp orderDate;
@@ -37,10 +35,11 @@ public class Order {
     private Timestamp confirmedDate;
     private Timestamp cancelledDate;
     private Timestamp completedDate;
-    private String status;
+    private Status status = Status.RECEIVED;
     private User user;
     private Company company;
     private Integer vote;
+    private String discountInformation;
 
     @Id
     @Column(name = "order_id")
@@ -161,14 +160,22 @@ public class Order {
 
     @Column(name = "status")
     @NotNull
-    @Pattern(regexp = "Received|Accepted|Confirmed|Completed|Cancelled",
-            message = "Available statuses are: Received, Accepted, Confirmed, Completed, Cancelled")
-    public String getStatus() {
+    @Enumerated(EnumType.STRING)
+    public Status getStatus() {
         return status;
     }
 
-    public void setStatus(String status) {
+    public void setStatus(Status status) {
         this.status = status;
+    }
+
+    @Column(name = "discount_information")
+    public String getDiscountInformation() {
+        return discountInformation;
+    }
+
+    public void setDiscountInformation(String discountInformation) {
+        this.discountInformation = discountInformation;
     }
 
     @ManyToOne(fetch = FetchType.EAGER)

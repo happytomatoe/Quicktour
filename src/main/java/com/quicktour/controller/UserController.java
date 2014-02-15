@@ -1,9 +1,11 @@
 package com.quicktour.controller;
 
-import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
-import com.quicktour.service.*;
+import com.quicktour.service.EmailService;
+import com.quicktour.service.PhotoService;
+import com.quicktour.service.UsersService;
+import com.quicktour.service.ValidationService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -17,28 +19,21 @@ import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.context.request.RequestContextHolder;
-import org.springframework.web.context.request.ServletRequestAttributes;
 import org.springframework.web.multipart.MultipartFile;
 
-import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
 
 /**
- * Connects all functionality connected with creating new users and companies,
- * such as user registration, company registration, activating users profile,
- * and password recovering to the views.
- *
- * @author Andrew Zarichnyi
- * @version 1.0 12/27/2013
+ * @author Roman Lukash
  */
 @Controller
-public class RegistrationController {
+@PreAuthorize("isAnonymous()")
+public class UserController {
 
     @Autowired
     private UsersService usersService;
 
-    private final Logger logger = LoggerFactory.getLogger(RegistrationController.class);
+    private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
     @Autowired
     private PhotoService photoService;
 
@@ -47,8 +42,6 @@ public class RegistrationController {
 
     @Autowired
     private EmailService emailService;
-    @Autowired
-    private CompanyService companyService;
     @Value("${maxImageSize}")
     int maxImageSize;
 
@@ -58,6 +51,7 @@ public class RegistrationController {
      * @param model - model that will be represented in registration page
      * @return redirects user to the registration page
      */
+    @PreAuthorize("isAnonymous()||hasRole('admin')")
     @RequestMapping(value = "/registration", method = RequestMethod.GET)
     public String registrationForm(Model model) {
         model.addAttribute("user", new User());
@@ -79,6 +73,7 @@ public class RegistrationController {
      * "registration success" notification if all is OK
      */
     @Transactional
+    @PreAuthorize("isAnonymous()||hasRole('admin')")
     @RequestMapping(value = "/registration", method = RequestMethod.POST)
     public String registrationForm(@Valid User user, BindingResult bindingResult,
                                    @RequestParam(value = "avatar", required = false)
@@ -109,56 +104,13 @@ public class RegistrationController {
             String avatarName = user.getLogin() + ".jpg";
             user.setPhoto(photoService.saveImage(avatarName, image));
         }
-        User newUser = usersService.registrateNewUser(user);
+        User newUser = usersService.registerUser(user);
         ValidationLink validationLink = validationService.createValidationLink(newUser);
-        ServletRequestAttributes sra = ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes());
-        HttpServletRequest request = sra.getRequest();
-        emailService.sendRegistrationEmail(user, request, validationLink);
+        emailService.sendRegistrationEmail(user, validationLink);
         return "registrationsuccess-tile";
 
     }
 
-    /**
-     * Maps empty Company object to company registration form
-     *
-     * @param model - model that will be represented on the "add company" page
-     * @return - redirects user to the "add company" page
-     */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/addcompany", method = RequestMethod.GET)
-    public String addNewCompany(Model model) {
-        Company company = new Company();
-        model.addAttribute("company", company);
-        return "companyregistration";
-    }
-
-    /**
-     * Checks Company object that will come from ui for correctness due to entity restrictions
-     * by bindingResult, then if admin didn't upload any avatar, company will be just registrated
-     * to the system, otherwise the image will be saved to the database, Company object will be
-     * connected with uploaded image and then saved to the database
-     *
-     * @param company       - contains all information that admin inputs in company registration form
-     * @param bindingResult - contains all information about correctness of Company object that
-     *                      will come from ui due to entity restrictions
-     * @param image         - contains file that admin will upload with company information as its avatar
-     *                      (may be empty)
-     * @return - redirects admin back to the registration form if something is wrong or to the main
-     * page if all is OK
-     */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/addcompany", method = RequestMethod.POST)
-    public String addNewCompany(@Valid Company company, BindingResult bindingResult,
-                                @RequestParam(value = "avatar", required = false)
-                                MultipartFile image) {
-        String avatarName = company.getName() + "comp.jpg";
-        company.setPhoto(photoService.saveImage(avatarName, image));
-
-        if (bindingResult.hasErrors() || companyService.addNewCompany(company)) {
-            return "companyregistration";
-        }
-        return "redirect:/";
-    }
 
     /**
      * Activate new user profile after he visits link that he has received in the
@@ -167,11 +119,12 @@ public class RegistrationController {
      * @param validationLink - link of the user to activate
      * @return redirects user to the login page
      */
-    @RequestMapping(value = "/login/{validationLink}")
-    public String validationResolve(@PathVariable("validationLink") String validationLink, Model model) {
+    @RequestMapping(value = "/activate/{validationLink}")
+    public String validationResolve(@PathVariable("validationLink") String validationLink) {
         boolean success = validationService.resolveLink(validationLink);
-        model.addAttribute("validationSuccess", success);
-        logger.debug("Validation link {}.{}", validationLink, success);
+        if (!success) {
+            return "404";
+        }
         return "login";
     }
 
@@ -196,9 +149,55 @@ public class RegistrationController {
      * @return - redirects user to login page
      */
     @RequestMapping(value = "/passwordrecovery", method = RequestMethod.POST)
-    public String passwordRecovery(@Valid User user, BindingResult bindingResult) {
-        //  usersService.setNewPassword(user);
-        //TODO:change
-        return "login";
+    public String passwordRecovery(@Valid User user, BindingResult bindingResult, Model model) {
+        User existingUser = usersService.findByEmail(user.getEmail());
+        if (existingUser == null || !existingUser.isActive()) {
+            bindingResult.rejectValue("email", "user.notexists", "User with such email doesn't exist or is not active");
+        }
+        if (bindingResult.hasErrors()) {
+            return "passwordrecovery";
+        }
+        usersService.recoverPassword(existingUser);
+        model.addAttribute("message", "Check your email for further instructions!");
+        return "success";
     }
+
+    @RequestMapping(value = "/changePassword/{link}", method = RequestMethod.GET)
+    public String changePassword(@PathVariable("link") String link) {
+        User user = validationService.checkPasswordChangeLink(link);
+        if (user == null) {
+            return "404";
+        }
+        return "change-pass";
+    }
+
+    @RequestMapping(value = "/changePassword/{link}", method = RequestMethod.POST)
+    public String changePasswordPost(@RequestParam("password") String password,
+                                     @RequestParam("password2") String password2,
+                                     @PathVariable("link") String link,
+                                     Model model) {
+        boolean fail = false;
+        if (password.isEmpty()) {
+            model.addAttribute("passwordError", "Password is empty");
+            fail = true;
+        }
+        if (password.length() < 8) {
+            model.addAttribute("passwordError", "Password length must be at least 8 character ");
+            fail = true;
+        }
+        if (!password2.equals(password)) {
+            model.addAttribute("password2Error", "Passwords dont match");
+            fail = true;
+        }
+        if (fail) {
+            return "change-pass";
+        }
+        model.addAttribute("message", "Your password successfuly chaged!");
+        ValidationLink validationLink = validationService.findByUrl(link);
+        usersService.changePassword(password, validationLink.getUserId());
+        validationService.delete(validationLink);
+        return "success";
+    }
+
+
 }

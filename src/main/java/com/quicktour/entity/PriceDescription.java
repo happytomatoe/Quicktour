@@ -49,6 +49,11 @@ public class PriceDescription {
     }
 
     @Override
+    public String toString() {
+        return description;
+    }
+
+    @Override
     public int hashCode() {
         int result = priceDescriptionId;
         result = 31 * result + (description != null ? description.hashCode() : 0);

@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.Roles;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.service.CompanyService;
@@ -28,6 +29,7 @@ import java.util.List;
  */
 
 @Controller
+@PreAuthorize("hasRole('admin')")
 public class AdminController {
     @Autowired
     private UsersService usersService;
@@ -38,19 +40,20 @@ public class AdminController {
     @Autowired
     private PhotoService photoService;
 
-    /**
-     * Method gets the List<User> with  all users that exist in the system and
-     * adds it to viewusers tile model.
-     *
-     * @param model - Model that will be mapped to the viewuser tile
-     * @return
-     */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/viewusers", method = RequestMethod.GET)
+    @RequestMapping(value = "/users", method = RequestMethod.GET)
     public String viewAllUsers(Model model) {
         List<User> users = usersService.findAll();
         model.addAttribute("users", users);
         return "viewusers";
+    }
+
+    @RequestMapping(value = "/users/delete/{id}", method = RequestMethod.GET)
+    public String deleter(@PathVariable("id") int id) {
+        User user = usersService.findOne(id);
+        if (user != null && user.getRole() != Roles.admin) {
+            usersService.delete(user);
+        }
+        return "redirect:/users/";
     }
 
     /**
@@ -60,10 +63,12 @@ public class AdminController {
      * @param model - model that will be mapped to th edituser tile
      * @return name of the tile where controller will redirect user after this method will end its work
      */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/edituser/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.GET)
     public String myProfileForm(@PathVariable("id") int id, Model model) {
         User user = usersService.findOne(id);
+        if (user.getRole() == Roles.admin) {
+            return "404";
+        }
         model.addAttribute("user", user);
         return "edituser-tile";
     }
@@ -77,14 +82,13 @@ public class AdminController {
      * @return - redirects user to the main page if the update was successful and back
      * to the myrofile page if bindingResult will have errors.
      */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/edituser/{id}", method = RequestMethod.POST)
+    @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.POST)
     public String myProfileForm(@Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
             return "edituser-tile";
         }
         usersService.save(user);
-        return "redirect:/";
+        return "redirect:/users";
     }
 
     /**
@@ -92,10 +96,8 @@ public class AdminController {
      * adds it to viewcompanies tile model.
      *
      * @param model - Model that will be mapped to the viewcompanies tile
-     * @return
      */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/viewcompanies", method = RequestMethod.GET)
+    @RequestMapping(value = "/company", method = RequestMethod.GET)
     public String viewAllCompanies(Model model) {
         List<Company> companies = companyService.findAll();
         model.addAttribute("companies", companies);
@@ -109,8 +111,7 @@ public class AdminController {
      * @param model - model that will be mapped to th edituser tile
      * @return name of the tile where controller will redirect admin after this method will end its work
      */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/editcompany/{id}", method = RequestMethod.GET)
+    @RequestMapping(value = "/company/edit/{id}", method = RequestMethod.GET)
     public String editCompany(@PathVariable("id") int id, Model model) {
         Company company = companyService.findOne(id);
         model.addAttribute("company", company);
@@ -126,24 +127,21 @@ public class AdminController {
      *                      due to entity restrictions
      * @param image         - contains file that admin uploads with new company details(optional).
      *                      It will be set as company avatar. If null, avatar change won't happen.
-     * @return
      */
-    @PreAuthorize("hasRole('admin')")
-    @RequestMapping(value = "/editcompany/{id}", method = RequestMethod.POST)
+    @RequestMapping(value = "/company/edit/{id}", method = RequestMethod.POST)
     public String editCompany(@Valid Company company, BindingResult bindingResult,
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
-        String newAvatarName;
-        if (companyService.findByName(company.getName()).getPhoto() != null)                            /** check if current company already has avatar*/
-            newAvatarName = "@" + companyService.findByName(company.getName()).getPhoto().getUrl(); /** if true, we need to create new avatars url for correct inserting to database */
-        else
-            newAvatarName = company.getName() + "comp.jpg";                                              /** else use standart filename creation algorithm*/
         if (bindingResult.hasErrors()) {
             return "editcompany";
         }
-        company.setPhoto(photoService.saveImage(newAvatarName, image));
+        String newAvatarName = company.getName() + "comp.jpg";
+        if (!image.isEmpty()) {
+            company.setPhoto(photoService.saveImage(newAvatarName, image));
+        }
         if (companyService.saveAndFlush(company) == null) {
             return "editcompany";
-        } else return "redirect:/";
+        }
+        return "redirect:/company";
     }
 }

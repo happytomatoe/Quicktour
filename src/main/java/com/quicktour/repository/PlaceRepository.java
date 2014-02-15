@@ -7,12 +7,13 @@ import org.springframework.data.jpa.repository.Query;
 import java.util.List;
 
 public interface PlaceRepository extends JpaRepository<Place, Integer> {
-    @Query("select distinct p.country from Place p order by p.country")
-    List<String> findCountries();
+    @Query(value = "SELECT country , GROUP_CONCAT( places.name )FROM  places " +
+            "INNER JOIN tours_places " +
+            "ON places.place_id=tours_places.places_id " +
+            "INNER JOIN tours " +
+            "ON tours.tour_id=tours_places.tours_id " +
+            "WHERE tours.active=1 " +
+            "GROUP BY country ", nativeQuery = true)
+    List<Object[]> findCountriesWithPlaces();
 
-    @Query("select distinct p.name from Place p order by p.name")
-    List<String> findPlaceNames();
-
-    @Query("select distinct p.name from Place p where p.country=?1 order by p.name")
-    List<String> findPlacesByCountry(String country);
 }
