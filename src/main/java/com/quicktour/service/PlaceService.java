@@ -1,7 +1,6 @@
 package com.quicktour.service;
 
 import com.quicktour.dto.Country;
-import com.quicktour.entity.Place;
 import com.quicktour.repository.PlaceRepository;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -35,11 +34,6 @@ public class PlaceService {
             countries.add(new Country((String) countryWithPlaces[0], new HashSet<String>(Arrays.asList(((String) countryWithPlaces[1]).split(",")))));
         }
         return countries;
-    }
-
-
-    public List<Place> savePlaces(List<Place> places) {
-        return placeRepository.save(places);
     }
 
     public List<String> extractPlaces(List<Country> countriesWithPlaces) {

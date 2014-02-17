@@ -1,15 +1,14 @@
 //markers on google map
 var markers = [];
 
+var center;
 //tourInfo dates counter
 var btnAddDateClicked = 0;
 
-//tourInfo places counter
-var placesCounter = 0;
+//tourInfo toursPlaces counter
+var toursPlacesCounter = 0;
 jQuery.validator.addMethod("greaterThan",
     function (value, element, params) {
-        console.log("Dates", (Number(value), $(params).val()));
-
         if (!/Invalid|NaN/.test(new Date(value))) {
             return new Date(value) > new Date($(params).val());
         }
@@ -17,9 +16,15 @@ jQuery.validator.addMethod("greaterThan",
             || (Number(value) > Number($(params).val()));
     }, 'Must be greater than start date.');
 window.onload = function () {
+
     btnAddDateClicked = document.forms[0].elements["tourInfoCount"].value;
-    placesCounter = document.forms[0].elements["tourPlacesCount"].value;
-    var v = jQuery("#manageTourForm").validate({errorClass: "text-danger"});
+    toursPlacesCounter = document.forms[0].elements["tourPlacesCount"].value;
+    var form = jQuery("#manageTourForm");
+    var v = form.validate({
+        errorClass: "text-danger",
+        submitHandler: function (form) {
+            form.submit();
+        }});
     if (btnAddDateClicked == 0) {
         addTourInfo();
     }
@@ -50,6 +55,15 @@ window.onload = function () {
             $("#collapseThree").collapse('hide');
         }
     }
+    //google map default settings
+    var options = {
+        zoom: 7,
+        center: new google.maps.LatLng(37.09, -95.71),
+        mapTypeId: google.maps.MapTypeId.ROADMAP
+    }
+
+    //create a map
+    map = new google.maps.Map(mapDiv, options);
 
     next2.onclick = function () {
         if (v.form()) {
@@ -57,6 +71,9 @@ window.onload = function () {
             $("#collapseTwo").collapse('hide');
             $("#collapseThree").collapse('show');
         }
+        google.maps.event.trigger(map, 'resize');
+        map.setCenter(center);
+        window.scrollTo(0, 0);
     }
 
     prev2.onclick = function () {
@@ -65,17 +82,8 @@ window.onload = function () {
         $("#collapseThree").collapse('hide');
     }
 
-    //google map default settings
-    var options = {
-        zoom: 4,
-        center: new google.maps.LatLng(37.09, -95.71),
-        mapTypeId: google.maps.MapTypeId.ROADMAP
-    }
 
-    //create a map
-    map = new google.maps.Map(mapDiv, options);
-
-    if (placesCounter > 0) {
+    if (toursPlacesCounter > 0) {
         setTourPlaces();
     }
 
@@ -102,6 +110,9 @@ window.onload = function () {
             $("#collapseThree").collapse('show');
         }
     }
+    var $prices = $("input[id$='price']");
+    $prices.attr("min", 0);
+
 
     setCollapses(false, true, true);
 }
@@ -232,19 +243,19 @@ function addPlace() {
     var name;
     var forElement;
 
-    //get div for places
+    //get div for toursPlaces
     var placeDiv = document.getElementById("placeBlock");
 
     //set place div view
     var newPlaceDiv = document.createElement("div");
-    id = "place" + placesCounter;
+    id = "place" + toursPlacesCounter;
     newPlaceDiv.setAttribute("id", id);
     newPlaceDiv.setAttribute("class", "col-md-6");
 
     //hiden element for place country
     var countryNode = document.createElement("input");
-    id = "places" + placesCounter + ".country";
-    name = "places[" + placesCounter + "].country";
+    id = "toursPlaces" + toursPlacesCounter + ".country";
+    name = "toursPlaces[" + toursPlacesCounter + "].country";
     countryNode.setAttribute("id", id);
     countryNode.setAttribute("name", name);
     countryNode.setAttribute("type", "hidden");
@@ -252,8 +263,8 @@ function addPlace() {
 
     //hidden element for place Lat coordinate
     var latNode = document.createElement("input");
-    id = "places" + placesCounter + ".geoHeight";
-    name = "places[" + placesCounter + "].geoHeight";
+    id = "toursPlaces" + toursPlacesCounter + ".geoHeight";
+    name = "toursPlaces[" + toursPlacesCounter + "].geoHeight";
     latNode.setAttribute("id", id);
     latNode.setAttribute("name", name);
     latNode.setAttribute("type", "hidden");
@@ -261,21 +272,21 @@ function addPlace() {
 
     //hidden element for place Lng coordinate
     var lngNode = document.createElement("input");
-    id = "places" + placesCounter + ".geoWidth";
-    name = "places[" + placesCounter + "].geoWidth";
+    id = "toursPlaces" + toursPlacesCounter + ".geoWidth";
+    name = "toursPlaces[" + toursPlacesCounter + "].geoWidth";
     lngNode.setAttribute("id", id);
     lngNode.setAttribute("name", name);
     lngNode.setAttribute("type", "hidden");
     newPlaceDiv.appendChild(lngNode);
 
     var nameLabelNode = document.createElement("label");
-    forElement = "places" + placesCounter + ".name";
+    forElement = "toursPlaces" + toursPlacesCounter + ".name";
     nameLabelNode.setAttribute("for", forElement);
     nameLabelNode.textContent = "Place name";
 
     var nameNode = document.createElement("input");
-    id = "places" + placesCounter + ".name";
-    name = "places[" + placesCounter + "].name";
+    id = "toursPlaces" + toursPlacesCounter + ".name";
+    name = "toursPlaces[" + toursPlacesCounter + "].name";
     nameNode.setAttribute("id", id);
     nameNode.setAttribute("name", name);
     nameNode.setAttribute("type", "text");
@@ -285,13 +296,13 @@ function addPlace() {
     newPlaceDiv.appendChild(nameNode);
 
     var descLabelNode = document.createElement("label");
-    forElement = "places" + placesCounter + ".description";
+    forElement = "toursPlaces" + toursPlacesCounter + ".description";
     descLabelNode.setAttribute("for", forElement);
     descLabelNode.textContent = "Place description";
 
     var descriptNode = document.createElement("textarea");
-    id = "places" + placesCounter + ".description";
-    name = "places[" + placesCounter + "].description";
+    id = "toursPlaces" + toursPlacesCounter + ".description";
+    name = "toursPlaces[" + toursPlacesCounter + "].description";
     descriptNode.setAttribute("id", id);
     descriptNode.setAttribute("name", name);
     descriptNode.setAttribute("class", "form-control");
@@ -299,13 +310,13 @@ function addPlace() {
     newPlaceDiv.appendChild(descriptNode);
 
     var priceLabelNode = document.createElement("label");
-    forElement = "places" + placesCounter + ".price";
+    forElement = "toursPlaces" + toursPlacesCounter + ".price";
     priceLabelNode.setAttribute("for", forElement);
     priceLabelNode.textContent = "Price";
 
     var placePriceNode = document.createElement("input");
-    id = "places" + placesCounter + ".price";
-    name = "places[" + placesCounter + "].price";
+    id = "toursPlaces" + toursPlacesCounter + ".price";
+    name = "toursPlaces[" + toursPlacesCounter + "].price";
     placePriceNode.setAttribute("id", id);
     placePriceNode.setAttribute("name", name);
     placePriceNode.setAttribute("type", "text");
@@ -316,7 +327,7 @@ function addPlace() {
     newPlaceDiv.appendChild(placePriceNode);
 
     placeDiv.appendChild(newPlaceDiv);
-    placesCounter++;
+    toursPlacesCounter++;
 }
 
 function getCoordinates(address) {
@@ -393,31 +404,119 @@ function getGooglePlaceElement(data, element) {
 }
 
 function setPlaceData(locality, country, lat, lng) {
-    document.getElementById("places" + (placesCounter - 1) + ".name").setAttribute("value", locality);
-    document.getElementById("places" + (placesCounter - 1) + ".country").setAttribute("value", country);
-    document.getElementById("places" + (placesCounter - 1) + ".geoHeight").setAttribute("value", lat);
-    document.getElementById("places" + (placesCounter - 1) + ".geoWidth").setAttribute("value", lng);
+    document.getElementById("toursPlaces" + (toursPlacesCounter - 1) + ".name").setAttribute("value", locality);
+    document.getElementById("toursPlaces" + (toursPlacesCounter - 1) + ".country").setAttribute("value", country);
+    document.getElementById("toursPlaces" + (toursPlacesCounter - 1) + ".geoHeight").setAttribute("value", lat);
+    document.getElementById("toursPlaces" + (toursPlacesCounter - 1) + ".geoWidth").setAttribute("value", lng);
 }
 
+var setRightZoomLevel = function (map, minlat, maxlat, minlng, maxlng, ctrlat, ctrlng) {
+    var mapdisplay = 600;
+    var interval = 0;
+
+    if ((maxlat - minlat) > (maxlng - minlng)) {
+        interval = (maxlat - minlat) / 2;
+        minlng = ctrlng - interval;
+        maxlng = ctrlng + interval;
+    } else {
+        interval = (maxlng - minlng) / 2;
+        minlat = ctrlat - interval;
+        maxlat = ctrlat + interval;
+    }
+
+    var dist = (6371 * Math.acos(Math.sin(minlat / 57.2958) * Math.sin(maxlat / 57.2958)
+        + (Math.cos(minlat / 57.2958) * Math.cos(maxlat / 57.2958) * Math.cos((maxlng / 57.2958) - (minlng / 57.2958)))));
+
+    var zoom = Math.floor(8 - Math.log(1.6446 * dist / Math.sqrt(2 * (mapdisplay * mapdisplay))) / Math.log(2));
+    console.log("Zoom", zoom);
+    if (zoom > 7) {
+        zoom = 7;
+    }
+    map.setZoom(zoom);
+
+
+};
 function setTourPlaces() {
-    for (var i = 0; i < placesCounter; i++) {
-        var id = "places" + i + ".geoHeight";
+    var minlat;
+    var maxlat;
+    var minlng;
+    var maxlng;
+    for (var i = 0; i < toursPlacesCounter; i++) {
+        var id = "toursPlaces" + i + ".geoHeight";
         var height = document.forms[0].elements[id].value;
-        id = "places" + i + ".geoWidth";
+        id = "toursPlaces" + i + ".geoWidth";
         var width = document.forms[0].elements[id].value;
         var latLng = new google.maps.LatLng(height, width, false);
-        if (i == 0) {
-            map.setCenter(latLng);
-        }
         marker = new google.maps.Marker({
             position: latLng,
             map: map
         });
+        if (i == 0) {
+            minlat = height;
+            maxlat = height;
+            minlng = width;
+            maxlng = width;
+
+        }
+        minlat = Math.min(minlat, height);
+        maxlat = Math.max(maxlat, height);
+        minlng = Math.min(minlng, width);
+        maxlng = Math.max(maxlng, width);
+
         markers.push(marker);
         var length = markers.length;
         google.maps.event.addListener(markers[length - 1], 'click', function () {
             setMarkerAction(length - 1);
         });
     }
-    console.log(markers);
+
+    var ctrlng = (maxlng + minlng) / 2;
+    var ctrlat = (minlat + maxlat) / 2;
+    console.log("Center", ctrlat, ctrlng);
+    setRightZoomLevel(map, minlat, maxlat, minlng, maxlng, ctrlat, ctrlng);
+    center = new google.maps.LatLng(ctrlat, ctrlng, false);
+    paintRoute(markers, $("#travelType").val());
+
+    console.log(markers.length);
 }
+function paintRoute(places, travelType) {
+    var rendererOptions = {
+        map: map,
+        suppressMarkers: true
+    };
+    var directionsDisplay = new google.maps.DirectionsRenderer(rendererOptions);
+    var directionsService = new google.maps.DirectionsService();
+
+    var start = new google.maps.LatLng(places[0].geoHeight, places[0].geoWidth);
+    var end = new google.maps.LatLng(places[places.length - 1].geoHeight, places[places.length - 1].geoWidth)
+    var wayPoints = [];
+    for (var i = 1; i < places.length - 1; i++) {
+        var location = new google.maps.LatLng(places[i].geoHeight, places[i].geoWidth);
+        wayPoints.push({location: location});
+    }
+
+    var travelMode;
+    switch (travelType) {
+        case 'bycicling':
+            travelMode = google.maps.TravelMode.BICYCLING;
+            break;
+        case 'walking':
+            travelMode = google.maps.TravelMode.WALKING;
+            break;
+        default:
+            travelMode = google.maps.TravelMode.DRIVING;
+    }
+
+    request = {
+        origin: start,
+        destination: end,
+        waypoints: wayPoints,
+        travelMode: travelMode
+    };
+    directionsService.route(request, function (response, status) {
+        if (status == google.maps.DirectionsStatus.OK) {
+            directionsDisplay.setDirections(response);
+        }
+    });
+}
+

@@ -1,23 +1,21 @@
 package com.quicktour.service;
 
-import com.quicktour.Roles;
 import com.quicktour.dto.DiscountPoliciesResult;
-import com.quicktour.entity.Company;
-import com.quicktour.entity.Tour;
-import com.quicktour.entity.TourInfo;
-import com.quicktour.entity.User;
-import com.quicktour.repository.CommentRepository;
+import com.quicktour.entity.*;
+import com.quicktour.entity.User.Roles;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.ToursRepository;
-import com.quicktour.repository.UserRepository;
+import com.quicktour.utils.HTMLUtils;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
@@ -25,16 +23,16 @@ import javax.persistence.Query;
 import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.Arrays;
-import java.util.Collection;
+import java.util.Iterator;
 import java.util.List;
-
-//import org.springframework.data.domain.PageImpl;
 
 @Service
 @Transactional
 public class ToursService {
-    private final int NUMBER_OF_RECORDS_PER_PAGE = 4;
-    private static final int NUMBER_OF_FAMOUS_TOURS = 3;
+    @Value("${numberOfToursOnPage}")
+    private int NUMBER_OF_RECORDS_PER_PAGE;
+    @Value("${numberOfFamousTours}")
+    private int NUMBER_OF_FAMOUS_TOURS;
     private static final Logger logger = LoggerFactory.getLogger(ToursService.class);
     @Autowired
     private UsersService usersService;
@@ -43,11 +41,9 @@ public class ToursService {
     @Autowired
     private CompanyRepository companyRepository;
     @Autowired
-    private CommentRepository commentRepository;
-    @Autowired
     private DiscountPolicyService discountPolicyService;
     @Autowired
-    private UserRepository userRepository;
+    PhotoService photoService;
     private EntityManager entityManager;
     @Autowired
     private ToursRepository toursRepository;
@@ -65,34 +61,19 @@ public class ToursService {
         return toursRepository.save(tours);
     }
 
-    public List<Tour> getTours(Integer[] tourIds) {
+    public List<Tour> findTours(Integer[] tourIds) {
         return toursRepository.findByTourIdIn(Arrays.asList(tourIds));
     }
 
-    /**
-     * Save tour to database
-     *
-     * @param tour the tour entity for save
-     * @return saved tour
-     */
     public Tour saveTour(Tour tour) {
         return toursRepository.saveAndFlush(tour);
     }
 
-    /**
-     * @return all tours from database
-     */
     public List<Tour> findAllTours() {
         return toursRepository.findAll();
     }
 
-    /**
-     * search tours created by agency of the current logged in agent
-     *
-     * @return list of tour, which current agent can manage
-     * if current user is admin return all tours
-     */
-    public List<Tour> findAgencyTour() {
+    public List<Tour> findByCurrentUserAgency() {
         User user = usersService.getCurrentUser();
         if (user.getRole() == Roles.agent) {
             Company company = companyRepository.findByCompanyCode(user.getCompanyCode());
@@ -101,31 +82,23 @@ public class ToursService {
         return findAllTours();
     }
 
-    /**
-     * search all tours and paginate it
-     *
-     * @param pageNumber number of page for pagination
-     * @return selected tour page
-     */
     public Page<Tour> findAllTours(int pageNumber) {
-        Page<Tour> tours = toursRepository.findByActiveTrue(new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        loadRate(tours);
-        return tours;
+        return toursRepository.findByActiveTrue(new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
     }
 
-    private void loadRate(Iterable<Tour> tours) {
-        for (Tour tour : tours) {
-            Long rateCount = tour.getRateCount();
-            if (rateCount != null && rateCount > 0) {
-                tour.getRate();
-            }
+    public Page<Tour> findAllTours(int pageNumber, int numberOfRecords) {
+        return toursRepository.findByActiveTrue(new PageRequest(pageNumber, numberOfRecords));
+    }
+
+    public Page<Tour> findAllToursAndCalculateDiscount(int pageNumber, Integer numberOfRecords) {
+        Page<Tour> tourPage;
+        if (numberOfRecords == null) {
+            tourPage = findAllTours(pageNumber);
+        } else {
+            tourPage = findAllTours(pageNumber, numberOfRecords);
+
         }
-    }
-
-    public Page<Tour> findAllToursAndCut(int pageNumber) {
-        Page<Tour> tourPage = findAllTours(pageNumber);
         List<Tour> toursList = tourPage.getContent();
-        toursList = (List<Tour>) cutToursDescription(toursList);
         DiscountPoliciesResult discountPoliciesResult;
         User user = usersService.getCurrentUser();
         for (Tour tour : toursList) {
@@ -154,41 +127,22 @@ public class ToursService {
     public Page<Tour> findToursByCountry(String country, int pageNumber) {
         Page<Tour> tours = toursRepository.findToursByCountry(country,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        loadRate(tours);
         return tours;
     }
 
-    public Page<Tour> findToursByCountryAndCut(String country, int pageNumber) {
-        Page<Tour> tours = findToursByCountry(country, pageNumber);
-        cutToursDescription(tours.getContent());
-        return tours;
-    }
 
     public Page<Tour> findToursByPlaces(String placeName, int pageNumber) {
         Page<Tour> tours = toursRepository.findToursByPlaceName(placeName,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        loadRate(tours);
         return tours;
     }
 
-    public Page<Tour> findToursByPlacesAndCut(String placeName, int pageNumber) {
-        Page<Tour> tours = findToursByPlaces(placeName, pageNumber);
-        cutToursDescription(tours.getContent());
-        return tours;
-    }
 
     public Page<Tour> findToursByPrice(int minPrice, int maxPrice, int pageNumber) {
-        Page<Tour> tours = toursRepository.findToursByPrice(new BigDecimal(minPrice), new BigDecimal(maxPrice),
+        return toursRepository.findToursByPrice(new BigDecimal(minPrice), new BigDecimal(maxPrice),
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        loadRate(tours);
-        return tours;
     }
 
-    public Page<Tour> findToursByPriceAndCut(int minPrice, int maxPrice, int pageNumber) {
-        Page<Tour> tours = findToursByPrice(minPrice, maxPrice, pageNumber);
-        cutToursDescription(tours.getContent());
-        return tours;
-    }
 
     /**
      * Search tours by entered by users parameters
@@ -198,19 +152,18 @@ public class ToursService {
                                    Integer minPrice, Integer maxPrice,
                                    int pageNumber) {
         boolean firstQueryParam = true;
-        StringBuilder strBuilder = new StringBuilder();
-        strBuilder.append("select distinct t from Tour as t inner join t.toursPlaces as p " +
+        StringBuilder sql = new StringBuilder("select distinct t from Tour as t inner join t.toursPlaces as p " +
                 "inner join t.tourInfo as ti where");
 
-        firstQueryParam = addElementToQuery(country, firstQueryParam, strBuilder, "p.country='");
-        firstQueryParam = addElementToQuery(place, firstQueryParam, strBuilder, "p.name='");
-        firstQueryParam = addElementToQuery(minDate, firstQueryParam, strBuilder, "ti.startDate>'");
-        firstQueryParam = addElementToQuery(maxDate, firstQueryParam, strBuilder, "ti.startDate<'");
-        firstQueryParam = addElementToQuery(minPrice, firstQueryParam, strBuilder, "t.price>'");
-        addElementToQuery(maxPrice, firstQueryParam, strBuilder, "t.price<'");
+        firstQueryParam = addElementToQuery(country, firstQueryParam, sql, "p.country='");
+        firstQueryParam = addElementToQuery(place, firstQueryParam, sql, "p.name='");
+        firstQueryParam = addElementToQuery(minDate, firstQueryParam, sql, "ti.startDate>'");
+        firstQueryParam = addElementToQuery(maxDate, firstQueryParam, sql, "ti.startDate<'");
+        firstQueryParam = addElementToQuery(minPrice, firstQueryParam, sql, "t.price>'");
+        addElementToQuery(maxPrice, firstQueryParam, sql, "t.price<'");
 
         if (!firstQueryParam) {
-            Query query = entityManager.createQuery(strBuilder.toString());
+            Query query = entityManager.createQuery(sql.toString());
             List<Tour> results = query.getResultList();
             int totalNumberOfResults = results.size();
             if (totalNumberOfResults == 0) {
@@ -219,14 +172,13 @@ public class ToursService {
             Page<Tour> tourPage = new PageImpl<Tour>(results,
                     new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE),
                     totalNumberOfResults);
-            loadRate(tourPage);
-            return cutToursOnPage(tourPage);
+            return tourPage;
         }
         return null;
     }
 
     private boolean addElementToQuery(Object element, boolean firstQueryParam, StringBuilder strBuilder, String strElement) {
-        if (element != null && element.toString().length() > 0) {
+        if (element != null && !element.toString().isEmpty()) {
             strBuilder.append((firstQueryParam) ? " " : " and ").
                     append(strElement).append(element.toString()).append("'");
             return false;
@@ -236,23 +188,6 @@ public class ToursService {
 
     }
 
-    public String cutDescription(String description) {
-        final int DEFAULT_LENGTH = 125;
-        if (description.length() > DEFAULT_LENGTH) {
-            description = description.substring(0, DEFAULT_LENGTH) + "...";
-        }
-        return description;
-    }
-
-    private Collection<Tour> cutToursDescription(Collection<Tour> tours) {
-        for (Tour tour : tours) {
-            String desc = tour.getDescription();
-            desc = cutDescription(desc);
-            tour.setDescription(desc);
-            //tour.setPrice((BigDecimal) findMinPrice(tour));
-        }
-        return tours;
-    }
 
     /**
      * search min price for tour
@@ -291,18 +226,13 @@ public class ToursService {
         return totalDiscount.doubleValue();
     }
 
-    public Page<Tour> cutToursOnPage(Page<Tour> tourPage) {
-        cutToursDescription(tourPage.getContent());
-        return tourPage;
-    }
-
     public List<Tour> findFamousTours() {
         return toursRepository.findFamousTours(new PageRequest(0, NUMBER_OF_FAMOUS_TOURS)).getContent();
     }
 
     public List<Tour> findAgencyToursWithEmptyDiscountPolicies() {
         User currentUser = usersService.getCurrentUser();
-        Company company = companyService.getCompanyByUserId(currentUser.getUserId());
+        Company company = companyService.findByCompanyCode(currentUser.getCompanyCode());
         List<Tour> tours = toursRepository.findByCompanyAndDiscountPoliciesIsEmpty(company);
         prepareTour(false, tours);
         return tours;
@@ -310,7 +240,7 @@ public class ToursService {
 
     public List<Tour> findAgencyToursWithNotEmptyDiscountPolicies() {
         User currentUser = usersService.getCurrentUser();
-        Company company = companyService.getCompanyByUserId(currentUser.getUserId());
+        Company company = companyService.findByCompanyCode(currentUser.getCompanyCode());
         List<Tour> tours = toursRepository.findByCompanyAndDiscountPoliciesIsNotEmpty(company);
         prepareTour(true, tours);
         return tours;
@@ -336,11 +266,90 @@ public class ToursService {
     }
 
 
-    public Tour findTourByIdWithPlacesAndPriceIncludes(int id) {
-        Tour tour = toursRepository.findOne(id);
-        logger.debug("Tour places {}", tour.getPriceIncludes().size());
-        tour.getToursPlaces().size();
-        return tour;
+    /**
+     * Change tour active state to state preset in activeState parameter
+     */
+    public void toogleActive(int tourId) {
+        Tour tour = toursRepository.findOne(tourId);
+        tour.toogleActive();
+        toursRepository.saveAndFlush(tour);
     }
+
+    /**
+     * Save or update tour with dates, places and price descriptions
+     *
+     * @param tour      object of class Tour which contains Tour, list of Place,
+     *                  list of String which represent Price descriptions, and list of TourInfo
+     * @param mainPhoto file which contains main photo of the tour
+     */
+    public void saveCombinedTours(Tour tour, MultipartFile mainPhoto) {
+        int price;
+        User currentUser = usersService.getCurrentUser();
+        tour.setCompany(companyService.findByCompanyCode(currentUser.getCompanyCode()));
+        if (!mainPhoto.isEmpty()) {
+            tour.setPhoto(photoService.saveImage(tour.getName(), mainPhoto));
+        }
+        logger.debug("Edited tour photo is {}.Empty {}", tour.getPhoto(), mainPhoto.isEmpty());
+        if (tour.getToursPlaces() != null) {
+            Iterator<Place> placeIterator = tour.getToursPlaces().iterator();
+            while (placeIterator.hasNext()) {
+                Place place = placeIterator.next();
+                if (place.getCountry() == null && place.getPrice() == null
+                        && place.getName() == null && place.getGeoWidth() == null
+                        && place.getGeoHeight() == null) {
+                    placeIterator.remove();
+                } else {
+                    List<Tour> placeTours = place.getTours();
+                    if (placeTours == null) {
+                        placeTours = new ArrayList<Tour>();
+                    }
+                    placeTours.add(tour);
+                    place.setTours(placeTours);
+                }
+            }
+        }
+        logger.debug("Finished places");
+        cleanTourUnsafeHTML(tour);
+        logger.debug("Finished places");
+        for (TourInfo tourInfo : tour.getTourInfo()) {
+            tourInfo.setTour(tour);
+        }
+        logger.debug("Finished tourInfos");
+
+        price = calculateTourPrice(tour);
+        logger.debug("Finished price");
+        tour.setPrice(new BigDecimal(price));
+        tour.setDescription(tour.getDescription().trim());
+        logger.debug("Description {}", tour.getDescription().length());
+        saveTour(tour);
+        logger.debug("Tour {} saved successfully", tour.getTourId());
+    }
+
+
+    private int calculateTourPrice(Tour tour) {
+        int price = 0;
+        if (tour.getToursPlaces() != null) {
+            for (Place place : tour.getToursPlaces()) {
+                price += place.getPrice().intValue();
+            }
+        }
+        return price;
+    }
+
+
+    private void cleanTourUnsafeHTML(Tour tour) {
+        tour.setName(HTMLUtils.cleanHTML(tour.getName()));
+        tour.setDescription(HTMLUtils.cleanHTML(tour.getDescription()));
+        tour.setTransportDesc(HTMLUtils.cleanHTML(tour.getTransportDesc()));
+        List<Place> places = tour.getToursPlaces();
+        if (places != null) {
+            for (Place place : places) {
+                place.setName(HTMLUtils.cleanHTML(place.getName()));
+                place.setDescription(HTMLUtils.cleanHTML(place.getDescription()));
+            }
+        }
+
+    }
+
 
 }

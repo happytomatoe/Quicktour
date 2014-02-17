@@ -92,7 +92,7 @@ public class PhotoService {
         } else {
             Company company = null;
             if (currentUser != null) {
-                company = companyService.getCompanyByUserId(currentUser.getUserId());
+                company = companyService.findByCompanyCode(currentUser.getCompanyCode());
             }
             if (company != null) {
                 title += company.toString() + ":";
@@ -143,7 +143,7 @@ public class PhotoService {
             }
             tryCount++;
             try {
-                Thread.sleep(3000);
+                Thread.sleep(5000);
             } catch (InterruptedException e1) {
                 logger.error("{}", e);
             }
@@ -171,6 +171,7 @@ public class PhotoService {
                 flickr.getPhotosInterface().delete(photoId);
             } catch (FlickrException e) {
                 logger.error("Cannot delete photo on flick with photoId {}.{}", photoId, e);
+                return false;
             }
             photoRepository.delete(photo.getPhotoId());
         }

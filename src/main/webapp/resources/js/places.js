@@ -22,6 +22,9 @@ $(document).ready(function () {
         editor = CKEDITOR.instances[textBoxId];
 
     }
+
+    $("#description").expander({slicePoint: 125});
+
 });
 
 /**

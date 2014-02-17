@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
-        <a href="<c:url value="/"/> " class="navbar-brand">TourServe</a>
+        <a href="<c:url value="/"/>" class="navbar-brand">TourServe</a>
         <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeaderCollapse">
             Expand
         </button>
@@ -71,10 +71,10 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="<c:url value="/agent/manageTours" />">Create new tour</a>
+                                <a href="<c:url value="/tours/add" />">Create new tour</a>
                             </li>
                             <li>
-                                <a href="<c:url value="/agent/showOwnTours" />">Tours</a>
+                                <a href="<c:url value="/tours/" />">Tours</a>
                             </li>
                         </ul>
                     </li>

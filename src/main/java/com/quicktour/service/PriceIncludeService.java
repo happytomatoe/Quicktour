@@ -8,13 +8,6 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
-/**
- * Created with IntelliJ IDEA.
- * User: student
- * Date: 11.12.13
- * Time: 15:25
- * To change this template use File | Settings | File Templates.
- */
 
 @Service
 @Transactional
@@ -26,9 +19,4 @@ public class PriceIncludeService {
     public List<PriceDescription> findAll() {
         return priceIncludeRepository.findAll();
     }
-
-    public PriceDescription findByDescription(String description) {
-        return priceIncludeRepository.findByDescription(description);
-    }
-
 }

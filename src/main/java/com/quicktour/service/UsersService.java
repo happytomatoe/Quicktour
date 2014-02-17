@@ -1,7 +1,7 @@
 package com.quicktour.service;
 
-import com.quicktour.Roles;
 import com.quicktour.entity.User;
+import com.quicktour.entity.User.Roles;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;

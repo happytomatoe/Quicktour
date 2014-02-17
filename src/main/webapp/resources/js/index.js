@@ -1,6 +1,7 @@
 var country = $("#country");
 var placeInput = $("#place");
 var baseUrl;
+
 $(document).ready(function () {
     baseUrl = $("input#baseUrl").val();
     country.select2({ placeholder: "Select a country",
@@ -11,8 +12,26 @@ $(document).ready(function () {
 });
 
 jQuery(function () {
+    //pagination and number of records
+    var $numberOfRecords = $("#numberOfRecords");
+    $numberOfRecords.change(function () {
+        var url = window.location.href;
+        if (url.contains("numberOfRecords")) {
+            url = url.substr(0, url.length - 1) + $numberOfRecords.val();
+        } else {
+            url += "?numberOfRecords=" + $numberOfRecords.val();
+        }
+        window.location.href = url;
+    });
+
+    var value = $numberOfRecords.attr("selected-value");
+    if (typeof value != 'undefined') {
+        $numberOfRecords.val(value);
+    }
+    $(".tourDescription").expander({slicePoint: 125});
+
     jQuery("#minDate").datepicker({
-        //defaultDate: "+1w",
+        defaultDate: "+1w",
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         numberOfMonths: 1,
@@ -21,7 +40,7 @@ jQuery(function () {
         }
     });
     jQuery("#maxDate").datepicker({
-        //defaultDate: "+1w",
+        defaultDate: "+1w",
         dateFormat: "yy-mm-dd",
         changeMonth: true,
         numberOfMonths: 1,

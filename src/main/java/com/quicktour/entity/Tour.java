@@ -7,10 +7,10 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import javax.validation.Valid;
+import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
-import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 @Entity
 @Table(name = "tours")
@@ -18,12 +18,17 @@ public class Tour {
     private int tourId;
     private Company company;
     private BigDecimal price;
-    private Collection<TourInfo> tourInfo;
+    @Valid
+    private List<TourInfo> tourInfo;
+    @Valid
     private List<Place> toursPlaces;
-    private Set<PriceDescription> priceIncludes;
+    private List<PriceDescription> priceIncludes;
     private List<DiscountPolicy> discountPolicies;
+    @NotNull
     private String name;
+    @NotNull
     private String description;
+    @NotNull
     private String transportDesc;
     private Photo photo;
     private Boolean active;
@@ -102,13 +107,13 @@ public class Tour {
         this.travelType = travelType;
     }
 
-    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "tour", fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JsonIgnore
-    public Collection<TourInfo> getTourInfo() {
+    public List<TourInfo> getTourInfo() {
         return tourInfo;
     }
 
-    public void setTourInfo(Collection<TourInfo> tourInfo) {
+    public void setTourInfo(List<TourInfo> tourInfo) {
         this.tourInfo = tourInfo;
     }
 
@@ -119,6 +124,10 @@ public class Tour {
 
     public void setActive(Boolean active) {
         this.active = active;
+    }
+
+    public void toogleActive() {
+        this.active = !this.active;
     }
 
 
@@ -139,11 +148,11 @@ public class Tour {
     @JoinTable(name = "tours_price_includes",
             joinColumns = @JoinColumn(name = "tours_id"),
             inverseJoinColumns = @JoinColumn(name = "price_includes_id"))
-    public Set<PriceDescription> getPriceIncludes() {
+    public List<PriceDescription> getPriceIncludes() {
         return priceIncludes;
     }
 
-    public void setPriceIncludes(Set<PriceDescription> priceIncludes) {
+    public void setPriceIncludes(List<PriceDescription> priceIncludes) {
         this.priceIncludes = priceIncludes;
     }
 
@@ -170,7 +179,7 @@ public class Tour {
         this.name = name;
     }
 
-    @Column(name = "description")
+    @Column(name = "description", columnDefinition = "TEXT")
     public String getDescription() {
         return description;
     }

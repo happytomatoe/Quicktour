@@ -32,9 +32,13 @@
         <jstl.version>1.2</jstl.version>
         <hibernate.validator.version>4.2.0.Final</hibernate.validator.version>
         <javax.validator.version>1.0.0.GA</javax.validator.version>
-        <kefirbb.version>1.0</kefirbb.version>
+        <jsoup.version>1.7.2</jsoup.version>
         <javax.mail.version>1.4.7</javax.mail.version>
-
+        <jackson-mapper.version>1.9.12</jackson-mapper.version>
+        <servlet-api.version>2.5</servlet-api.version>
+        <flickr4java.version>2.5</flickr4java.version>
+        <commons-fileupload.version>1.2.2</commons-fileupload.version>
+        <commons-io.version>1.3.2</commons-io.version>
     </properties>
 
     <dependencies>
@@ -177,7 +181,7 @@
         <dependency>
             <groupId>org.codehaus.jackson</groupId>
             <artifactId>jackson-mapper-asl</artifactId>
-            <version>1.9.12</version>
+            <version>${jackson-mapper.version}</version>
         </dependency>
 
         <dependency>
@@ -195,32 +199,33 @@
         <dependency>
             <groupId>javax.servlet</groupId>
             <artifactId>servlet-api</artifactId>
-            <version>2.5</version>
+            <version>${servlet-api.version}</version>
             <scope>compile</scope>
         </dependency>
         <dependency>
             <groupId>com.flickr4java</groupId>
             <artifactId>flickr</artifactId>
-            <version>2.5</version>
+            <version>${flickr4java.version}</version>
         </dependency>
 
         <dependency>
             <groupId>commons-fileupload</groupId>
             <artifactId>commons-fileupload</artifactId>
-            <version>1.2.2</version>
+            <version>${commons-fileupload.version}</version>
         </dependency>
 
         <dependency>
             <groupId>commons-io</groupId>
             <artifactId>commons-io</artifactId>
-            <version>1.3.2</version>
+            <version>${commons-io.version}</version>
         </dependency>
-        <!--Kefir better than milk.For clearing unsafe html-->
+
         <dependency>
-            <groupId>org.kefirsf</groupId>
-            <artifactId>kefirbb</artifactId>
-            <version>${kefirbb.version}</version>
+            <groupId>org.jsoup</groupId>
+            <artifactId>jsoup</artifactId>
+            <version>${jsoup.version}</version>
         </dependency>
+
 
     </dependencies>
 

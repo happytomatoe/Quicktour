@@ -1,6 +1,5 @@
 package com.quicktour.entity;
 
-import com.quicktour.Roles;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
@@ -14,6 +13,10 @@ import java.util.Collection;
 @Entity
 @Table(name = "users")
 public class User {
+
+    public enum Roles {
+        admin, agent, user
+    }
 
     private int userId;
     private String login;

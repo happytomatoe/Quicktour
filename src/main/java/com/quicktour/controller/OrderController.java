@@ -157,7 +157,7 @@ public class OrderController {
             tour.setDiscountPolicies(activeDiscountPolicies);
             companyDiscount = companyService.getCompanyDiscount(activeUser);
             logger.debug("Discount based on discount policies {}  .TourInfo discount {}\nCompany:{}.\nUser: {}", tour.getDiscountPolicies(),
-                    tourInfo.getDiscount(), companyService.getCompanyByUserId(activeUser.getUserId()), activeUser);
+                    tourInfo.getDiscount(), companyService.findByCompanyCode(activeUser.getCompanyCode()), activeUser);
         }
         totalDiscount = tour.getDiscount().add(new BigDecimal(tourInfo.getDiscount().toString()));
         if (companyDiscount != null && companyDiscount.doubleValue() > 0) {
@@ -195,7 +195,6 @@ public class OrderController {
 //            order.setUser(userService.saveAnonymousCustomer(user));
 //            ordersService.createValidationLink(user);
         }
-        order.setUser(activeUser);
         ordersService.add(order, tourId);
 
         return new ModelAndView("ordersuccess");

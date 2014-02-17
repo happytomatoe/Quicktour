@@ -35,7 +35,7 @@ public class DiscountPolicyService {
     private static final String OR = "OR";
     private static final String DB_NULL = "NULL";
 
-    private final Logger logger = LoggerFactory.getLogger(DiscountPolicyService.class);
+    private static final Logger logger = LoggerFactory.getLogger(DiscountPolicyService.class);
     @Autowired
     private DiscountPolicyRepository discountPoliciesRepository;
     @Autowired
@@ -62,7 +62,7 @@ public class DiscountPolicyService {
      */
     public DiscountPolicy addDiscountPolicy(DiscountPolicy discountPolicy) {
         User user = usersService.getCurrentUser();
-        discountPolicy.setCompany(companyService.getCompanyByUserId(user.getUserId()));
+        discountPolicy.setCompany(companyService.findByCompanyCode(user.getCompanyCode()));
         String convertedFormula = discountDependencyService.convertFormula(discountPolicy.getFormula());
         discountPolicy.setFormula(convertedFormula);
         return discountPoliciesRepository.saveAndFlush(discountPolicy);
@@ -170,7 +170,7 @@ public class DiscountPolicyService {
      * Finds discount policies by current user's company
      */
     public List<DiscountPolicy> findByCompany() {
-        Company company = companyService.getCompanyByUserId(usersService.getCurrentUser().getUserId());
+        Company company = companyService.findByCompanyCode(usersService.getCurrentUser().getCompanyCode());
         List<DiscountPolicy> discountPolicies = discountPoliciesRepository.findByCompany(company);
         return changeView(discountPolicies);
     }
@@ -275,7 +275,7 @@ public class DiscountPolicyService {
      * @return saved tours
      */
     public List<Tour> applyDiscount(Integer[] tourIds, Integer[] policyIds) {
-        List<Tour> tours = toursService.getTours(tourIds);
+        List<Tour> tours = toursService.findTours(tourIds);
         List<DiscountPolicy> discountPolicies = getDiscountPolicies(policyIds);
         logger.info("Applying discount policies {} to tours {}", tours, discountPolicies);
         for (Tour tour : tours) {

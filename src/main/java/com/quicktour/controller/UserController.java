@@ -45,6 +45,11 @@ public class UserController {
     @Value("${maxImageSize}")
     int maxImageSize;
 
+    @RequestMapping(value = "/login")
+    public String login() {
+        return "login";
+    }
+
     /**
      * Maps empty User object to the registration form
      *
@@ -186,13 +191,13 @@ public class UserController {
             fail = true;
         }
         if (!password2.equals(password)) {
-            model.addAttribute("password2Error", "Passwords dont match");
+            model.addAttribute("password2Error", "Passwords don't match");
             fail = true;
         }
         if (fail) {
             return "change-pass";
         }
-        model.addAttribute("message", "Your password successfuly chaged!");
+        model.addAttribute("message", "Your password successfully changed!");
         ValidationLink validationLink = validationService.findByUrl(link);
         usersService.changePassword(password, validationLink.getUserId());
         validationService.delete(validationLink);

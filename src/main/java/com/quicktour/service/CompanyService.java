@@ -23,7 +23,6 @@ public class CompanyService {
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(CompanyService.class);
     @Autowired
     UserRepository userRepository;
-
     @Autowired
     CompanyRepository companyRepository;
     @Autowired
@@ -45,26 +44,11 @@ public class CompanyService {
         return companyRepository.saveAndFlush(company);
     }
 
+
     public Company findByCompanyCode(String code) {
         return companyRepository.findByCompanyCode(code);
     }
 
-
-    /**
-     * Returns Company object that represents company that is connected with user by company code
-     *
-     * @param userId - id of the user who has company code
-     * @return company if request was successful, else returns null
-     */
-    public Company getCompanyByUserId(int userId) {
-        User user = userRepository.findOne(userId);
-        if (user.getCompanyCode() != null && !user.getCompanyCode().isEmpty()) {
-            return companyRepository.findByCompanyCode(user.getCompanyCode());
-        } else {
-            return null;
-        }
-
-    }
 
     /**
      * Sends registration message to the email that was input during company registration
@@ -72,6 +56,7 @@ public class CompanyService {
      *
      * @param company - company that has to be registered
      * @return - true if all is OK. and false if saving fails
+     * TODO:test and check
      */
     public boolean addNewCompany(Company company) {
         try {
@@ -90,7 +75,7 @@ public class CompanyService {
         if (user == null) {
             return result;
         }
-        Company userCompany = getCompanyByUserId(user.getUserId());
+        Company userCompany = findByCompanyCode(user.getCompanyCode());
         if (userCompany != null) {
             Integer companyDiscount = userCompany.getDiscount();
             if (companyDiscount != null && companyDiscount > 0) {

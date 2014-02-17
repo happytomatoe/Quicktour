@@ -2,6 +2,7 @@ package com.quicktour.entity;
 
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.Range;
 
 import javax.persistence.*;
 import java.sql.Date;
@@ -24,7 +25,7 @@ public class TourInfo {
     private Date startDate;
 
     private Date endDate;
-
+    @Range(min = 0, max = 100)
     private Integer discount;
 
     private Collection<Order> orders;

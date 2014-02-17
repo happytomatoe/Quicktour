@@ -1,15 +1,14 @@
 package com.quicktour.utils;
 
-import org.kefirsf.bb.BBProcessorFactory;
-import org.kefirsf.bb.TextProcessor;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 
 /**
  * @author Roman Lukash
  */
 public class HTMLUtils {
-    private static final TextProcessor processor = BBProcessorFactory.getInstance().createFromResource("org/kefirsf/bb/safehtml.xml");
 
     public static String cleanHTML(String toClean) {
-        return processor.process(toClean);
+        return Jsoup.clean(toClean, Whitelist.basic());
     }
 }

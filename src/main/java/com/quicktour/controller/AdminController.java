@@ -1,8 +1,8 @@
 package com.quicktour.controller;
 
-import com.quicktour.Roles;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
+import com.quicktour.entity.User.Roles;
 import com.quicktour.service.CompanyService;
 import com.quicktour.service.PhotoService;
 import com.quicktour.service.UsersService;

@@ -13,6 +13,7 @@
 <link href="<c:url value="/resources/css/bootstrap-select.css"/>" rel="stylesheet">
 <script src="<c:url value="/resources/js/places.js"/>"></script>
 <script src="<c:url value="/resources/ckeditor/ckeditor.js"/>"></script>
+<script src="<c:url value="/resources/js/jquery.expander.min.js"/> "></script>
 
 <div class="row">
     <div class="breadcrumb row">
@@ -80,7 +81,7 @@
 
         <div class="panel panel-default">
             <div class="panel-body">
-                <div class="col-md-12"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${tour.description}
+                <div class="col-md-12" id="description"> &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${tour.description}
                 </div>
             </div>
         </div>
@@ -111,7 +112,7 @@
         <div class="panel-body">
             <h3 class="text-center">Price Includes:</h3>
             <c:forEach items="${tour.priceIncludes}" var="priceIncludes">
-                <div class="row success">
+                <div class="row bg-success">
                     <span class="glyphicon glyphicon-ok"></span>
                         ${priceIncludes.description}
                 </div>

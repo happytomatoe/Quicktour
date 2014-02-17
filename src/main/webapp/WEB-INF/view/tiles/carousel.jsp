@@ -3,9 +3,11 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 <div class="row">
-    <div class="col-md-3">
-        <div class="panel panel-success">
-            <div class="panel-heading">
+    <div class="col-md-3 pull-down" style="margin-top:30px">
+
+        <div class="panel panel-success ">
+
+            <div class="panel-heading ">
                 Filter by...
             </div>
             <div class="panel-body">

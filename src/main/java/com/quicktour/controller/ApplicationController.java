@@ -1,19 +1,19 @@
 package com.quicktour.controller;
 
 import com.quicktour.dto.Country;
+import com.quicktour.entity.Company;
+import com.quicktour.entity.User;
 import com.quicktour.service.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
-import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.ModelMap;
 import org.springframework.web.bind.WebDataBinder;
 import org.springframework.web.bind.annotation.*;
 
-import javax.servlet.http.HttpServletRequest;
 import java.sql.Date;
 import java.util.List;
 
@@ -27,17 +27,13 @@ import java.util.List;
 public class ApplicationController {
     Logger logger = LoggerFactory.getLogger(ApplicationController.class);
     @Autowired
-    DiscountPolicyService discountPolicyService;
+    private CompanyService companyService;
     @Autowired
-    UsersService usersService;
+    private UsersService usersService;
     @Autowired
     private ToursService toursService;
     @Autowired
     private PlaceService placeService;
-    @Autowired
-    EmailService emailService;
-    @Autowired
-    HttpServletRequest httpServletRequest;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -62,9 +58,10 @@ public class ApplicationController {
      */
     @RequestMapping(value = "/page/{page}", method = RequestMethod.GET)
     public String showPage(ModelMap map,
-                           @PathVariable("page") int pageNum) {
+                           @PathVariable("page") int pageNum,
+                           @RequestParam(value = "numberOfRecords", required = false) Integer numberOfRecordsPerPage) {
         addSidebarAttributes(map);
-        Page page = toursService.findAllToursAndCut(pageNum);
+        Page page = toursService.findAllToursAndCalculateDiscount(pageNum, numberOfRecordsPerPage);
         map.addAttribute("page", page);
         return "index-extended";
     }
@@ -78,7 +75,7 @@ public class ApplicationController {
     public String indexCountry(@PathVariable("country") String country,
                                @PathVariable("page") int pageNum,
                                ModelMap map) {
-        map.addAttribute("page", toursService.findToursByCountryAndCut(country, pageNum));
+        map.addAttribute("page", toursService.findToursByCountry(country, pageNum));
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -91,7 +88,7 @@ public class ApplicationController {
     public String indexPlace(@PathVariable("place") String place,
                              @PathVariable("page") int pageNum,
                              ModelMap map) {
-        map.addAttribute("page", toursService.findToursByPlacesAndCut(place, pageNum));
+        map.addAttribute("page", toursService.findToursByPlaces(place, pageNum));
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -105,7 +102,7 @@ public class ApplicationController {
                                   @PathVariable("max") Integer max,
                                   @PathVariable("page") int pageNum,
                                   ModelMap map) {
-        map.addAttribute("page", toursService.findToursByPriceAndCut(min, max, pageNum));
+        map.addAttribute("page", toursService.findToursByPrice(min, max, pageNum));
         addSidebarAttributes(map);
         return "index-extended";
     }
@@ -133,11 +130,6 @@ public class ApplicationController {
         return "index-extended";
     }
 
-    @PreAuthorize("isAnonymous()")
-    @RequestMapping(value = "/login")
-    public String login() {
-        return "login";
-    }
 
 
     private void addSidebarAttributes(ModelMap map) {
@@ -146,6 +138,16 @@ public class ApplicationController {
         map.addAttribute("countriesWithPlaces", countriesWithPlaces);
         map.addAttribute("places", placeService.extractPlaces(countriesWithPlaces));
         map.addAttribute("famousTours", toursService.findFamousTours());
+        User currentUser = usersService.getCurrentUser();
+        if (currentUser != null && currentUser.getCompanyCode() != null) {
+            Company company = companyService.findByCompanyCode(currentUser.getCompanyCode());
+            if (company != null) {
+                map.addAttribute("companyName", company.getName());
+            }
+        } else {
+            map.addAttribute("companyName", "");
+        }
+
     }
 
 

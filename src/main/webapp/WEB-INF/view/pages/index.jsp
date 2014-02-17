@@ -10,8 +10,20 @@
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/select2-3.4.5/select2.css"/>">
 <script src="<c:url value="/resources/select2-3.4.5/select2.min.js"/> "></script>
 <script src="<c:url value="/resources/js/index.js"/> "></script>
+<script src="<c:url value="/resources/js/toogleActiveInTour.js"/> "></script>
+<script src="<c:url value="/resources/js/jquery.expander.min.js"/> "></script>
+
+<%
+    String numberOfRecords = request.getParameter("numberOfRecords");
+    if (numberOfRecords != null) {
+        pageContext.setAttribute("numberOfRecords", numberOfRecords);
+    } else {
+        pageContext.setAttribute("numberOfRecords", "6");
+
+    }
+%>
+
 <div>
-    <input type="hidden" id="baseUrl" name="baseUrl" value="<c:url value="/"/>"/>
 
     <div class="row">
         <c:if test="${page.content == null}">
@@ -64,8 +76,8 @@
                                 </div>
                             </div>
                             <div class="row">
-                                <div class="col-md-12">
-                                        ${tour.description}
+                                <div class="col-md-12 tourDescription">
+                                ${tour.description}
                                 </div>
                             </div>
                             <br>
@@ -95,6 +107,16 @@
                                             </ul>
                                         </div>
                                     </sec:authorize>
+                                    <sec:authorize access="hasRole('agent')">
+                                        <c:if test="${tour.company.name==companyName}">
+                                            <a href="<c:url value="/tours/edit/${tour.tourId}"/>"
+                                               class="btn btn-primary">Edit</a>
+                                            <button type="button" id="${tour.tourId}"
+                                                    onclick="toggleActive(${tour.tourId})" class="btn btn-warning">
+                                                Deactivate
+                                            </button>
+                                        </c:if>
+                                    </sec:authorize>
                                 </div>
                             </div>
                         </div>
@@ -108,9 +130,9 @@
         </c:forEach>
     </div>
     <div class="row">
-        <div class="col-md-12 text-center">
-
-            <s:url value="{pageNum}" var="first">
+        <div class="col-md-12 ">
+            <div class="text-center">
+                <s:url value="{pageNum}" var="first">
                 <s:param name="pageNum" value="0"/>
             </s:url>
 
@@ -129,17 +151,20 @@
             <c:if test="${page.totalPages gt 1}">
                 <ul class="pagination">
 
+
                     <li id="navFirst"><a href="${first}">First</a></li>
                     <li id="navPrevious"><a href="${previous}">&laquo;</a></li>
 
                     <c:forEach var="num" begin="1" end="${page.totalPages}">
                         <s:url value="{pageNum}" var="pageBtnUrl">
                             <s:param name="pageNum" value="${num - 1}"/>
+                            <s:param name="numberOfRecords" value="${numberOfRecords}"/>
+
                         </s:url>
 
                         <c:choose>
                             <c:when test="${page.number eq num - 1}">
-                                <c:set var="buttonClass" value="active"/>
+                                <c:set var="buttonClass" value="class='active'"/>
                             </c:when>
                             <c:otherwise>
                                 <c:set var="buttonClass" value=""/>
@@ -147,7 +172,8 @@
                         </c:choose>
 
                         <c:if test="${((page.number - num) ge 0) && ((page.number - num) lt 2 )}">
-                            <li class="${buttonClass}">
+                            <li  ${buttonClass}
+                                    >
                                 <a href="${pageBtnUrl}">
                                     <c:out value="${num}"/>
                                 </a>
@@ -155,7 +181,7 @@
                         </c:if>
 
                         <c:if test="${((num - page.number) gt 0) && ((num - page.number) lt 4)}">
-                            <li class="${buttonClass}">
+                            <li ${buttonClass}>
                                 <a href="${pageBtnUrl}">
                                     <c:out value="${num}"/>
                                 </a>
@@ -166,7 +192,6 @@
 
                     <li id="navNext"><a href="${next}">&raquo;</a></li>
                     <li id="navLast"><a href="${last}">Last</a></li>
-
                 </ul>
 
                 <c:if test="${page.number gt 0}">
@@ -178,6 +203,27 @@
                 </c:if>
 
             </c:if>
+            </div>
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+            &nbsp;
+
+            <label for="numberOfRecords">Row count</label>
+            <select name="numberOfRecords" selected-value="${numberOfRecords}" id="numberOfRecords">
+                <option value="6">6</option>
+                <option value="10">10</option>
+                <option value="20">20</option>
+                <option value="50">50</option>
+                <option value="100">100</option>
+            </select>
+            <br>
+            <br>
+            <br>
+            <br>
+            <br>
+
         </div>
     </div>
 </div>

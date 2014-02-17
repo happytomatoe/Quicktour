@@ -20,7 +20,8 @@
                             </div>
                         </c:if>
                         <div class="form-group">
-                            <input class="form-control" placeholder="E-mail" name="j_username" type="text" required="">
+                            <input class="form-control" placeholder="Username" name="j_username" type="text"
+                                   required="">
                         </div>
                         <div class="form-group">
                             <input class="form-control" placeholder="Password" name="j_password" type="password"

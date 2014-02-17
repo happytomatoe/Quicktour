@@ -3,7 +3,8 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <link rel="stylesheet" href="<c:url value="/resources/css/datepicker.css"/>"/>
-
+<%@ page import="com.quicktour.entity.Order.Status" %>
+<script src="<c:url value="/resources/js/jquery.expander.min.js"/> "></script>
 
 <!-- Headliner -->
 <div class="row">
@@ -164,13 +165,11 @@
 
             </div>
 
-            <c:set var="description" value="${order.tourInfo.tour.description}"/>
-            <c:if test="${fn:length(description) > 500}">
-                <c:set var="description" value="${fn:substring(description, 0, 500)}"/>
-            </c:if>
             <div class="col-sm-6 no_margin_left pt-10">
-                ${description}...
-                <a href="/tour/${order.tourInfo.tour.tourId}" target="_blank" title="More..."
+                <div id="tourDescription">
+                    ${order.tourInfo.tour.description}
+                </div>
+                <a href="/tour/${order.tourInfo.tour.tourId}" target="_blank" title="More about tour..."
                    class="btn btn-default btn-xs">&raquo;</a>
             </div>
 
@@ -348,10 +347,12 @@
                             <c:otherwise>
                                 <select name="status" id="status" class="form-control">
                                     <option value="${order.status}" selected="selected">${order.status}</option>
-                                    <option value="Accepted">Accepted</option>
-                                    <option value="Confirmed">Confirmed</option>
-                                    <option value="Completed">Completed</option>
-                                    <option value="Cancelled">Cancelled</option>
+                                    <% pageContext.setAttribute("statuses", Status.values()); %>
+                                    <c:forEach var="status" items="${statuses}">
+                                        <c:if test="${status!=order.status}">
+                                            <option value="${status}">${status}</option>
+                                        </c:if>
+                                    </c:forEach>
                                 </select>
                             </c:otherwise>
                         </c:choose>

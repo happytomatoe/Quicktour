@@ -12,7 +12,7 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/register.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/passfield.min.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
-<%@ page import="com.quicktour.Roles" %>
+<%@ page import="com.quicktour.entity.User.Roles" %>
 
 <div class="row">
     <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">

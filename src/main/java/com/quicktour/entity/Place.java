@@ -6,6 +6,9 @@ import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
 
 import javax.persistence.*;
+import javax.validation.constraints.Min;
+import javax.validation.constraints.NotNull;
+import java.math.BigDecimal;
 import java.util.List;
 
 @Entity
@@ -13,11 +16,17 @@ import java.util.List;
 public class Place {
 
     private int placeId;
+    @NotNull
     private String country;
+    @NotNull
     private String name;
     private boolean optional;
-    private String price;
+    @NotNull
+    @Min(0)
+    private BigDecimal price;
+    @NotNull
     private Double geoWidth;
+    @NotNull
     private Double geoHeight;
     @JsonIgnore
     private String description;
@@ -74,11 +83,11 @@ public class Place {
     }
 
     @Column(name = "price")
-    public String getPrice() {
+    public BigDecimal getPrice() {
         return price;
     }
 
-    public void setPrice(String price) {
+    public void setPrice(BigDecimal price) {
         this.price = price;
     }
 
@@ -94,6 +103,38 @@ public class Place {
     @Column(name = "geowidth")
     public Double getGeoWidth() {
         return geoWidth;
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+
+        Place place = (Place) o;
+
+        if (optional != place.optional) return false;
+        if (placeId != place.placeId) return false;
+        if (country != null ? !country.equals(place.country) : place.country != null) return false;
+        if (description != null ? !description.equals(place.description) : place.description != null) return false;
+        if (!geoHeight.equals(place.geoHeight)) return false;
+        if (!geoWidth.equals(place.geoWidth)) return false;
+        if (!name.equals(place.name)) return false;
+        if (price != null ? !price.equals(place.price) : place.price != null) return false;
+
+        return true;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = placeId;
+        result = 31 * result + (country != null ? country.hashCode() : 0);
+        result = 31 * result + name.hashCode();
+        result = 31 * result + (optional ? 1 : 0);
+        result = 31 * result + (price != null ? price.hashCode() : 0);
+        result = 31 * result + geoWidth.hashCode();
+        result = 31 * result + geoHeight.hashCode();
+        result = 31 * result + (description != null ? description.hashCode() : 0);
+        return result;
     }
 
     public void setGeoWidth(Double geoWidth) {

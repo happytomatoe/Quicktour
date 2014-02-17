@@ -31,6 +31,7 @@ public class OrdersService {
     private static final List<String> SORT_VALUES = Arrays.asList("tourInfoId", "orderDate", "price", "status",
             "nextPaymentDate");
     private static final String ACTIVE = "Active";
+    private static final String DESC = "desc";
     private final Logger logger = LoggerFactory.getLogger(OrdersService.class);
     @Autowired
     private DiscountPolicyService discountPolicyService;
@@ -62,8 +63,8 @@ public class OrdersService {
             case admin:
                 return orderRepository.findOne(id);
             case agent:
-                return orderRepository.findByCompanyId(companyService.getCompanyByUserId(
-                        activeUser.getUserId()).getCompanyId(), id);
+                return orderRepository.findByCompanyId(companyService.findByCompanyCode(activeUser.getCompanyCode())
+                        .getCompanyId(), id);
             case user:
                 return orderRepository.findByUserId(activeUser.getUserId(), id);
         }
@@ -134,7 +135,7 @@ public class OrdersService {
 
         String sortValue = SORT_VALUES.contains(value) ? value : Order.ID;
         Sort.Order sortOrder;
-        if ("desc".equalsIgnoreCase(direction)) {
+        if (DESC.equalsIgnoreCase(direction)) {
             sortOrder = new Sort.Order(Sort.Direction.DESC, sortValue);
         } else {
             sortOrder = new Sort.Order(Sort.Direction.ASC, sortValue);
@@ -154,7 +155,7 @@ public class OrdersService {
                 orders = findAll(pageNumber, sortOrder);
                 break;
             case agent:
-                Company company = companyService.getCompanyByUserId(activeUser.getUserId());
+                Company company = companyService.findByCompanyCode(activeUser.getCompanyCode());
                 orders = findByCompanyId(company.getCompanyId(), pageNumber, sortOrder);
                 break;
             case user:
@@ -172,7 +173,7 @@ public class OrdersService {
         Page<Order> orders = null;
         Order.Status orderStatus = null;
         if (!status.equals(ACTIVE)) {
-            orderStatus = Order.Status.valueOf(status);
+            orderStatus = Order.Status.valueOf(status.toUpperCase());
         }
         switch (activeUser.getRole()) {
             case admin:
@@ -180,7 +181,7 @@ public class OrdersService {
                         findByStatus(orderStatus, pageNumber, sortOrder);
                 break;
             case agent:
-                Company company = companyService.getCompanyByUserId(activeUser.getUserId());
+                Company company = companyService.findByCompanyCode(activeUser.getCompanyCode());
                 orders = status.equals(ACTIVE) ? findActiveOrdersByCompanyId(company, pageNumber, sortOrder) :
                         findByStatusAndCompanyId(orderStatus, company, pageNumber, sortOrder);
                 break;
@@ -204,7 +205,7 @@ public class OrdersService {
                 allCount = orderRepository.count();
                 break;
             case agent:
-                allCount = countByCompanyId(companyService.getCompanyByUserId(activeUser.getUserId()));
+                allCount = countByCompanyId(companyService.findByCompanyCode(activeUser.getCompanyCode()));
                 break;
             case user:
                 allCount = countByUserId(activeUser);
@@ -225,7 +226,7 @@ public class OrdersService {
                 byStatusCount = orderRepository.countByStatus(status);
                 break;
             case agent:
-                byStatusCount = countByCompanyIdAndStatus(companyService.getCompanyByUserId(activeUser.getUserId()), status);
+                byStatusCount = countByCompanyIdAndStatus(companyService.findByCompanyCode(activeUser.getCompanyCode()), status);
                 break;
             case user:
                 byStatusCount = countByUserIdAndStatus(activeUser, status);
@@ -317,33 +318,39 @@ public class OrdersService {
     }
 
     public void add(Order order, int tourId) {
-
+        //Extracting values
         User activeUser = userService.getCurrentUser();
-
         TourInfo tourInfo = tourRepository.findOne(tourId);
         Tour tour = tourInfo.getTour();
         Company company = tour.getCompany();
-
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
 
-        order.setCompany(company);
-        order.setTourInfo(tourInfo);
-        if (order.getUser() == null) { //if user was not set in controller
-            order.setUser(activeUser);
-        }
-        order.setOrderDate(currentTimestamp);
-        order.setPrice(tour.getPrice().multiply(new BigDecimal(order.getNumberOfAdults().toString())));
-
+        //calculate total discount
         BigDecimal tourInfoDiscount = new BigDecimal(tourInfo.getDiscount());
         DiscountPoliciesResult discountPoliciesResult = discountPolicyService.
                 calculateDiscount(tour.getDiscountPolicies());
-
-        BigDecimal totalDiscount = tourInfoDiscount.add(discountPoliciesResult.getDiscount());
         BigDecimal companyDiscount = companyService.getCompanyDiscount(activeUser);
+        BigDecimal totalDiscount = tourInfoDiscount.add(discountPoliciesResult.getDiscount());
         if (companyDiscount.doubleValue() > 0) {
             totalDiscount = totalDiscount.add(companyDiscount);
         }
+        String discountInformation = prepareDiscountInformation(totalDiscount, tourInfoDiscount,
+                discountPoliciesResult, companyDiscount);
+        if (order.getUser() == null) { //if user was not set in controller
+            order.setUser(activeUser);
+        }
         order.setDiscount(totalDiscount);
+        order.setOrderDate(currentTimestamp);
+        order.setPrice(tour.getPrice().multiply(new BigDecimal(order.getNumberOfAdults().toString())));
+        order.setCompany(company);
+        order.setTourInfo(tourInfo);
+        order.setDiscountInformation(discountInformation.toString());
+        order.setStatus(Order.Status.RECEIVED);
+
+        orderRepository.saveAndFlush(order);
+    }
+
+    private String prepareDiscountInformation(BigDecimal totalDiscount, BigDecimal tourInfoDiscount, DiscountPoliciesResult discountPoliciesResult, BigDecimal companyDiscount) {
         StringBuilder discountInformation = new StringBuilder();
         if (tourInfoDiscount.doubleValue() > 0) {
             discountInformation.append("tour discount=").append(totalDiscount.toString()).append("<br>");
@@ -365,10 +372,7 @@ public class OrdersService {
             discountInformation.append("</tbody></table>");
 
         }
-        order.setDiscountInformation(discountInformation.toString());
-        order.setStatus(Order.Status.RECEIVED);
-
-        orderRepository.saveAndFlush(order);
+        return discountInformation.toString();
     }
 
     public void addVote(int order, int score) {
