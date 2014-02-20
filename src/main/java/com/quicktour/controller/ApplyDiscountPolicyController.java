@@ -25,7 +25,7 @@ import java.util.List;
  */
 @Controller
 @RequestMapping("/applyDiscount")
-@PreAuthorize("hasRole('agent')")
+@PreAuthorize("hasRole('ROLE_AGENT')")
 public class ApplyDiscountPolicyController {
     @Autowired
     private ToursService toursService;

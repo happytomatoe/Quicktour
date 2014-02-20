@@ -1,4 +1,3 @@
-<%@ page import="com.quicktour.Roles" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
@@ -10,9 +9,9 @@
     <div>
         <fieldset>
             <div class="form-group">
-                <p>Login:${user.login}
-                    <input type="hidden" name="login" value="${user.login}"/>
-                    <input type="hidden" name="userId" value="${user.userId}"/>
+                <p>Username:${user.username}
+                        <form:hidden path="username"/>
+                        <form:hidden path="userId"/>
 
                 <p>
                     <form:label path="name" cssClass="form-signin-heading">Name*</form:label>
@@ -45,16 +44,24 @@
                                     cssClass="form-control"/>
 
                 <p>
-                    <% pageContext.setAttribute("sexes", new String[]{"", "Male", "Female"}); %>
-                    <form:label path="sex" clas="form-signin-heading">Sex:</form:label>
-                    <form:select path="sex" items="${sexes}"/>
+                    <% pageContext.setAttribute("genders", new String[]{"", "Male", "Female"}); %>
+                    <form:label path="gender" clas="form-signin-heading">Gender:</form:label>
+                    <form:select path="gender" items="${genders}"/>
                 </p>
                 <form:label path="role" clas="form-signin-heading">Role:</form:label>
-                <c:if test="${user.role !='admin'}">
-                <% pageContext.setAttribute("roles", Roles.values()); %>
-                <form:select path="role" items="${roles}"/>
-                <p>
-                    </c:if>
+                <div class="form-group">
+                    <form:select path="role.roleId" class="form-control input-lg">
+                        <c:forEach items="${roles}" var="role">
+                            <option value="${role.roleId}"
+                                    <c:if test="${role.roleId==user.role.roleId}">
+                                        selected="selected"
+                                    </c:if>
+                                    >${role.name}
+                            </option>
+                        </c:forEach>
+
+                    </form:select>
+                </div>
 
                 <p> * - required fields.</p>
 

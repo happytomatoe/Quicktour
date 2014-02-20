@@ -17,7 +17,6 @@ import java.io.UnsupportedEncodingException;
 import java.math.BigInteger;
 import java.security.MessageDigest;
 import java.security.NoSuchAlgorithmException;
-import java.util.List;
 import java.util.UUID;
 
 /**
@@ -83,14 +82,18 @@ public class ValidationService {
     public ValidationLink createValidationLink(User user) {
         ValidationLink link = new ValidationLink();
         String hash = generateMD5(user.getUserId(), user.getEmail());
-        link.setUserId(user.getUserId());
+        link.setUser(user);
         link.setUrl(hash);
         return save(link);
     }
 
     public ValidationLink createPasswordChangeLink(User user) {
+        ValidationLink userLink = validationLinksRepository.findByUser(user);
+        if (userLink != null) {
+            validationLinksRepository.delete(userLink);
+        }
         ValidationLink link = new ValidationLink();
-        link.setUserId(user.getUserId());
+        link.setUser(user);
         link.setUrl(generateMD5(UUID.randomUUID().toString()));
         return save(link);
     }
@@ -99,7 +102,7 @@ public class ValidationService {
         User user = null;
         ValidationLink validationLink = validationLinksRepository.findByUrl(link);
         if (validationLink != null) {
-            user = userRepository.findOne(validationLink.getUserId());
+            user = validationLink.getUser();
         }
         return user;
     }
@@ -136,7 +139,7 @@ public class ValidationService {
     public boolean resolveLink(String validationLink) {
         ValidationLink link = validationLinksRepository.findByUrl(validationLink);
         if (link != null) {
-            User user = userService.findOne(link.getUserId());
+            User user = link.getUser();
             userService.activate(user);
             validationLinksRepository.delete(link);
             return true;
@@ -144,10 +147,6 @@ public class ValidationService {
         return false;
     }
 
-    public void delete(User user) {
-        List<ValidationLink> validationLinks = validationLinksRepository.findByUserId(user.getUserId());
-        validationLinksRepository.delete(validationLinks);
-    }
 
     public void delete(ValidationLink validationLink) {
         validationLinksRepository.delete(validationLink);

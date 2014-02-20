@@ -4,6 +4,7 @@ import org.codehaus.jackson.annotate.JsonBackReference;
 import org.codehaus.jackson.annotate.JsonIgnore;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.constraints.Min;
@@ -16,23 +17,13 @@ import java.util.List;
 public class Place {
 
     private int placeId;
-    @NotNull
     private String country;
-    @NotNull
     private String name;
     private boolean optional;
-    @NotNull
-    @Min(0)
     private BigDecimal price;
-    @NotNull
     private Double geoWidth;
-    @NotNull
     private Double geoHeight;
-    @JsonIgnore
     private String description;
-    @JsonIgnore
-    private List<Excursion> excursions;
-    @JsonBackReference
     private List<Tour> tours;
 
     @Column(name = "place_id")
@@ -46,6 +37,7 @@ public class Place {
         this.placeId = placeId;
     }
 
+    @NotBlank
     @Column(name = "country")
     public String getCountry() {
         return country;
@@ -55,6 +47,7 @@ public class Place {
         this.country = country;
     }
 
+    @NotBlank
     @Column(name = "name")
     public String getName() {
         return name;
@@ -64,6 +57,7 @@ public class Place {
         this.name = name;
     }
 
+    @JsonIgnore
     @Column(name = "description")
     public String getDescription() {
         return description;
@@ -82,6 +76,8 @@ public class Place {
         this.optional = optional;
     }
 
+    @NotNull
+    @Min(0)
     @Column(name = "price")
     public BigDecimal getPrice() {
         return price;
@@ -91,6 +87,7 @@ public class Place {
         this.price = price;
     }
 
+    @NotNull
     @Column(name = "geoheight")
     public Double getGeoHeight() {
         return geoHeight;
@@ -100,6 +97,7 @@ public class Place {
         this.geoHeight = geoHeight;
     }
 
+    @NotNull
     @Column(name = "geowidth")
     public Double getGeoWidth() {
         return geoWidth;
@@ -128,11 +126,11 @@ public class Place {
     public int hashCode() {
         int result = placeId;
         result = 31 * result + (country != null ? country.hashCode() : 0);
-        result = 31 * result + name.hashCode();
+        result = 31 * result + (name != null ? name.hashCode() : 0);
         result = 31 * result + (optional ? 1 : 0);
         result = 31 * result + (price != null ? price.hashCode() : 0);
-        result = 31 * result + geoWidth.hashCode();
-        result = 31 * result + geoHeight.hashCode();
+        result = 31 * result + (geoWidth != null ? geoWidth.hashCode() : 0);
+        result = 31 * result + (geoHeight != null ? geoHeight.hashCode() : 0);
         result = 31 * result + (description != null ? description.hashCode() : 0);
         return result;
     }
@@ -141,16 +139,7 @@ public class Place {
         this.geoWidth = geoWidth;
     }
 
-    @OneToMany(mappedBy = "place")
-    @LazyCollection(LazyCollectionOption.TRUE)
-    public List<Excursion> getExcursions() {
-        return excursions;
-    }
-
-    public void setExcursions(List<Excursion> excursions) {
-        this.excursions = excursions;
-    }
-
+    @JsonBackReference
     @ManyToMany(mappedBy = "toursPlaces")
     @LazyCollection(LazyCollectionOption.TRUE)
     public List<Tour> getTours() {

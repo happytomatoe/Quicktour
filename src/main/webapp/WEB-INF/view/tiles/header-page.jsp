@@ -9,10 +9,10 @@
         </button>
         <div class="collapse navbar-collapse navHeaderCollapse">
             <ul class="nav navbar-nav navbar-right">
-                <sec:authorize access="hasAnyRole('admin', 'agent', 'user')">
+                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_AGENT', 'ROLE_USER')">
                     <li><a href="<c:url value="/orders"/>">Orders</a></li>
                 </sec:authorize>
-                <sec:authorize access="hasRole('agent')">
+                <sec:authorize access="hasRole('ROLE_AGENT')">
                     <li>
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             Discount
@@ -20,19 +20,19 @@
                         </a>
                         <ul class="dropdown-menu">
                             <li>
-                                <a href="<c:url value="/discount_policy"/>">Discount Policy</a>
+                                <a href="<c:url value="/discount_policy"/>">Discount policies</a>
                             </li>
                             <li>
-                                <a href="<c:url value="/applyDiscount"/>">Apply Discount policy</a>
+                                <a href="<c:url value="/applyDiscount"/>">Apply discount policy</a>
                             </li>
 
                         </ul>
                     </li>
 
                 </sec:authorize>
-                <sec:authorize access="hasRole('admin')">
+                <sec:authorize access="hasRole('ROLE_ADMIN')">
                     <li>
-                        <a href="<c:url value="/discount_dependency"/>">Discount dependency</a>
+                        <a href="<c:url value="/discount_dependency"/>">Discount dependencies</a>
                     </li>
                     <li>
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
@@ -58,12 +58,12 @@
                                 <a href="<c:url value="/company/add"/>">Company</a>
                             </li>
                             <li>
-                                <a href="<c:url value= "/registration"/>">User</a>
+                                <a href="<c:url value= "/signup"/>">User</a>
                             </li>
                         </ul>
                     </li>
                 </sec:authorize>
-                <sec:authorize access="hasAnyRole( 'agent')">
+                <sec:authorize access="hasAnyRole( 'ROLE_AGENT')">
                     <li>
                         <a class="dropdown-toggle" data-toggle="dropdown" href="#">
                             Manage tours
@@ -74,17 +74,17 @@
                                 <a href="<c:url value="/tours/add" />">Create new tour</a>
                             </li>
                             <li>
-                                <a href="<c:url value="/tours/" />">Tours</a>
+                                <a href="<c:url value="/tours" />">Tours</a>
                             </li>
                         </ul>
                     </li>
                 </sec:authorize>
                 <sec:authorize access="isAnonymous()">
                     <li>
-                        <a href="<c:url value="/registration"/>">Registration</a>
+                        <a href="<c:url value="/signup"/>">Signup</a>
                     </li>
                     <li>
-                        <a href="<c:url value="/login"/>">Login</a>
+                        <a href="<c:url value="/signin"/>">Signin</a>
                     </li>
                 </sec:authorize>
                 <sec:authorize access="isAuthenticated()">
@@ -97,13 +97,13 @@
                             <li>
                                 <a href="<c:url value="/profile"/>">Profile</a>
                             </li>
-                            <sec:authorize access="!hasRole('admin')">
+                            <sec:authorize access="!hasRole('ROLE_ADMIN')">
                                 <li>
                                     <a href="<c:url value="/mycompany"/>">Company</a>
                                 </li>
                             </sec:authorize>
                             <li>
-                                <a href="<c:url value="/j_spring_security_logout"/>">Logout</a>
+                                <a href="<c:url value="/j_spring_security_logout"/>">Signout</a>
                             </li>
                         </ul>
                     </li>

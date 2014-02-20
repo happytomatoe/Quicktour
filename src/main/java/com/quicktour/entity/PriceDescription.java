@@ -1,18 +1,24 @@
 package com.quicktour.entity;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 @Table(name = "price_includes")
 @Entity
 public class PriceDescription {
+
     private int priceDescriptionId;
     private String description;
 
+    public PriceDescription(int id) {
+        priceDescriptionId = id;
+    }
+
+    public PriceDescription() {
+    }
+
     @Column(name = "price_include_id")
     @Id
+    @GeneratedValue
     public int getPriceDescriptionId() {
         return priceDescriptionId;
     }

@@ -7,7 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface UserRepository extends JpaRepository<User, Integer> {
-    User findByLogin(String login);
+    User findByUsername(String username);
 
 
     User findByEmail(String email);

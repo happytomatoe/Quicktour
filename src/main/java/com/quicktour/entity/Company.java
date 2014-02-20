@@ -30,6 +30,7 @@ public class Company {
 
     @Column(name = "company_id")
     @Id
+    @GeneratedValue
     public int getCompanyId() {
         return companyId;
     }
@@ -154,8 +155,8 @@ public class Company {
     }
 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "photos_id", insertable = false, updatable = false)
+    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @JoinColumn(name = "photos_id")
     public Photo getPhoto() {
         return photo;
     }

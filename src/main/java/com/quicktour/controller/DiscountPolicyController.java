@@ -29,7 +29,7 @@ import java.util.regex.Pattern;
  * @author babkamen
  */
 @Controller
-@PreAuthorize("hasRole('agent')")
+@PreAuthorize("hasRole('ROLE_AGENT')")
 @RequestMapping("/discount_policy")
 public class DiscountPolicyController {
 

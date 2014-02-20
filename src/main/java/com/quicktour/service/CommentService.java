@@ -1,14 +1,16 @@
 package com.quicktour.service;
 
 import com.quicktour.entity.Comment;
+import com.quicktour.entity.Role;
 import com.quicktour.entity.Tour;
 import com.quicktour.entity.User;
 import com.quicktour.repository.CommentRepository;
-import com.quicktour.repository.ToursRepository;
-import com.quicktour.utils.HTMLUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
+import org.springframework.security.access.AccessDeniedException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -22,11 +24,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class CommentService {
     private final org.slf4j.Logger logger = org.slf4j.LoggerFactory.getLogger(UsersService.class);
     @Autowired
-    CommentRepository commentRepository;
+    private CommentRepository commentRepository;
     @Autowired
-    ToursRepository toursRepository;
-    @Autowired
-    UsersService usersService;
+    private UsersService usersService;
 
     public Page<Comment> findAllComments(int tourId, int pageNumber, int numberOfRecordsPerPage) {
         PageRequest pageRequest = new PageRequest(pageNumber, numberOfRecordsPerPage);
@@ -58,21 +58,42 @@ public class CommentService {
      */
     public Comment saveComment(Comment comment) {
         User currentUser = usersService.getCurrentUser();
+        int commentId = comment.getCommentId();
+        Comment originalComment = null;
+        if (commentId != 0) {
+            originalComment = findOne(commentId);
+            if (originalComment.getUser().getName() != currentUser.getUsername() &&
+                    currentUser.getRole().getRoleId() != Role.ROLE_ADMIN) {
+                throw new AccessDeniedException("You don't have right to edit this comment");
+            }
+        }
         String commentText = comment.getContent();
         String commentUpdated = commentText.replace("\n", "<br/>");
-        String commentTextForSave = HTMLUtils.cleanHTML(commentUpdated);
+        String commentTextForSave = Jsoup.clean(commentUpdated, Whitelist.basic());
         if (commentTextForSave.isEmpty()) {
             throw new IllegalArgumentException("Comment is empty when saving comment");
         } else {
             comment.setContent(commentTextForSave);
-            comment.setUser(currentUser);
-            logger.info("The user {}  was add new comment: {}", comment.getUser().getLogin(), comment.getContent());
+            if (originalComment != null && currentUser.getRole().getRoleId() == Role.ROLE_ADMIN) {
+                comment.setUser(originalComment.getUser());
+            } else {
+                comment.setUser(currentUser);
+            }
+            logger.info("The user {}  was add new comment: {}", comment.getUser().getUsername(), comment.getContent());
             comment = commentRepository.saveAndFlush(comment);
         }
         return comment;
     }
 
-    public void delete(Comment comment) {
+    public String delete(Comment comment) {
+        User currentUser = usersService.getCurrentUser();
+        Comment originalComment = findOne(comment.getCommentId());
+        if (originalComment.getUser().getUserId() != currentUser.getUserId() &&
+                currentUser.getRole().getRoleId() != Role.ROLE_ADMIN) {
+            throw new AccessDeniedException("You don't have right to delete this comment");
+        }
+
         commentRepository.delete(comment);
+        return "Ok";
     }
 }

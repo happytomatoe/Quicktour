@@ -180,10 +180,10 @@
                                     <select id="numberOfAdults" name="numberOfAdults" class="form-control num"
                                             required=""/>
                                     <option value="1">1</option>
-                                        <option value="2">2</option>
-                                        <option value="3">3</option>
-                                        <option value="4">4</option>
-                                        <option value="5">5</option>
+                                    <option value="2">2</option>
+                                    <option value="3">3</option>
+                                    <option value="4">4</option>
+                                    <option value="5">5</option>
                                     </select>
                                     <form:errors path="numberOfAdults" cssClass="alert-danger"/>
                                 </div>
@@ -201,7 +201,7 @@
                                     </select>
                                     <form:errors path="numberOfChildren" cssClass="alert-danger"/>
                                 </div>
-                                <sec:authorize access="hasAnyRole('admin', 'agent', 'user')">
+                                <sec:authorize access="hasAnyRole('ROLE_ADMIN', 'ROLE_AGENT', 'ROLE_USER')">
                                     <button type="button" id="calculateDiscount" class="btn btn-primary btn-sm">
                                         Calculate
                                     </button>
@@ -253,9 +253,9 @@
 
                     <fieldset>
                         <div class="form-group">
-                            <label for="comments">Comments:</label>
+                            <label for="comments">Comment:</label>
                             <textarea id="comments" name="userInfo" rows="4"
-                                      class="form-control">User_info</textarea>
+                                      class="form-control"></textarea>
                         </div>
                                     <span class="pull-right">
                                         <input type="submit" value="Confirm Order" class="btn btn-success btn-sm">

@@ -11,7 +11,7 @@
 <script src="<c:url value="/resources/js/bootstrap-select.js"/>"></script>
 <script src="<c:url value="/resources/js/jquery.raty.js"/>"></script>
 <link href="<c:url value="/resources/css/bootstrap-select.css"/>" rel="stylesheet">
-<script src="<c:url value="/resources/js/places.js"/>"></script>
+<script src="<c:url value="/resources/js/tourDetails.js"/>"></script>
 <script src="<c:url value="/resources/ckeditor/ckeditor.js"/>"></script>
 <script src="<c:url value="/resources/js/jquery.expander.min.js"/> "></script>
 
@@ -49,7 +49,7 @@
 
     </div>
     <div class="col-md-3">
-        <sec:authorize access="!(hasRole('agent'))">
+        <sec:authorize access="!(hasRole('ROLE_AGENT'))">
             <div class="btn-group">
                 <button type="button" class="btn btn-success dropdown-toggle" data-toggle="dropdown">
                     <span class="glyphicon glyphicon-hand-right"></span>
@@ -90,7 +90,7 @@
 <div class="row">
     <div class="col-md-7 pull-right">
         <div class="col-md-5">
-            <sec:authorize access="hasAnyRole('admin','user')">
+            <sec:authorize access="hasAnyRole('ROLE_ADMIN','ROLE_USER')">
                 <c:if test="${maxDiscount>0}">
                     <h3>
                         Discount: <span class="label label-danger">  ${maxDiscount}%</span>
@@ -108,17 +108,15 @@
 </div>
 
 <div class="row">
-    <div class="panel panel-default">
-        <div class="panel-body">
-            <h3 class="text-center">Price Includes:</h3>
-            <c:forEach items="${tour.priceIncludes}" var="priceIncludes">
-                <div class="row bg-success">
-                    <span class="glyphicon glyphicon-ok"></span>
-                        ${priceIncludes.description}
-                </div>
-            </c:forEach>
-        </div>
-    </div>
+    <ul class="list-group">
+        <h3 class="text-center">Price Includes:</h3>
+        <c:forEach items="${tour.priceIncludes}" var="priceIncludes">
+            <li class="list-group-item list-group-item-success">
+                <span class="glyphicon glyphicon-ok"></span>
+                    ${priceIncludes.description}
+            </li>
+        </c:forEach>
+    </ul>
 </div>
 
 <div class="row">
@@ -209,7 +207,6 @@
     </div>
 </sec:authorize>
 <sec:authorize access="isAnonymous()">
-    <p></p>
 
     <div class="col-sm-12">
         <div class="row well no_margin_left">

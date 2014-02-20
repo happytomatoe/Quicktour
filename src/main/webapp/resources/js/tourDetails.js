@@ -23,7 +23,7 @@ $(document).ready(function () {
 
     }
 
-    $("#description").expander({slicePoint: 125});
+    $("#description").expander({slicePoint: 600});
 
 });
 
@@ -255,20 +255,23 @@ function displayPagination(page) {
     var $last = $('<li><a href="javascript:void(0)" onclick="getLastPage()" >&raquo;</a></li>');
     var $pagination = $("#pagination");
     $pagination.html("");
-    $pagination.append($first);
-    for (var i = -3; i < 3; i++) {
-        var newPage = currentPage + i;
-        if (newPage < 0 || newPage > totalPages - 1) {
-            continue;
+
+    if (page.totalPages > 1) {
+        $pagination.append($first);
+        for (var i = -3; i < 3; i++) {
+            var newPage = currentPage + i;
+            if (newPage < 0 || newPage > totalPages - 1) {
+                continue;
+            }
+            if (i == 0) {
+                $pagination.append('<li class="active"><a href="javascript:void(0)"  >' + (newPage + 1) + '<span class="sr-only">(current)</span></a></li>')
+            }
+            else {
+                $pagination.append('<li><a href="javascript:void(0)" onclick="getPage(' + newPage + ')" >' + (newPage + 1) + '</a></li>')
+            }
         }
-        if (i == 0) {
-            $pagination.append('<li class="active"><a href="javascript:void(0)"  >' + (newPage + 1) + '<span class="sr-only">(current)</span></a></li>')
-        }
-        else {
-            $pagination.append('<li><a href="javascript:void(0)" onclick="getPage(' + newPage + ')" >' + (newPage + 1) + '</a></li>')
-        }
+        $pagination.append($last);
     }
-    $pagination.append($last);
 };
 var clearCommentBox = function () {
     commentBox.html("");

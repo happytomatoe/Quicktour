@@ -44,11 +44,11 @@
 <table class="table table-striped table-hover table-bordered ">
     <thead>
     <tr>
-        <c:if test="${user.role !='user'}">
+        <c:if test="${user.role !='ROLE_USER'}">
             <th>
                 <a href="<c:url value="/orders/${filterLink}orderId/asc/${page.number}"/>"
                    title="Sort by order ID" class="asc">
-                ID
+                    ID
                 </a>
 
 
@@ -72,7 +72,7 @@
         &nbsp;
 
         <th>
-            <c:out value="${user.role != 'user' ? 'Rated by customer': 'Rate this tour'}"/>
+            <c:out value="${user.role != 'ROLE_USER' ? 'Rated by customer': 'Rate this tour'}"/>
             &nbsp;
         </th>
         &nbsp;
@@ -88,9 +88,14 @@
             <span id="priceDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
 
         </th>
+        <sec:authorize access="hasRole('ROLE_AGENT')">
+            <th>
+                User
+            </th>
+        </sec:authorize>
         &nbsp;
 
-        <c:if test="${user.role =='user' }">
+        <c:if test="${user.role =='ROLE_USER' }">
             <th>Starting date</th>
             &nbsp;
 
@@ -127,7 +132,7 @@
         &nbsp;
         &nbsp;
 
-        <c:if test="${user.role !='user' }">
+        <c:if test="${user.role !='ROLE_USER' }">
             <th>
 
                 <a href="<c:url value="/orders/${filterLink}nextPaymentDate/desc/${page.number}"/>"
@@ -142,8 +147,9 @@
         </c:if>
         &nbsp;
         <th> &nbsp;</th>
-        <sec:authorize access="!hasRole('user')">
+        <sec:authorize access="!hasRole('ROLE_USER')">
             <th> Discount information</th>
+            <th> User information</th>
         </sec:authorize>
     </tr>
 
@@ -154,7 +160,7 @@
     <c:forEach items="${orders}" var="order">
 
         <tr>
-            <c:if test="${user.role !='user' }">
+            <c:if test="${user.role !='ROLE_USER' }">
                 <td>${order.orderId}</td>
             </c:if>
 
@@ -167,7 +173,7 @@
                 <span id="rate_${order.orderId}"></span>
                 <script type="text/javascript">
                     jQuery('#rate_${order.orderId}').raty({
-                        <c:if test="${user.role !='user' }">
+                        <c:if test="${user.role !='ROLE_USER' }">
                         readOnly: true,
                         </c:if>
                         cancel: true,
@@ -183,8 +189,17 @@
             </td>
 
             <td>$ ${order.price}</td>
+            &nbsp;
+            <sec:authorize access="!hasRole('ROLE_USER')">
+                <td>
+                    <c:if test="${order.user!=null}">
+                        <a href="<c:url value="/user/${user.userId}"/>">${order.user.username}</a>
+                    </c:if>
+                </td>
+            </sec:authorize>
+            &nbsp;
 
-            <c:if test="${user.role =='user'}">
+            <c:if test="${user.role =='ROLE_USER'}">
                 <td>${order.tourInfo.startDate}</td>
 
                 <td>${order.tourInfo.endDate}</td>
@@ -195,18 +210,21 @@
 
             <td>${order.status}</td>
 
-            <c:if test="${user.role !='user' }">
+            <c:if test="${user.role !='ROLE_USER' }">
                 <td>${order.nextPaymentDate}</td>
             </c:if>
 
             <td>
                 <a href="<c:url value="/manageOrder/${order.orderId}"/>" class="btn btn-success btn-sm">
-                    <c:out value="${user.role!= 'user' ? 'Manage': 'View order'}"/>
+                    <c:out value="${user.role!= 'ROLE_USER' ? 'Manage': 'View order'}"/>
                 </a>
             </td>
             <td>
-                <sec:authorize access="!hasRole('user')">
+                <sec:authorize access="!hasRole('ROLE_USER')">
                     ${order.discountInformation}
+            </td>
+            <td>
+                    ${order.userInfo}
                 </sec:authorize>
             </td>
         </tr>
@@ -261,7 +279,7 @@
 
                 <c:if test="${((page.number - num) ge 0) && ((page.number - num) lt 2 )}">
                     <li class="${buttonClass}">
-                        <a href="<c:url value="${pageBtnUrl}"/>">
+                        <a href="${pageBtnUrl}">
                             <c:out value="${num}"/>
                         </a>
                     </li>
@@ -269,7 +287,7 @@
 
                 <c:if test="${((num - page.number) gt 0) && ((num - page.number) lt 4)}">
                     <li class="${buttonClass}">
-                        <a href="<c:url value="${pageBtnUrl}"/>">
+                        <a href="${pageBtnUrl}">
                             <c:out value="${num}"/>
                         </a>
                     </li>

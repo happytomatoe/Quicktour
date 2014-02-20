@@ -1,7 +1,57 @@
-$(function () {
+var baseUrl;
+var validator;
+$(document).ready(function () {
+
+    baseUrl = $(".navbar-brand").attr("href");
     $("select:has(option[value=]:first-child)").on('change',function () {
         $(this).toggleClass("empty", $.inArray($(this).val(), ['', null]) >= 0);
     }).trigger('change');
+    var $registrationForm = $("#registrationForm");
+    validator = $registrationForm.validate({
+        errorElement: "div",
+        rules: {
+            name: {
+                minlength: 3
+            }, surname: {
+                minlength: 3
+            }, username: {
+                remote: baseUrl + "username/validate"
+            }, email: {
+                email: true,
+                remote: baseUrl + "email/validate"
+            }, password: {
+                minlength: 8
+            }, password_confirmation: {
+                equalTo: "#password"
+            }, avatar: {
+                accept: "image/*"
+            }
+        }, messages: {
+            username: {
+                remote: "Username is taken"
+            }, email: {
+                remote: "Email is taken"
+            }, avatar: {
+                accept: "Uploaded file is not an image"
+            }
+        }, errorPlacement: function (error, element) {
+            if (element.attr("name") == "avatar") {
+                element.parent().parent().after(error);
+            } else {
+                element.after(error);
+            }
+
+        },
+        errorClass: "text-danger",
+        submitHandler: function (form) {
+            form.submit();
+        }
+    });
+    $registrationForm.submit(function () {
+        return validator.form();
+    });
+    console.log("Validate login url", baseUrl + "email/validate");
+
 
     var maskList = $.masksSort($.masksLoad("resources/js/phone-codes.json"), ['#'], /[0-9]|#/, "mask");
     var maskOpts = {
@@ -22,7 +72,7 @@ $(function () {
         listKey: "mask"
     };
     var $phone = $('#phone');
-    //  $phone.inputmasks(maskOpts);
+//      $phone.inputmasks(maskOpts);
 //    if ($phone.val() == "") {
 //        $phone.val(7);
 //    }

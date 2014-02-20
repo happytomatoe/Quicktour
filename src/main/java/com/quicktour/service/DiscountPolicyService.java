@@ -159,7 +159,7 @@ public class DiscountPolicyService {
     public void delete(DiscountPolicy discountPolicy) {
         User currentUser = usersService.getCurrentUser();
         if (currentUser != null) {
-            logger.info("Delete discount policy with id {} by user {}", discountPolicy, currentUser.getLogin());
+            logger.info("Delete discount policy with id {} by user {}", discountPolicy, currentUser.getUsername());
         }
         if (discountPolicy != null) {
             discountPoliciesRepository.delete(discountPolicy);

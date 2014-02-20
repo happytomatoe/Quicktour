@@ -1,10 +1,11 @@
 package com.quicktour.controller;
 
 import com.quicktour.entity.Company;
+import com.quicktour.entity.Role;
 import com.quicktour.entity.User;
-import com.quicktour.entity.User.Roles;
 import com.quicktour.service.CompanyService;
 import com.quicktour.service.PhotoService;
+import com.quicktour.service.RolesService;
 import com.quicktour.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -29,11 +30,13 @@ import java.util.List;
  */
 
 @Controller
-@PreAuthorize("hasRole('admin')")
+@PreAuthorize("hasRole('ROLE_ADMIN')")
 public class AdminController {
     @Autowired
     private UsersService usersService;
 
+    @Autowired
+    private RolesService rolesService;
     @Autowired
     private CompanyService companyService;
 
@@ -44,13 +47,13 @@ public class AdminController {
     public String viewAllUsers(Model model) {
         List<User> users = usersService.findAll();
         model.addAttribute("users", users);
-        return "viewusers";
+        return "viewUsers";
     }
 
     @RequestMapping(value = "/users/delete/{id}", method = RequestMethod.GET)
     public String deleter(@PathVariable("id") int id) {
         User user = usersService.findOne(id);
-        if (user != null && user.getRole() != Roles.admin) {
+        if (user != null && user.getRole().getRoleId() != Role.ROLE_ADMIN) {
             usersService.delete(user);
         }
         return "redirect:/users/";
@@ -66,11 +69,12 @@ public class AdminController {
     @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.GET)
     public String myProfileForm(@PathVariable("id") int id, Model model) {
         User user = usersService.findOne(id);
-        if (user.getRole() == Roles.admin) {
+        if (user.getRole().getRoleId() == Role.ROLE_ADMIN) {
             return "404";
         }
+        model.addAttribute("roles", rolesService.findAll());
         model.addAttribute("user", user);
-        return "edituser-tile";
+        return "editUser";
     }
 
     /**
@@ -85,9 +89,9 @@ public class AdminController {
     @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.POST)
     public String myProfileForm(@Valid User user, BindingResult bindingResult) {
         if (bindingResult.hasErrors()) {
-            return "edituser-tile";
+            return "editUser";
         }
-        usersService.save(user);
+        usersService.edit(user);
         return "redirect:/users";
     }
 
@@ -101,7 +105,7 @@ public class AdminController {
     public String viewAllCompanies(Model model) {
         List<Company> companies = companyService.findAll();
         model.addAttribute("companies", companies);
-        return "viewcompanies";
+        return "viewCompanies";
     }
 
     /**
@@ -115,7 +119,7 @@ public class AdminController {
     public String editCompany(@PathVariable("id") int id, Model model) {
         Company company = companyService.findOne(id);
         model.addAttribute("company", company);
-        return "editcompany";
+        return "editCompany";
     }
 
 
@@ -133,15 +137,10 @@ public class AdminController {
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
         if (bindingResult.hasErrors()) {
-            return "editcompany";
+            return "editCompany";
         }
-        String newAvatarName = company.getName() + "comp.jpg";
-        if (!image.isEmpty()) {
-            company.setPhoto(photoService.saveImage(newAvatarName, image));
-        }
-        if (companyService.saveAndFlush(company) == null) {
-            return "editcompany";
-        }
+        photoService.saveImageAndSet(company, image);
+        companyService.saveAndFlush(company);
         return "redirect:/company";
     }
 }

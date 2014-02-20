@@ -9,14 +9,14 @@
             </div>
             <div class="col-md-7">
                 <h2 class="featurette-heading">
-                        ${user.login}
-                    <span class="text-muted">${user.role}</span>
+                        ${user.username}
+                    <span class="text-muted">${user.role.name}</span>
                 </h2>
 
                 <p class="lead">${user.name}, ${user.surname}, ${user.email}, ${user.phone},
-                        ${user.age}, ${user.sex}</p>
+                        ${user.age}, ${user.gender}</p>
             </div>
-            <c:if test="${user.role!='admin'}">
+            <c:if test="${user.role!='ROLE_ADMIN'}">
 
             <div class="col-md-3">
                 <a href="<c:url value="/users/edit/${user.userId}"/>" class="btn btn-warning">

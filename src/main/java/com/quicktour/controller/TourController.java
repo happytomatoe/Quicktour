@@ -52,7 +52,7 @@ public class TourController {
         map.addAttribute("user", usersService.getCurrentUser());
 
 
-        return "place-extended";
+        return "viewTour";
     }
 
 

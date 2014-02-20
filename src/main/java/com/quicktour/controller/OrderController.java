@@ -82,7 +82,7 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("page", page);
 
-        return "list-orders";
+        return "listOrders";
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -117,7 +117,7 @@ public class OrderController {
         model.addAttribute("orders", orders);
         model.addAttribute("page", page);
 
-        return "list-orders";
+        return "listOrders";
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -126,11 +126,11 @@ public class OrderController {
         return MessageFormat.format("redirect:/orders/filter/{0}/orderId/asc/0", orderStatusFilter);
     }
 
-    @PreAuthorize("!(hasRole('agent'))")
+    @PreAuthorize("!(hasRole('ROLE_AGENT'))")
     @RequestMapping(value = "/createOrder/{tourId}", method = RequestMethod.GET)
     public ModelAndView createOrder(@PathVariable("tourId") int tourId
     ) {
-        return new ModelAndView("create-order", prepareCreateOrderAttributes(tourId));
+        return new ModelAndView("createOrder", prepareCreateOrderAttributes(tourId));
     }
 
     private ModelMap prepareCreateOrderAttributes(int tourId) {
@@ -173,31 +173,29 @@ public class OrderController {
         return modelMap;
     }
 
-    @PreAuthorize("!(hasRole('agent'))")
+    @PreAuthorize("!(hasRole('ROLE_AGENT'))")
     @RequestMapping(value = "/createOrder/{tourId}", method = RequestMethod.POST)
     public ModelAndView addOrder(@Valid Order order,
                                  BindingResult bindingResult,
                                  @PathVariable("tourId") int tourId
     ) {
 
+        User activeUser = userService.getCurrentUser();
+        if (activeUser != null && userService.findByEmail(order.getUser().getEmail()) != null) {
+            bindingResult.rejectValue("email", "email.taken", "User with this email already exists");
+        }
         if (bindingResult.hasErrors()) {
             logger.debug("Binding result :{}", bindingResult);
-            return new ModelAndView("create-order", prepareCreateOrderAttributes(tourId));
+            return new ModelAndView("createOrder", prepareCreateOrderAttributes(tourId));
 
         }
-        User activeUser = userService.getCurrentUser();
-
         if (activeUser == null) {
-            if (userService.findByEmail(order.getUser().getEmail()) != null) {
-                return new ModelAndView("ordererror");
-            }
-
-//            order.setUser(userService.saveAnonymousCustomer(user));
-//            ordersService.createValidationLink(user);
+            order.setUserInfo(ordersService.constructAnonymousUserInfo(order));
+            order.setUser(null);
         }
         ordersService.add(order, tourId);
 
-        return new ModelAndView("ordersuccess");
+        return new ModelAndView("orderSuccess");
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -214,9 +212,8 @@ public class OrderController {
         model.addAttribute("tour", tour);
         model.addAttribute("user", usersService.getCurrentUser());
         model.addAttribute("order", order);
-        model.addAttribute("ordersService", ordersService);
 
-        return "manage-order";
+        return "manageOrder";
     }
 
     @PreAuthorize("isAuthenticated()")
@@ -234,9 +231,8 @@ public class OrderController {
 
             model.addAttribute("user", usersService.getCurrentUser());
             model.addAttribute("order", order);
-            model.addAttribute("ordersService", ordersService);
 
-            return "manage-order";
+            return "manageOrder";
         }
 
         boolean notifyUserByEmail = sendEmail != null && sendEmail.equals("yes");
@@ -247,7 +243,7 @@ public class OrderController {
     }
 
 
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @RequestMapping(value = "/orders/rate", method = RequestMethod.POST)
     public
     @ResponseBody
@@ -261,7 +257,7 @@ public class OrderController {
         return "OK";
     }
 
-    @PreAuthorize("hasRole('user')")
+    @PreAuthorize("hasRole('ROLE_USER')")
     @RequestMapping(value = "/orders/comments", method = RequestMethod.POST)
     public
     @ResponseBody

@@ -49,11 +49,15 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
 
     Page<Order> findByStatusAndUser(Order.Status status, User user, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1 AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1 " +
+            "AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
     Page<Order> findActiveOrdersByCompanyId(int id, Pageable pageable);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1 AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
+    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1" +
+            " AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
     Page<Order> findActiveOrdersByUserId(int id, Pageable pageable);
 
-
+    @Query("SELECT COUNT(o.orderId) FROM Order AS o INNER JOIN o.user " +
+            "AS u WHERE u.userId = ?1 AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
+    Long countByActiveStatusAndUser(User activeUser);
 }

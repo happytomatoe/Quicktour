@@ -5,10 +5,11 @@ import com.flickr4java.flickr.FlickrException;
 import com.flickr4java.flickr.REST;
 import com.flickr4java.flickr.RequestContext;
 import com.flickr4java.flickr.auth.Auth;
+import com.flickr4java.flickr.photos.upload.Ticket;
 import com.flickr4java.flickr.uploader.UploadMetaData;
-import com.flickr4java.flickr.uploader.Uploader;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.Photo;
+import com.quicktour.entity.Tour;
 import com.quicktour.entity.User;
 import com.quicktour.repository.PhotoRepository;
 import org.scribe.model.Token;
@@ -16,12 +17,14 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
 import java.io.IOException;
+import java.util.*;
 
 
 /**
@@ -33,9 +36,10 @@ import java.io.IOException;
 @Service
 @Transactional
 public class PhotoService {
-
-    private static final int DEFAULT_AVATAR_ID = 4;
-    private static final String FLICKR_COM = "flickr.com";
+    @Value("${defaultUserPhotoId}")
+    private int DEFAULT_USER_PHOTO_ID;
+    @Value("${defaultCompanyPhotoId}")
+    private int DEFAULT_COMPANY_PHOTO_ID;
     private final Logger logger = LoggerFactory.getLogger(PhotoService.class);
     @Value("${flickRetryCount}")
     private int retryCount;
@@ -45,7 +49,10 @@ public class PhotoService {
     @Autowired
     CompanyService companyService;
     @Autowired
+    ToursService toursService;
+    @Autowired
     private PhotoRepository photoRepository;
+
     @Value("${flickrApiKey}")
     private String apiKey;
     @Value("${flickrSecretKey}")
@@ -55,6 +62,107 @@ public class PhotoService {
     @Value("${accessTokenSecret}")
     private String accessTokenSecret;
     private static Flickr flickr;
+    private Set<String> tickets = new LinkedHashSet<>();
+    private List waitingRecipients = Collections.synchronizedList(new ArrayList());
+
+
+    @Scheduled(cron = "0/15 * * * * *")
+    public void checkTickets() {
+        if (tickets.size() > 0) {
+            logger.debug("Tickets {}.WaitingRecipients {}", tickets, waitingRecipients);
+            List<Ticket> checkedTickets = null;
+            try {
+                checkedTickets = flickr.getUploadInterface().checkTickets(tickets);
+            } catch (FlickrException e) {
+                logger.error("Exception while checking tickets.{}", e);
+            }
+            if (checkedTickets != null && checkedTickets.size() > 0) {
+                int i = 0;
+                Photo photo;
+                logger.debug("Tickets {}. size {}", checkedTickets, checkedTickets.size());
+                for (Ticket ticket : checkedTickets) {
+                    if (ticket.hasCompleted()) {
+                        Object waitingRecipient = waitingRecipients.get(i);
+                        Photo newPhoto = createPhoto(ticket.getPhotoId());
+                        if (waitingRecipient instanceof Tour) {
+                            Tour tour = (Tour) waitingRecipient;
+                            tour = toursService.findTourById(tour.getTourId());
+                            photo = tour.getPhoto();
+                            if (photo != null) {
+                                photoRepository.delete(photo);
+                            }
+                            tour.setPhoto(newPhoto);
+                            toursService.saveTour(tour);
+                        } else if (waitingRecipient instanceof User) {
+                            User user = (User) waitingRecipient;
+                            logger.debug("Founded userId {}", user.getUserId());
+                            int j = 0;
+                            do {
+                                user = usersService.findByUsername(user.getUsername());
+                                j++;
+                                if (user == null) {
+                                    try {
+                                        Thread.sleep(1000);
+                                    } catch (InterruptedException e) {
+                                        logger.error("Cannot sleep anymore!.{}", e);
+                                    }
+                                }
+                            } while (j < 5);
+                            logger.debug("Founded user {}.Recipient {}", user, waitingRecipient);
+                            photo = user.getPhoto();
+                            if (photo != null) {
+                                photoRepository.delete(photo);
+                            }
+                            user.setPhoto(newPhoto);
+                            usersService.save(user);
+                        } else if (waitingRecipient instanceof Company) {
+                            Company company = (Company) waitingRecipient;
+                            company = companyService.findOne(company.getCompanyId());
+                            photo = company.getPhoto();
+                            if (photo != null) {
+                                photoRepository.delete(photo);
+                            }
+                            company.setPhoto(newPhoto);
+                            companyService.saveAndFlush(company);
+                        }
+                        logger.debug("Removing ticket {}.Size {}", ticket, checkedTickets.size());
+                        tickets.remove(ticket.getTicketId());
+                        logger.debug("Size {}", checkedTickets.size());
+                        waitingRecipients.remove(waitingRecipient);
+
+                    }
+                    i++;
+                }
+            }
+        }
+
+    }
+
+    private Photo createPhoto(String photoId) {
+        try {
+            authorize();
+        } catch (FlickrException e) {
+            logger.error("Cant authorize on flickr.{}", e.getMessage());
+        }
+        logger.debug("Create photo with photoId {}", photoId);
+        com.flickr4java.flickr.photos.Photo info = null;
+        Photo photo = new Photo();
+        photo.setFlickrPhotoId(photoId);
+        try {
+            info = flickr.getPhotosInterface().getInfo(photoId, null);
+        } catch (FlickrException e) {
+            if (tryCount <= retryCount) {
+                tryCount++;
+                createPhoto(photoId);
+            } else {
+                logger.error("Cannot get info after 3 attempts on flick photo with photoId:{}", photoId);
+            }
+        } finally {
+            tryCount = 0;
+        }
+        photo.setUrl(info.getMediumUrl());
+        return photoRepository.saveAndFlush(photo);
+    }
 
     @PostConstruct
     private void init() {
@@ -68,62 +176,50 @@ public class PhotoService {
         }
     }
 
+    private String replaceImage(Photo existingPhoto, MultipartFile newPhoto) {
+        try {
+            authorize();
+        } catch (FlickrException e) {
+            logger.error("Cant authorize on flickr.{}", e.getMessage());
+        }
+        String ticketId = null;
+        try {
+            ticketId = flickr.getUploader().replace(newPhoto.getBytes(),
+                    existingPhoto.getFlickrPhotoId(), true);
+        } catch (FlickrException e) {
+            logger.error("Cannot replace image on flickr .{}", e);
+        } catch (IOException e) {
+            logger.error("Cannot call getBytes on new image when replacing image.{}", e);
+        }
+        return ticketId;
+    }
 
     /**
-     * Saves image that user uploads in registration forms to the filesystem
-     *
-     * @param filename - filename of the file to be saved
-     * @param image    - contains file that user uploads
-     * @return - returns true if all is OK and false if we have errors
+     * Uploads image to flickr asynchronously and returns ticketId
      */
-    public Photo saveImage(String filename, MultipartFile image) {
+    private String uploadImage(MultipartFile image) {
         if (image.isEmpty()) {
             return null;
         }
-        String photoId;
-        User currentUser = usersService.getCurrentUser();
-        Uploader uploader = flickr.getUploader();
-        UploadMetaData metaData = new UploadMetaData();
-        metaData.setContentType(Flickr.CONTENTTYPE_PHOTO);
-        metaData.setHidden(false);
-        String title = "";
-        if (filename != null) {
-            title = filename;
-        } else {
-            Company company = null;
-            if (currentUser != null) {
-                company = companyService.findByCompanyCode(currentUser.getCompanyCode());
-            }
-            if (company != null) {
-                title += company.toString() + ":";
-            }
-            if (currentUser != null) {
-                title += currentUser.getLogin();
-            }
-        }
-        metaData.setTitle(title);
-        com.flickr4java.flickr.photos.Photo info;
         try {
             authorize();
-            photoId = uploader.upload(image.getBytes(), metaData);
-            info = flickr.getPhotosInterface().getInfo(photoId, null);
         } catch (FlickrException e) {
-            logger.error("Flickr exception while saving image. {}", e);
-            return null;
+            logger.error("Cant authorize on flickr.{}", e.getMessage());
+        }
+        String ticketId = null;
+        UploadMetaData metaData = new UploadMetaData();
+        metaData.setContentType(Flickr.CONTENTTYPE_PHOTO);
+        metaData.setHidden(true);
+        metaData.setAsync(true);
+        try {
+            ticketId = flickr.getUploader().upload(image.getBytes(), metaData);
+        } catch (FlickrException e) {
+            logger.error("Flickr exception while uploading image to flickr.{}", e);
         } catch (IOException e) {
-            logger.error("IOException while saving image .{}", e);
-            return null;
+            logger.error("{}", e);
         }
-        logger.info("Saved image.Response from Flickr:{}", photoId);
-        Photo photo = new Photo();
-        photo.setUrl(info.getMediumUrl());
-        photo = photoRepository.saveAndFlush(photo);
-        if (photo.getPhotoId() == 0) {
-            throw new NullPointerException("Cant save image " + photo.getPhotoId() + " " + photo.getUrl());
-        }
-        logger.debug("Saved image: {},{}", photo.getPhotoId(), photo.getUrl());
-
-        return photo;
+        logger.info("Saved image.Response from TicketId:{}", ticketId);
+        return ticketId;
     }
 
     private void authorize() throws FlickrException {
@@ -134,6 +230,7 @@ public class PhotoService {
         try {
             Token accessToken2 = new Token(accessToken, accessTokenSecret);
             Auth auth = flickr.getAuthInterface().checkToken(accessToken2);
+            logger.debug("Permission after auth: {}", auth.getPermission().toString());
             flickr.setAuth(auth);
             RequestContext.getRequestContext().setAuth(auth);
 
@@ -155,28 +252,40 @@ public class PhotoService {
     }
 
 
-    public Photo getDefaultAvatar() {
-        return photoRepository.findOne(DEFAULT_AVATAR_ID);
+    public Photo getUserAvatar() {
+        return photoRepository.findOne(DEFAULT_USER_PHOTO_ID);
     }
 
-    public boolean deletePhoto(Photo photo) {
-        //TODO:test
-        if (photo == null) {
-            return false;
-        }
-        String url = photo.getUrl();
-        if (url.contains(FLICKR_COM)) {
-            String photoId = url.substring(url.lastIndexOf("/"));
-            try {
-                flickr.getPhotosInterface().delete(photoId);
-            } catch (FlickrException e) {
-                logger.error("Cannot delete photo on flick with photoId {}.{}", photoId, e);
-                return false;
-            }
-            photoRepository.delete(photo.getPhotoId());
-        }
-        return true;
+    public Photo getCompanyAvatar() {
+        return photoRepository.findOne(DEFAULT_COMPANY_PHOTO_ID);
     }
 
+    private void uploadImageAndSaveTicket(MultipartFile image, Photo photo) {
+        String ticketId = null;
+        if (photo != null && photo.getFlickrPhotoId() != null && !photo.getFlickrPhotoId().isEmpty()) {
+            ticketId = replaceImage(photo, image);
+        } else {
+            ticketId = uploadImage(image);
+        }
+        tickets.add(ticketId);
+    }
 
+    public void saveImageAndSet(Tour tour, MultipartFile image) {
+        logger.debug("saving and setting image to {}", tour);
+        Photo photo = tour.getPhoto();
+        uploadImageAndSaveTicket(image, photo);
+        waitingRecipients.add(tour);
+    }
+
+    public void saveImageAndSet(User user, MultipartFile image) {
+        logger.debug("saving and setting image to {}", user);
+        uploadImageAndSaveTicket(image, user.getPhoto());
+        waitingRecipients.add(user);
+    }
+
+    public void saveImageAndSet(Company company, MultipartFile image) {
+        logger.debug("saving and setting image to {}", company);
+        uploadImageAndSaveTicket(image, company.getPhoto());
+        waitingRecipients.add(company);
+    }
 }

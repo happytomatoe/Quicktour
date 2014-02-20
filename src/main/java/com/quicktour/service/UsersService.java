@@ -1,8 +1,6 @@
 package com.quicktour.service;
 
-import com.quicktour.entity.User;
-import com.quicktour.entity.User.Roles;
-import com.quicktour.entity.ValidationLink;
+import com.quicktour.entity.*;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -26,7 +24,7 @@ import java.util.List;
  * @author Andrew Zarichnyi
  * @version 1.0 12/27/2013
  */
-@Service
+@Service("myUserService")
 @Transactional
 public class UsersService {
     private static final String TOUR_AGENCY = "Tour Agency";
@@ -44,28 +42,25 @@ public class UsersService {
 
 
     /**
-     * Finds and deletes users that wasn't activated for 2 days every 2 minutes
+     * Finds and deletes users that wasn't activated within 2 days every 2 days
      */
-    @Scheduled(cron = "0 0 0/2 * * *")
+    @Scheduled(cron = "0 0 0 0/2 * *")
     public void deleteExpiredNotActiveUsers() {
-        logger.debug("Checking users");
         userRepository.deleteExpiredNotActiveUsers();
     }
 
 
-    /**
-     * Registers new user
-     *
-     * @param user - user that has to be registrated
-     */
     public User registerUser(User user) {
-        user.setActive(false);
+
+        user.setEnabled(false);
         user.setPassword(passwordEncoder.encode(user.getPassword()));
         if (user.getRole() == null) {
-            user.setRole(updateRoleByCode(user));
+            Role newRole = checkIfAgent(user.getCompanyCode()) ?
+                    new Role(Role.ROLE_AGENT) : new Role(Role.ROLE_USER);
+            user.setRole(newRole);
         }
         User savedUser = userRepository.saveAndFlush(user);
-        logger.info("New user saved: {} with role {}", user.getLogin(), user.getRole());
+        logger.info("New user saved: {} with role {}", user.getUsername(), user.getRole());
         return savedUser;
 
     }
@@ -75,28 +70,15 @@ public class UsersService {
      */
     public User getCurrentUser() {
         Authentication auth = SecurityContextHolder.getContext().getAuthentication();
-        return userRepository.findByLogin(auth.getName());
+        return userRepository.findByUsername(auth.getName());
     }
 
-    /**
-     * Updates user role by his company code. Note: Admin cannot change his role in this way
-     *
-     * @param user - object of User class which company code was changed
-     * @return object of Role class which represents role that this user object has to have
-     */
-    private Roles updateRoleByCode(User user) {
-        if (user.getRole() != Roles.admin)
-            if (user.getCompanyCode() == null ||
-                    companyRepository.findByCompanyCode(user.getCompanyCode()) == null) {
-                return Roles.user;
-            } else if (companyRepository.findByCompanyCode(user.getCompanyCode()).getType().equals(TOUR_AGENCY)) {
-                return Roles.agent;
-            } else {
-                return Roles.user;
-            }
-        else {
-            return Roles.admin;
+    private boolean checkIfAgent(String companyCode) {
+        Company company = companyRepository.findByCompanyCode(companyCode);
+        if (companyCode != null && company != null && company.getType().equals(TOUR_AGENCY)) {
+            return true;
         }
+        return false;
     }
 
 
@@ -106,9 +88,8 @@ public class UsersService {
      * @param user -  user to be activated
      */
     public void activate(User user) {
-        user.setActive(true);
+        user.setEnabled(true);
         userRepository.saveAndFlush(user);
-
     }
 
 
@@ -120,16 +101,18 @@ public class UsersService {
     public void updateCompanyCode(String newCompanyCode) {
         User user = getCurrentUser();
         user.setCompanyCode(newCompanyCode);
-        user.setRole(updateRoleByCode(user));
+        int roleId = user.getRole().getRoleId();
+        if (roleId != Role.ROLE_ADMIN && roleId != Role.ROLE_AGENT &&
+                checkIfAgent(user.getCompanyCode())) {
+            user.setRole(new Role(Role.ROLE_AGENT));
+        }
         userRepository.saveAndFlush(user);
-        logger.info("User " + user.getLogin() + " " + "has changed his company code to '"
+        logger.info("User " + user.getUsername() + " " + "has changed his company code to '"
                 + user.getCompanyCode() + "'");
     }
 
-    public void changePassword(String newPassword, int userId) {
-        User user = userRepository.findOne(userId);
+    public void changePassword(String newPassword, User user) {
         user.setPassword(passwordEncoder.encode(newPassword));
-
         userRepository.saveAndFlush(user);
         emailService.sendPasswordSuccessRecoveryEmail(user);
     }
@@ -143,8 +126,8 @@ public class UsersService {
         return userRepository.findOne(id);
     }
 
-    public User findByLogin(String login) {
-        return userRepository.findByLogin(login);
+    public User findByUsername(String username) {
+        return userRepository.findByUsername(username);
     }
 
     public List<User> findAll() {
@@ -157,7 +140,6 @@ public class UsersService {
 
 
     public void recoverPassword(User user) {
-        validationService.delete(user);
         ValidationLink passwordChangeLink = validationService.createPasswordChangeLink(user);
         emailService.sendPasswordRecoveryEmail(user, passwordChangeLink);
 
@@ -167,4 +149,13 @@ public class UsersService {
         userRepository.delete(user);
     }
 
+    public void edit(User user) {
+        User existingUser = findOne(user.getUserId());
+        user.setPassword(existingUser.getPassword());
+        Photo photo = existingUser.getPhoto();
+        if (photo != null) {
+            user.setPhoto(photo);
+        }
+        save(user);
+    }
 }

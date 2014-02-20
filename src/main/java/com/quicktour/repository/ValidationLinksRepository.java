@@ -1,5 +1,6 @@
 package com.quicktour.repository;
 
+import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
@@ -7,7 +8,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.transaction.annotation.Transactional;
 
 public interface ValidationLinksRepository extends JpaRepository<ValidationLink, Integer> {
-    public java.util.List<ValidationLink> findByUserId(int id);
+    public ValidationLink findByUser(User user);
 
     public ValidationLink findByUrl(String s);
 

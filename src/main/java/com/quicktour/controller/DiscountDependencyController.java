@@ -31,7 +31,7 @@ public class DiscountDependencyController {
 
     private final Logger logger = LoggerFactory.getLogger(DiscountDependencyController.class);
 
-    @PreAuthorize("hasAnyRole('admin','agent')")
+    @PreAuthorize("hasAnyRole('ROLE_ADMIN','ROLE_AGENT')")
     @RequestMapping(value = "/getAllDependencies")
     @ResponseBody
     public JTableResponse getAllDependencies() {
@@ -41,7 +41,7 @@ public class DiscountDependencyController {
         return jTableResponse;
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(method = RequestMethod.GET)
     public String index(Model model) {
         model.addAttribute("dependencies", dependenciesService.findAllDependencies());
@@ -49,7 +49,7 @@ public class DiscountDependencyController {
         return "discountDependency";
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = {"/add", "/edit"}, method = RequestMethod.POST)
     @ResponseBody
     public JTableResponse add(@Valid DiscountDependency discountDependency, BindingResult bindingResult) {
@@ -68,7 +68,7 @@ public class DiscountDependencyController {
         return jTableResponse;
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
     public JTableResponse delete(DiscountDependency discountDependency) {
@@ -78,7 +78,7 @@ public class DiscountDependencyController {
         return jTableResponse;
     }
 
-    @PreAuthorize("hasRole('admin')")
+    @PreAuthorize("hasRole('ROLE_ADMIN')")
     @RequestMapping(value = "/getAvailableFields", method = RequestMethod.GET)
     @ResponseBody
     public List<String> getColumnNames() {

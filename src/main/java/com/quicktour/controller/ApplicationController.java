@@ -63,7 +63,7 @@ public class ApplicationController {
         addSidebarAttributes(map);
         Page page = toursService.findAllToursAndCalculateDiscount(pageNum, numberOfRecordsPerPage);
         map.addAttribute("page", page);
-        return "index-extended";
+        return "index-tile";
     }
 
 
@@ -77,7 +77,7 @@ public class ApplicationController {
                                ModelMap map) {
         map.addAttribute("page", toursService.findToursByCountry(country, pageNum));
         addSidebarAttributes(map);
-        return "index-extended";
+        return "index-tile";
     }
 
     /**
@@ -90,7 +90,7 @@ public class ApplicationController {
                              ModelMap map) {
         map.addAttribute("page", toursService.findToursByPlaces(place, pageNum));
         addSidebarAttributes(map);
-        return "index-extended";
+        return "index-tile";
     }
 
     /**
@@ -104,7 +104,7 @@ public class ApplicationController {
                                   ModelMap map) {
         map.addAttribute("page", toursService.findToursByPrice(min, max, pageNum));
         addSidebarAttributes(map);
-        return "index-extended";
+        return "index-tile";
     }
 
     /**
@@ -127,7 +127,7 @@ public class ApplicationController {
         map.addAttribute("page", toursService.extendFilter(country, place, minDate, maxDate,
                 minPrice, maxPrice, pageNum));
         addSidebarAttributes(map);
-        return "index-extended";
+        return "index-tile";
     }
 
 

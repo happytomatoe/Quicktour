@@ -7,6 +7,7 @@ import com.quicktour.repository.TourRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Sort;
@@ -26,8 +27,8 @@ import java.util.List;
 @Service
 @Transactional
 public class OrdersService {
-
-    private static final int NUMBER_OF_RECORDS_PER_PAGE = 10;
+    @Value("${numberOfOrdersOnPage}")
+    private int NUMBER_OF_ORDERS_PER_PAGE;
     private static final List<String> SORT_VALUES = Arrays.asList("tourInfoId", "orderDate", "price", "status",
             "nextPaymentDate");
     private static final String ACTIVE = "Active";
@@ -47,25 +48,24 @@ public class OrdersService {
     private TourRepository tourRepository;
 
     public Page<Order> findByUserId(int id, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByUsersId(id, new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+        return orderRepository.findByUsersId(id, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
     public Page<Order> findByCompanyId(int id, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByCompanyId(id, new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+        return orderRepository.findByCompanyId(id, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
 
     public Order findById(User activeUser, int id) {
-
-        switch (activeUser.getRole()) {
-            case admin:
+        switch (activeUser.getRole().getRoleId()) {
+            case Role.ROLE_ADMIN:
                 return orderRepository.findOne(id);
-            case agent:
+            case Role.ROLE_AGENT:
                 return orderRepository.findByCompanyId(companyService.findByCompanyCode(activeUser.getCompanyCode())
                         .getCompanyId(), id);
-            case user:
+            case Role.ROLE_USER:
                 return orderRepository.findByUserId(activeUser.getUserId(), id);
         }
 
@@ -73,42 +73,42 @@ public class OrdersService {
     }
 
     public Page<Order> findAll(int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findAll(new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+        return orderRepository.findAll(new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
     public Page<Order> findByStatus(Order.Status status, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByStatus(status, new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+        return orderRepository.findByStatus(status, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
     public Page<Order> findActiveOrders(int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findActiveOrders(new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+        return orderRepository.findActiveOrders(new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
     public Page<Order> findActiveOrdersByCompanyId(Company company, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findActiveOrdersByCompanyId(company.getCompanyId(),
-                new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+                new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findByStatusAndCompanyId(Order.Status status, Company company, int pageNumber, Sort.Order sortOrder) {
         logger.debug("Find by {}.{}.{}.{}", status, company, pageNumber, sortOrder);
         return orderRepository.findByStatusAndCompany(status, company,
-                new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+                new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findActiveOrdersByUserId(User activeUser, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findActiveOrdersByUserId(activeUser.getUserId(),
-                new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+                new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
     public Page<Order> findByStatusAndUserId(Order.Status status, User activeUser, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findByStatusAndUser(status, activeUser,
-                new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE,
+                new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
@@ -132,7 +132,6 @@ public class OrdersService {
      *  Defines sorting parameters for a list of orders
      */
     public Sort.Order sortByValue(String value, String direction) {
-
         String sortValue = SORT_VALUES.contains(value) ? value : Order.ID;
         Sort.Order sortOrder;
         if (DESC.equalsIgnoreCase(direction)) {
@@ -150,15 +149,15 @@ public class OrdersService {
     public Page<Order> listOrdersPaginated(User activeUser, int pageNumber, Sort.Order sortOrder) {
         Page<Order> orders = null;
 
-        switch (activeUser.getRole()) {
-            case admin:
+        switch (activeUser.getRole().getRoleId()) {
+            case Role.ROLE_ADMIN:
                 orders = findAll(pageNumber, sortOrder);
                 break;
-            case agent:
+            case Role.ROLE_AGENT:
                 Company company = companyService.findByCompanyCode(activeUser.getCompanyCode());
                 orders = findByCompanyId(company.getCompanyId(), pageNumber, sortOrder);
                 break;
-            case user:
+            case Role.ROLE_USER:
                 orders = findByUserId(activeUser.getUserId(), pageNumber, sortOrder);
                 break;
         }
@@ -175,17 +174,17 @@ public class OrdersService {
         if (!status.equals(ACTIVE)) {
             orderStatus = Order.Status.valueOf(status.toUpperCase());
         }
-        switch (activeUser.getRole()) {
-            case admin:
+        switch (activeUser.getRole().getRoleId()) {
+            case Role.ROLE_ADMIN:
                 orders = status.equals(ACTIVE) ? findActiveOrders(pageNumber, sortOrder) :
                         findByStatus(orderStatus, pageNumber, sortOrder);
                 break;
-            case agent:
+            case Role.ROLE_AGENT:
                 Company company = companyService.findByCompanyCode(activeUser.getCompanyCode());
                 orders = status.equals(ACTIVE) ? findActiveOrdersByCompanyId(company, pageNumber, sortOrder) :
                         findByStatusAndCompanyId(orderStatus, company, pageNumber, sortOrder);
                 break;
-            case user:
+            case Role.ROLE_USER:
                 orders = status.equals(ACTIVE) ? findActiveOrdersByUserId(activeUser, pageNumber, sortOrder) :
                         findByStatusAndUserId(orderStatus, activeUser, pageNumber, sortOrder);
                 break;
@@ -200,14 +199,14 @@ public class OrdersService {
     public Long allOrdersCount(User activeUser) {
         Long allCount = null;
 
-        switch (activeUser.getRole()) {
-            case admin:
+        switch (activeUser.getRole().getRoleId()) {
+            case Role.ROLE_ADMIN:
                 allCount = orderRepository.count();
                 break;
-            case agent:
+            case Role.ROLE_AGENT:
                 allCount = countByCompanyId(companyService.findByCompanyCode(activeUser.getCompanyCode()));
                 break;
-            case user:
+            case Role.ROLE_USER:
                 allCount = countByUserId(activeUser);
                 break;
         }
@@ -221,14 +220,15 @@ public class OrdersService {
     public Long ordersByStatusCount(User activeUser, Order.Status status) {
         Long byStatusCount = null;
 
-        switch (activeUser.getRole()) {
-            case admin:
+        switch (activeUser.getRole().getRoleId()) {
+            case Role.ROLE_ADMIN:
                 byStatusCount = orderRepository.countByStatus(status);
                 break;
-            case agent:
-                byStatusCount = countByCompanyIdAndStatus(companyService.findByCompanyCode(activeUser.getCompanyCode()), status);
+            case Role.ROLE_AGENT:
+                byStatusCount = countByCompanyIdAndStatus(
+                        companyService.findByCompanyCode(activeUser.getCompanyCode()), status);
                 break;
-            case user:
+            case Role.ROLE_USER:
                 byStatusCount = countByUserIdAndStatus(activeUser, status);
                 break;
         }
@@ -241,8 +241,7 @@ public class OrdersService {
      *  for specified user
      */
     public Long activeOrdersCount(User activeUser) {
-        return allOrdersCount(activeUser) - ordersByStatusCount(activeUser, Order.Status.COMPLETED) -
-                ordersByStatusCount(activeUser, Order.Status.CANCELLED);
+        return orderRepository.countByActiveStatusAndUser(activeUser);
     }
 
     /*
@@ -384,4 +383,10 @@ public class OrdersService {
     }
 
 
+    public String constructAnonymousUserInfo(Order order) {
+        User user = order.getUser();
+        return "Email:" + user.getEmail() + "<br>" + user.getName() + " " +
+                user.getSurname() + "<br>" + user.getPhone() + "<br>" +
+                order.getUserInfo();
+    }
 }

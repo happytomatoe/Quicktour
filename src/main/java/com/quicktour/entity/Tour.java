@@ -5,10 +5,10 @@ import org.codehaus.jackson.annotate.JsonManagedReference;
 import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.LazyCollection;
 import org.hibernate.annotations.LazyCollectionOption;
+import org.hibernate.validator.constraints.NotBlank;
 
 import javax.persistence.*;
 import javax.validation.Valid;
-import javax.validation.constraints.NotNull;
 import java.math.BigDecimal;
 import java.util.List;
 
@@ -24,11 +24,8 @@ public class Tour {
     private List<Place> toursPlaces;
     private List<PriceDescription> priceIncludes;
     private List<DiscountPolicy> discountPolicies;
-    @NotNull
     private String name;
-    @NotNull
     private String description;
-    @NotNull
     private String transportDesc;
     private Photo photo;
     private Boolean active;
@@ -144,7 +141,7 @@ public class Tour {
         this.toursPlaces = toursPlaces;
     }
 
-    @OneToMany(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToMany(fetch = FetchType.EAGER)
     @JoinTable(name = "tours_price_includes",
             joinColumns = @JoinColumn(name = "tours_id"),
             inverseJoinColumns = @JoinColumn(name = "price_includes_id"))
@@ -170,6 +167,7 @@ public class Tour {
         this.discountPolicies = discountPolicy;
     }
 
+    @NotBlank
     @Column(name = "name")
     public String getName() {
         return name;
@@ -179,6 +177,7 @@ public class Tour {
         this.name = name;
     }
 
+    @NotBlank
     @Column(name = "description", columnDefinition = "TEXT")
     public String getDescription() {
         return description;
@@ -188,6 +187,7 @@ public class Tour {
         this.description = description;
     }
 
+    @NotBlank
     @Column(name = "transport_description")
     public String getTransportDesc() {
         return transportDesc;
@@ -207,7 +207,7 @@ public class Tour {
         this.discount = discount;
     }
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
     @JoinColumn(name = "photo_id")
     public Photo getPhoto() {
         return photo;

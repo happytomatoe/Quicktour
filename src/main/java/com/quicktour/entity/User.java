@@ -14,12 +14,8 @@ import java.util.Collection;
 @Table(name = "users")
 public class User {
 
-    public enum Roles {
-        admin, agent, user
-    }
-
     private int userId;
-    private String login;
+    private String username;
     @JsonIgnore
     private String password;
     @JsonIgnore
@@ -35,14 +31,14 @@ public class User {
     @JsonIgnore
     private Integer age;
     @JsonIgnore
-    private String sex;
+    private String gender;
     @JsonIgnore
     private String companyCode;
     private Photo photo;
     @JsonIgnore
-    private boolean active;
+    private boolean enabled;
     @JsonIgnore
-    private Roles role;
+    private Role role;
     @JsonIgnore
     private Collection<Order> orders;
     @JsonIgnore
@@ -60,16 +56,6 @@ public class User {
     }
 
 
-    @Enumerated(EnumType.STRING)
-    public Roles getRole() {
-        return role;
-    }
-
-    public void setRole(Roles role) {
-        this.role = role;
-    }
-
-
     @Column(name = "user_id")
     @Id
     @GeneratedValue
@@ -84,13 +70,13 @@ public class User {
     @Pattern(regexp = "^[a-zA-Z0-9]+$",
             message = "Login must be alpha numeric with no spaces")
     @Size(min = 3, max = 30, message = "Login must be between 3 and 30 characters long.")
-    @Column(name = "login")
-    public String getLogin() {
-        return login;
+    @Column(name = "username")
+    public String getUsername() {
+        return username;
     }
 
-    public void setLogin(String login) {
-        this.login = login;
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     @Size(min = 8, message = "Password must be at least 8 characters long.")
@@ -169,13 +155,13 @@ public class User {
         this.age = age;
     }
 
-    @Column(name = "sex")
-    public String getSex() {
-        return sex;
+    @Column(name = "gender")
+    public String getGender() {
+        return gender;
     }
 
-    public void setSex(String sex) {
-        this.sex = sex;
+    public void setGender(String sex) {
+        this.gender = sex;
     }
 
     @Column(name = "company_code")
@@ -198,7 +184,7 @@ public class User {
     }
 
 
-    @ManyToOne()
+    @ManyToOne(cascade = CascadeType.ALL)
     @LazyCollection(LazyCollectionOption.TRUE)
     @JoinColumn(name = "photos_id")
     public Photo getPhoto() {
@@ -220,22 +206,31 @@ public class User {
         this.comments = comments;
     }
 
-    @Column(name = "active")
-    public boolean isActive() {
-        return active;
+    @Column(name = "enabled")
+    public boolean isEnabled() {
+        return enabled;
     }
 
-    public void setActive(boolean active) {
-        this.active = active;
+    public void setEnabled(boolean active) {
+        this.enabled = active;
     }
 
+    @ManyToOne
+    @JoinColumn(name = "roles_id", referencedColumnName = "role_id")
+    public Role getRole() {
+        return role;
+    }
+
+    public void setRole(Role role) {
+        this.role = role;
+    }
 
     @Override
     public String toString() {
         final StringBuilder sb = new StringBuilder("User{");
         sb.append("role=").append(role);
         sb.append(", id=").append(userId);
-        sb.append(", login='").append(login).append('\'');
+        sb.append(", login='").append(username).append('\'');
         sb.append(", password='").append(password).append('\'');
         sb.append(", email='").append(email).append('\'');
         sb.append(", phone='").append(phone).append('\'');
@@ -243,10 +238,10 @@ public class User {
         sb.append(", name='").append(name).append('\'');
         sb.append(", surname='").append(surname).append('\'');
         sb.append(", age=").append(age);
-        sb.append(", sex='").append(sex).append('\'');
+        sb.append(", sex='").append(gender).append('\'');
         sb.append(", companyCode='").append(companyCode).append('\'');
         sb.append(", photosId=").append(photo);
-        sb.append(", active=").append(active);
+        sb.append(", active=").append(enabled);
         sb.append('}');
         return sb.toString();
     }

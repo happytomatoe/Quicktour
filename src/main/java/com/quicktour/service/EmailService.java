@@ -72,16 +72,17 @@ public class EmailService {
         message.setSubject(subject);
         message.setText(text);
         mailSender.send(message);
+
     }
 
 
     public void sendRegistrationEmail(User user, ValidationLink validationLink) {
-        String toReplace[] = {"Name", "Surname", "Login", "ValidationLink"};
-        String[] replacement = {user.getName(), user.getSurname(), user.getLogin(),
+        String toReplace[] = {"Name", "Surname", "Username", "ValidationLink"};
+        String[] replacement = {user.getName(), user.getSurname(), user.getUsername(),
                 retrieveBaseUrl() + "/activate/" + validationLink.getUrl()};
         String emailText = formatEmailText(USER_REGISTRATION_TEXT, toReplace, replacement);
         sendEmail(user.getEmail(), USER_REGISTRATION_SUBJECT, emailText);
-        logger.info("Registrational email sent to: " + user.getLogin());
+        logger.info("Registrational email sent to: " + user.getUsername());
     }
 
     public void sendRegistrationEmail(Company company) {
@@ -118,7 +119,7 @@ public class EmailService {
 
     public void sendPasswordRecoveryEmail(User user, ValidationLink passwordChangeLink) {
         String[] toReplace = {"Username", "URL"};
-        String[] replacement = {user.getLogin(), retrieveBaseUrl() + "/changePassword/" + passwordChangeLink.getUrl()};
+        String[] replacement = {user.getUsername(), retrieveBaseUrl() + "/changePassword/" + passwordChangeLink.getUrl()};
         String mailText = formatEmailText(PASSWORD_RECOVERY_TEXT, toReplace, replacement);
         sendEmail(user.getEmail(), PASSWORD_RECOVERY_SUBJECT, mailText);
     }
@@ -155,7 +156,7 @@ public class EmailService {
         String mailSubject = formatEmailText(COMMENT_CHANGED_IN_ORDER_SUBJECT, toReplace, replacement);
 
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
-        String username = usersService.getCurrentUser().getLogin();
+        String username = usersService.getCurrentUser().getUsername();
         toReplace = new String[]{"OrderId", "Timestamp", "Username", "TourName", "TourInfoStartDate"};
         replacement = new String[]{orderId, currentTimestamp.toString(), username,
                 order.getTourInfo().getTour().getName(), order.getTourInfo().getStartDate().toString()};

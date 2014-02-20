@@ -20,7 +20,7 @@
                 </div>
                 <script type="text/javascript">
                     jQuery('#rate_${order.orderId}').raty({
-                        <c:if test="${user.role != 'user'}">
+                        <c:if test="${user.role != 'ROLE_USER'}">
                         readOnly: true,
                         </c:if>
                         cancel: true,
@@ -223,7 +223,7 @@
                         <label for="comments">Comments:</label>
                         <textarea name="userInfo" id="comments" rows="5"
                                   class="form-control">${order.userInfo}</textarea>
-                        <c:if test="${user.role == 'user'}">
+                        <c:if test="${user.role == 'ROLE_USER'}">
                             <div class="pull-right sc">
                                 <a id="saveComments" class="btn btn-success btn-sm">Save Comments</a>
                             </div>
@@ -242,7 +242,7 @@
     <div class="panel-heading">
         <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTree">
                   <span class="panel-title"><span class="glyphicon glyphicon-hand-right"></span>&nbsp;&nbsp;
-                    <c:out value="${user.role != 'user' ? 'Manage Order': 'Order Information'}"/>
+                    <c:out value="${user.role != 'ROLE_USER' ? 'Manage Order': 'Order Information'}"/>
                   </span>
         </a>
     </div>
@@ -253,7 +253,7 @@
                     <div class="form-group">
                         <label for="numberOfAdults">Adults:</label>
                         <c:choose>
-                            <c:when test="${user.role == 'user'}">
+                            <c:when test="${user.role == 'ROLE_USER'}">
                                 &nbsp;&nbsp;${order.numberOfAdults}
                             </c:when>
                             <c:otherwise>
@@ -277,7 +277,7 @@
                     <div class="form-group">
                         <label for="numberOfChildren">Children:</label>
                         <c:choose>
-                            <c:when test="${user.role == 'user'}">
+                            <c:when test="${user.role == 'ROLE_USER'}">
                                 &nbsp;&nbsp;${order.numberOfChildren}
                             </c:when>
                             <c:otherwise>
@@ -302,7 +302,7 @@
                     <div class="form-group">
                         <label for="discount">Discount, %:</label>
                         <c:choose>
-                            <c:when test="${user.role == 'user'}">
+                            <c:when test="${user.role == 'ROLE_USER'}">
                                 &nbsp;&nbsp;${order.discount}
                                 <input id="discount" value="${order.discount}" type="hidden">
                             </c:when>
@@ -322,7 +322,7 @@
                     <div class="form-group">
                         <label for="paymentDate">Next payment until:</label>
                         <c:choose>
-                            <c:when test="${user.role == 'user'}">
+                            <c:when test="${user.role == 'ROLE_USER'}">
                                 &nbsp;&nbsp;${order.nextPaymentDate}
                             </c:when>
                             <c:otherwise>
@@ -341,7 +341,7 @@
                     <div class="form-group">
                         <label for="status">Order status:</label>
                         <c:choose>
-                            <c:when test="${user.role == 'user'}">
+                            <c:when test="${user.role == 'ROLE_USER'}">
                                 &nbsp;&nbsp;${order.status}
                             </c:when>
                             <c:otherwise>
@@ -360,7 +360,7 @@
                     </div>
                     <input id="orderId" name="id" value="${order.orderId}" type="hidden">
                     <c:choose>
-                        <c:when test="${user.role == 'user'}">
+                        <c:when test="${user.role == 'ROLE_USER'}">
                           <span class="pull-right">
                             <a class="btn btn-default btn-sm" href="/orders">Back</a>
                           </span>

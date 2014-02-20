@@ -21,13 +21,9 @@ public class TourInfo {
     private int tourInfoId;
 
     private Tour tour;
-
     private Date startDate;
-
     private Date endDate;
-    @Range(min = 0, max = 100)
     private Integer discount;
-
     private Collection<Order> orders;
 
     @GeneratedValue
@@ -69,6 +65,7 @@ public class TourInfo {
         this.endDate = endDate;
     }
 
+    @Range(min = 0, max = 100)
     @Column(name = "discount")
     public Integer getDiscount() {
         return discount;

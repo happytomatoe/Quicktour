@@ -1,11 +1,22 @@
 /**
  *Adds condition to discount policy on add or edit discount policy pages
  */
+var createFormValidator;
 var signsDef = {'>': '>', '>=': "≥", '<': '<', '<=': '≤', '=': '='};
 var MAX_NUMB_OF_CONDITIONS = 6;
+jQuery.validator.addMethod("greaterThan",
+    function (value, element, params) {
+        if (!/Invalid|NaN/.test(new Date(value))) {
+            return new Date(value) > new Date($(params).val());
+        }
+        return isNaN(value) && isNaN($(params).val())
+            || (Number(value) > Number($(params).val()));
+    }, 'Must be greater than start date.');
+
 function addCondition(relation, condition) {
 
     var divCondition = document.getElementById("condition");
+
     if (divCondition.children.length > MAX_NUMB_OF_CONDITIONS) {
         openDialog("Maximum number of conditions is exceeded");
         return;
@@ -23,11 +34,14 @@ function addCondition(relation, condition) {
     var divRelationAndCondition = document.createElement("div");
     divRelationAndCondition.className = "relationAndCondition";
     if (divCondition.children.length > 0) {
+
         var divRow = document.createElement("div");
         divRow.className = "row";
         var divColSm1 = document.createElement("div");
         divColSm1.className = "col-sm-1";
         divRow.appendChild(divColSm1);
+        var divider = document.createElement("br");
+        divRelationAndCondition.appendChild(divider);
         divRelationAndCondition.appendChild(divRow);
         var selectRelation = document.createElement("select");
         selectRelation.name = "relation";
@@ -70,6 +84,8 @@ function addCondition(relation, condition) {
     var param = document.createElement("input");
     param.type = "number";
     param.name = "param";
+    param.required = "true";
+    param.number = "true";
     divParam.appendChild(param);
     var buttonDelete = document.createElement("button");
     buttonDelete.className = "btn btn-danger  btn-xs ";
@@ -78,7 +94,7 @@ function addCondition(relation, condition) {
         if (divRelationAndCondition.previousSibling == null) {
             var nextDiv = divRelationAndCondition.nextElementSibling;
             if (nextDiv != null) {
-                nextDiv.removeChild(nextDiv.firstChild);
+                nextDiv.removeChild(nextDiv.children[1]);
             }
 
         }
@@ -189,6 +205,7 @@ function checkSign(divOperator, e) {
         }
         var inputParam = document.createElement("input");
         inputParam.type = "text";
+        inputParam.required = "true";
         inputParam.className = "input-xs";
         inputParam.name = "param";
         param.parentNode.replaceChild(inputParam, param);
@@ -206,6 +223,7 @@ function checkSign(divOperator, e) {
         }
         var inputParam = document.createElement("input");
         inputParam.type = "number";
+        inputParam.number = "true";
         inputParam.name = "param";
         param.parentNode.replaceChild(inputParam, param);
     }
@@ -309,7 +327,26 @@ $(document).ready(function () {
             if (data.formType == 'edit' && data.record.condition != null) {
                 parseCondition(data.record.condition);
             }
-
+            createFormValidator = data.form.validate({
+                rules: {
+                    name: {
+                        required: true,
+                        minlength: 3
+                    }, formula: {
+                        required: true,
+                        number: true
+                    },
+                    endDate: {greaterThan: "input[name='startDate']"}
+                },
+                errorClass: "text-danger",
+                submitHandler: function (form) {
+                    form.submit();
+                }
+            });
+            console.log("validator", createFormValidator)
+        },
+        formSubmitting: function (event, data) {
+            return createFormValidator.form();
         },
         recordAdded: function (event, data) {
             policies.jtable('load');
@@ -364,9 +401,3 @@ function openDialog(message) {
     $("#dialog").dialog("open");
 
 };
-function checkLength(min, max, string) {
-    if (string.length < min || string.length > max) {
-        return false;
-    }
-    return true;
-}

@@ -17,6 +17,18 @@ jQuery.validator.addMethod("greaterThan",
     }, 'Must be greater than start date.');
 window.onload = function () {
 
+    boxes = $('.col-sm-6');
+    maxHeight = Math.max.apply(
+        Math, boxes.map(function () {
+            return $(this).height();
+        }).get());
+    boxes.height(maxHeight);
+
+    $('.col-sm-12 .panel ').height(maxHeight / 2 - 22);//22 = 20 (bottom-margin) + 2 *1 (border)
+
+
+    $(".select2").select2({placeholder: "Select price description(s)"});
+
     btnAddDateClicked = document.forms[0].elements["tourInfoCount"].value;
     toursPlacesCounter = document.forms[0].elements["tourPlacesCount"].value;
     var form = jQuery("#manageTourForm");
@@ -137,10 +149,24 @@ function addTourInfo() {
     var forElement;
 
     var dataDiv = document.getElementById("dateBlock");
-
+    var tourInfo = document.createElement("div");
+    tourInfo.setAttribute("class", "form-group col-md-4 col-sm-6 ");
+    var tourInfoPanel = document.createElement("div");
+    tourInfoPanel.setAttribute("class", "panel panel-default col-sm-12");
+    tourInfo.appendChild(tourInfoPanel);
     var myDiv = document.createElement("div");
-    myDiv.setAttribute("class", "form-group col-md-4");
-
+    myDiv.setAttribute("class", "panel-body");
+    tourInfoPanel.appendChild(myDiv);
+    var closeIcon = document.createElement("a");
+    closeIcon.setAttribute("class", "pull-right");
+    closeIcon.setAttribute("href", "javascript:void(0)");
+    var closeIconSpan = document.createElement("span");
+    closeIconSpan.setAttribute("class", "glyphicon glyphicon-remove ");
+    closeIcon.appendChild(closeIconSpan);
+    closeIcon.onclick = function () {
+        tourInfo.parentElement.removeChild(tourInfo);
+    };
+    myDiv.appendChild(closeIcon);
     var startDateDiv = document.createElement("div");
     startDateDiv.setAttribute("class", "form-group");
 
@@ -216,7 +242,7 @@ function addTourInfo() {
     discountDiv.appendChild(discountNode);
     myDiv.appendChild(discountDiv);
 
-    dataDiv.appendChild(myDiv);
+    dataDiv.appendChild(tourInfo);
     id = "tourInfo" + btnAddDateClicked + ".startDate";
     jQuery(function () {
         jQuery(document.getElementById(id)).datepicker({
@@ -238,19 +264,38 @@ function addTourInfo() {
     btnAddDateClicked++;
 }
 
-function addPlace() {
+
+function addPlace(markerNumber) {
     var id;
     var name;
     var forElement;
-
     //get div for toursPlaces
     var placeDiv = document.getElementById("placeBlock");
 
     //set place div view
-    var newPlaceDiv = document.createElement("div");
+    var newPlaceContainer = document.createElement("div");
     id = "place" + toursPlacesCounter;
-    newPlaceDiv.setAttribute("id", id);
-    newPlaceDiv.setAttribute("class", "col-md-6");
+    newPlaceContainer.setAttribute("id", id);
+    newPlaceContainer.setAttribute("class", "col-md-6");
+    newPlaceContainer.height = maxHeight / 2 - 22;
+//Add panel and panel body and close icon
+    var placePanel = document.createElement("div");
+    placePanel.setAttribute("class", "panel panel-default col-sm-12");
+    newPlaceContainer.appendChild(placePanel);
+    var newPlaceDiv = document.createElement("div");
+    newPlaceDiv.setAttribute("class", "panel-body");
+    placePanel.appendChild(newPlaceDiv);
+    var closeIcon = document.createElement("a");
+    closeIcon.setAttribute("class", "pull-right");
+    closeIcon.setAttribute("href", "javascript:void(0)");
+    var closeIconSpan = document.createElement("span");
+    closeIconSpan.setAttribute("class", "glyphicon glyphicon-remove ");
+    closeIcon.appendChild(closeIconSpan);
+    closeIcon.onclick = function () {
+        setMarkerAction(markerNumber);
+    };
+    newPlaceDiv.appendChild(closeIcon);
+
 
     //hiden element for place country
     var countryNode = document.createElement("input");
@@ -326,7 +371,7 @@ function addPlace() {
     newPlaceDiv.appendChild(priceLabelNode);
     newPlaceDiv.appendChild(placePriceNode);
 
-    placeDiv.appendChild(newPlaceDiv);
+    placeDiv.appendChild(newPlaceContainer);
     toursPlacesCounter++;
 }
 
@@ -344,6 +389,7 @@ function getCoordinates(address) {
             google.maps.event.addListener(markers[length - 1], 'click', function () {
                 setMarkerAction(length - 1);
             });
+
             var data = results[0].address_components;
             var lat = results[0].geometry.location.lat();
             var lng = results[0].geometry.location.lng();
@@ -375,7 +421,7 @@ function getPlaceByCoordinates(location) {
                 var lng = location.lng();
                 var locality = getGooglePlaceElement(data, "locality");
                 var country = getGooglePlaceElement(data, "country");
-                addPlace();
+                addPlace(length - 1);
                 setPlaceData(locality, country, lat, lng);
             }
         }
@@ -383,11 +429,21 @@ function getPlaceByCoordinates(location) {
 }
 
 function setMarkerAction(number) {
+
+    console.log("Trying to delete", number);
     markers[number].setMap(null);
     var id = "place" + number;
-    var placeDiv = document.getElementById("placeBlock");
     var markerPlace = document.getElementById(id);
-    placeDiv.removeChild(markerPlace);
+    console.log("Others", "#" + id, $("#" + id), $("#" + id).nextAll().find("input"));
+    $("#" + id).nextAll().find("input").each(function (i, item) {
+        var p = /(\d+)/;
+        var match = parseInt(p.exec(item.id));
+        console.log("Replacing value", match);
+        item.id = item.id.replace(match, match - 1);
+        item.name = item.name.replace(match, match - 1);
+    })
+    markerPlace.parentElement.removeChild(markerPlace);
+
 }
 
 function getGooglePlaceElement(data, element) {
@@ -402,6 +458,7 @@ function getGooglePlaceElement(data, element) {
         }
     }
 }
+
 
 function setPlaceData(locality, country, lat, lng) {
     document.getElementById("toursPlaces" + (toursPlacesCounter - 1) + ".name").setAttribute("value", locality);
@@ -465,6 +522,25 @@ function setTourPlaces() {
 
         markers.push(marker);
         var length = markers.length;
+        id = id.replace(".", "\\.");
+        var panel = $("#" + id).parent().parent().parent();
+
+        console.log("Element", "#" + id);
+        console.log("panel", panel);
+        console.log("MarkeAction", length - 1);
+        console.log("ashka", panel.find("a"));
+        a = function (length) {
+            var markerInd = length - 1;
+            panel.find("a").click(function () {
+                //TODO:repair
+                console.log("Trying to set delete marker .Length", markerInd);
+
+                setMarkerAction(markerInd);
+
+            });
+        }
+        a(length);
+        panel.find("a").attr("marker", length - 1);
         google.maps.event.addListener(markers[length - 1], 'click', function () {
             setMarkerAction(length - 1);
         });

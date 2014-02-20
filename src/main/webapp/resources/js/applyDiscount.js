@@ -17,7 +17,7 @@ $.fn.replaceWithPush = function (a) {
 function downloadAvailableTours() {
 //Get agency tours
     $.ajax({
-        url: cutUrl + "/agent/getAgencyToursWithoutDiscounts",
+        url: cutUrl + "/tours/getAgencyToursWithoutDiscounts",
         dataType: "json",
         success: function (data, textStatus) {
             availableTours = data;

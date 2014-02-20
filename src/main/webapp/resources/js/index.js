@@ -1,9 +1,7 @@
 var country = $("#country");
 var placeInput = $("#place");
-var baseUrl;
 
 $(document).ready(function () {
-    baseUrl = $("input#baseUrl").val();
     country.select2({ placeholder: "Select a country",
         allowClear: true});
     placeInput.select2({ placeholder: "Select a place",
@@ -14,10 +12,11 @@ $(document).ready(function () {
 jQuery(function () {
     //pagination and number of records
     var $numberOfRecords = $("#numberOfRecords");
+    var $numberOfRecords = $("#numberOfRecords");
     $numberOfRecords.change(function () {
         var url = window.location.href;
         if (url.contains("numberOfRecords")) {
-            url = url.substr(0, url.length - 1) + $numberOfRecords.val();
+            url = url.substr(0, url.lastIndexOf("=") + 1) + $numberOfRecords.val();
         } else {
             url += "?numberOfRecords=" + $numberOfRecords.val();
         }

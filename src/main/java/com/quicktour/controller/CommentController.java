@@ -9,6 +9,7 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.web.bind.annotation.*;
 
@@ -41,15 +42,11 @@ public class CommentController {
 
     @RequestMapping(value = "/{id}/removeComment", method = RequestMethod.POST)
     @ResponseBody
+    @PreAuthorize("isAuthenticated()")
     public String removeComment(
             Comment comment
     ) {
-        User commentUser = commentService.findOne(comment.getCommentId()).getUser();
-        if (!commentUser.getLogin().equals(usersService.getCurrentUser().getLogin())) {
-            return "Error";
-        }
-        commentService.delete(comment);
-        return "Ok";
+        return commentService.delete(comment);
     }
 
     @RequestMapping(value = "/{id}/getLastComments", method = RequestMethod.POST)
@@ -60,9 +57,19 @@ public class CommentController {
         return commentService.findLastPageComments(tourId, numberOfRecordsPerPage);
     }
 
+    @PreAuthorize("isAuthenticated()")
     @RequestMapping(value = "/{tourId}/saveComment", method = RequestMethod.POST)
     @ResponseBody
     public Comment saveComment(Comment comment, @PathVariable("tourId") int tourId) {
+        int commentId = comment.getCommentId();
+        User currentUser = usersService.getCurrentUser();
+        if (commentId != 0) {
+            Comment userComment = commentService.findOne(commentId);
+            if (!currentUser.equals(userComment.getUser())) {
+                return null;
+            }
+        }
+        comment.setUser(currentUser);
         Tour tour = new Tour();
         tour.setTourId(tourId);
         comment.setTour(tour);

@@ -42,6 +42,7 @@ public class Order {
     private String discountInformation;
 
     @Id
+    @GeneratedValue
     @Column(name = "order_id")
     public int getOrderId() {
         return orderId;

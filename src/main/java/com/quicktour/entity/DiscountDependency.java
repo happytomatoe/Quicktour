@@ -2,10 +2,7 @@ package com.quicktour.entity;
 
 import org.hibernate.validator.constraints.NotEmpty;
 
-import javax.persistence.Column;
-import javax.persistence.Entity;
-import javax.persistence.Id;
-import javax.persistence.Table;
+import javax.persistence.*;
 
 /**
  * @author Roman Lukash
@@ -21,6 +18,7 @@ public class DiscountDependency {
 
     @Column(name = "discount_dependency_id")
     @Id
+    @GeneratedValue
     public int getDiscountDependencyId() {
         return discountDependencyId;
     }

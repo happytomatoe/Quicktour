@@ -9,10 +9,11 @@
 <script src="<c:url value="/resources/js/jquery.bind-first-0.2.2.min.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.inputmask.js"/> "></script>
 <script src="<c:url value="/resources/js/jasny-bootstrap.min.js"/> "></script>
+<script src="<c:url value="/resources/js/jquery.validate.js"/> "></script>
+<script src="<c:url value="/resources/js/jquery.validator.additional-methods.js"/> "></script>
 <link rel="stylesheet" href="<c:url value="/resources/css/register.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/passfield.min.css"/>"/>
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
-<%@ page import="com.quicktour.entity.User.Roles" %>
 
 <div class="row">
     <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
@@ -42,10 +43,10 @@
             </div>
         </div>
         <div class="form-group">
-            <form:input name="login" id="login" path="login" size="30" maxlength="30"
+            <form:input name="username" id="username" path="username" size="30" maxlength="30"
                         cssClass="form-control input-lg"
-                        placeholder="Login" required="true" tabindex="3"/>
-            <form:errors path="login" cssClass="alert-danger"/>
+                        placeholder="Username" required="true" tabindex="3"/>
+            <form:errors path="username" cssClass="alert-danger"/>
         </div>
         <div class="form-group">
             <form:input name="email" id="email" path="email" size="30" maxlength="30"
@@ -57,13 +58,13 @@
             <div class="col-xs-6 col-sm-6 col-md-6">
                 <div class="form-group">
                     <form:input name="password" id="password" type="password" path="password"
-                                placeholder="Password" cssClass="form-control input-lg" tabindex="5"/>
+                                placeholder="Password" required="true" cssClass="form-control input-lg" tabindex="5"/>
                     <form:errors path="password" cssClass="alert-danger"/>
                 </div>
             </div>
             <div class="col-xs-6 col-sm-6 col-md-6">
                 <div class="form-group">
-                    <input type="password" name="password_confirmation" id="password_confirmation"
+                    <input type="password" name="password_confirmation" required="true" id="password_confirmation"
                            class="form-control input-lg" placeholder="Confirm Password" tabindex="6">
                 </div>
             </div>
@@ -93,8 +94,8 @@
             <form:errors path="phone" cssClass="alert-danger"/>
         </div>
         <div class="form-group">
-            <select name="sex" class="form-control input-lg" tabindex="10">
-                <option value="" disabled selected>
+            <select name="gender" class="form-control input-lg" tabindex="10">
+            <option value="" disabled selected>
                     Gender
                 </option>
                 <option value="Male">
@@ -118,16 +119,15 @@
             </div>
             <form:errors path="photo" cssClass="alert-danger"/>
         </div>
-        <sec:authorize access="hasRole('admin')">
-            <div class="form-group">
-                <% pageContext.setAttribute("roles", Roles.values()); %>
-                <select name="role" class="form-control input-lg">
-                    <c:forEach items="${roles}" var="role">
-                        <option value="${role}">${role}</option>
-                    </c:forEach>
+            <sec:authorize access="hasRole('ROLE_ADMIN')">
+                <div class="form-group">
+                    <form:select path="role" class="form-control input-lg">
+                        <c:forEach items="${roles}" var="role">
+                            <form:option value="${role.roleId}">${role.name}</form:option>
+                        </c:forEach>
 
-                </select>
-            </div>
+                    </form:select>
+                </div>
         </sec:authorize>
         <hr class="colorgraph">
         <div class="row">

@@ -2,10 +2,11 @@ package com.quicktour.service;
 
 import com.quicktour.dto.DiscountPoliciesResult;
 import com.quicktour.entity.*;
-import com.quicktour.entity.User.Roles;
 import com.quicktour.repository.CompanyRepository;
+import com.quicktour.repository.PriceIncludeRepository;
 import com.quicktour.repository.ToursRepository;
-import com.quicktour.utils.HTMLUtils;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,10 +22,7 @@ import javax.persistence.EntityManager;
 import javax.persistence.PersistenceContext;
 import javax.persistence.Query;
 import java.math.BigDecimal;
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.Iterator;
-import java.util.List;
+import java.util.*;
 
 @Service
 @Transactional
@@ -34,6 +32,8 @@ public class ToursService {
     @Value("${numberOfFamousTours}")
     private int NUMBER_OF_FAMOUS_TOURS;
     private static final Logger logger = LoggerFactory.getLogger(ToursService.class);
+    @Autowired
+    PriceIncludeRepository priceIncludeRepository;
     @Autowired
     private UsersService usersService;
     @Autowired
@@ -75,7 +75,7 @@ public class ToursService {
 
     public List<Tour> findByCurrentUserAgency() {
         User user = usersService.getCurrentUser();
-        if (user.getRole() == Roles.agent) {
+        if (user.getRole().getRoleId() == Role.ROLE_AGENT) {
             Company company = companyRepository.findByCompanyCode(user.getCompanyCode());
             return (List<Tour>) company.getTours();
         }
@@ -87,6 +87,10 @@ public class ToursService {
     }
 
     public Page<Tour> findAllTours(int pageNumber, int numberOfRecords) {
+        long count = toursRepository.count();
+        if (pageNumber * numberOfRecords > count) {
+            pageNumber = (int) count / numberOfRecords;
+        }
         return toursRepository.findByActiveTrue(new PageRequest(pageNumber, numberOfRecords));
     }
 
@@ -286,17 +290,45 @@ public class ToursService {
         int price;
         User currentUser = usersService.getCurrentUser();
         tour.setCompany(companyService.findByCompanyCode(currentUser.getCompanyCode()));
-        if (!mainPhoto.isEmpty()) {
-            tour.setPhoto(photoService.saveImage(tour.getName(), mainPhoto));
-        }
+        photoService.saveImageAndSet(tour, mainPhoto);
         logger.debug("Edited tour photo is {}.Empty {}", tour.getPhoto(), mainPhoto.isEmpty());
-        if (tour.getToursPlaces() != null) {
-            Iterator<Place> placeIterator = tour.getToursPlaces().iterator();
+        logger.debug("Finished places");
+        cleanTourUnsafeHTML(tour);
+        logger.debug("Finished places");
+        ListIterator<TourInfo> tourInfoListIterator = tour.getTourInfo().listIterator();
+        while (tourInfoListIterator.hasNext()) {
+            TourInfo tourInfo = tourInfoListIterator.next();
+            if (tourInfo == null) {
+                tourInfoListIterator.remove();
+            } else {
+                tourInfo.setTour(tour);
+
+            }
+        }
+        logger.debug("Finished tourInfos");
+
+        price = calculateTourPrice(tour);
+        logger.debug("Finished price");
+        tour.setPrice(new BigDecimal(price));
+        tour.setDescription(tour.getDescription().trim());
+        List<PriceDescription> priceIncludes = tour.getPriceIncludes();
+        for (int i = 0; i < priceIncludes.size(); i++) {
+
+            priceIncludes.set(i, priceIncludeRepository.findOne(priceIncludes.get(i).getPriceDescriptionId()));
+        }
+        tour.setPriceIncludes(priceIncludes);
+        logger.debug("Description {}", tour.getDescription().length());
+        saveTour(tour);
+        logger.debug("Tour {} saved successfully", tour.getTourId());
+    }
+
+    public void clearEmptyPlaces(Tour tour) {
+        List<Place> toursPlaces = tour.getToursPlaces();
+        if (toursPlaces != null) {
+            Iterator<Place> placeIterator = toursPlaces.iterator();
             while (placeIterator.hasNext()) {
                 Place place = placeIterator.next();
-                if (place.getCountry() == null && place.getPrice() == null
-                        && place.getName() == null && place.getGeoWidth() == null
-                        && place.getGeoHeight() == null) {
+                if (place.getPrice() == null && place.getName() == null) {
                     placeIterator.remove();
                 } else {
                     List<Tour> placeTours = place.getTours();
@@ -308,21 +340,6 @@ public class ToursService {
                 }
             }
         }
-        logger.debug("Finished places");
-        cleanTourUnsafeHTML(tour);
-        logger.debug("Finished places");
-        for (TourInfo tourInfo : tour.getTourInfo()) {
-            tourInfo.setTour(tour);
-        }
-        logger.debug("Finished tourInfos");
-
-        price = calculateTourPrice(tour);
-        logger.debug("Finished price");
-        tour.setPrice(new BigDecimal(price));
-        tour.setDescription(tour.getDescription().trim());
-        logger.debug("Description {}", tour.getDescription().length());
-        saveTour(tour);
-        logger.debug("Tour {} saved successfully", tour.getTourId());
     }
 
 
@@ -338,14 +355,14 @@ public class ToursService {
 
 
     private void cleanTourUnsafeHTML(Tour tour) {
-        tour.setName(HTMLUtils.cleanHTML(tour.getName()));
-        tour.setDescription(HTMLUtils.cleanHTML(tour.getDescription()));
-        tour.setTransportDesc(HTMLUtils.cleanHTML(tour.getTransportDesc()));
+        tour.setName(Jsoup.clean(tour.getName(), Whitelist.basic()));
+        tour.setDescription(Jsoup.clean(tour.getDescription(), Whitelist.basic()));
+        tour.setTransportDesc(Jsoup.clean(tour.getTransportDesc(), Whitelist.basic()));
         List<Place> places = tour.getToursPlaces();
         if (places != null) {
             for (Place place : places) {
-                place.setName(HTMLUtils.cleanHTML(place.getName()));
-                place.setDescription(HTMLUtils.cleanHTML(place.getDescription()));
+                place.setName(Jsoup.clean(place.getName(), Whitelist.basic()));
+                place.setDescription(Jsoup.clean(place.getDescription(), Whitelist.basic()));
             }
         }
 

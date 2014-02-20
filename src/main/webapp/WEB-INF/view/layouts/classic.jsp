@@ -5,12 +5,8 @@
 <head>
     <title><tiles:getAsString name="title"/></title>
     <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/bootstrap.css"/>">
-    <%--<link href="<c:url value="/resources/css/orders.css"/>" type="text/css" rel="stylesheet">--%>
     <script src="<c:url value="/resources/js/jquery.js" />" type="text/javascript"></script>
-    <%--<script src="<c:url value="/resources/js/jquery.MetaData.js" />" type="text/javascript"></script>--%>
     <script src="<c:url value="/resources/js/bootstrap.min.js"/>" type="text/javascript"></script>
-    <%--<script src="<c:url value="/resources/js/jquery.validate.js" />" type="text/javascript"></script>--%>
-    <%--<script src="<c:url value="/resources/js/jquery.raty.js"/>" type="text/javascript"></script>--%>
 
 
     <!--[if lt IE 9]>
@@ -23,6 +19,11 @@
 <div class="container bs-docs-container">
     <div class="page-header">
         <tiles:insertAttribute name="header"/>
+        <tiles:importAttribute name="carousel" scope="page" ignore="true"/>
+        <c:if test="${ pageScope.carousel!=null}">
+            <tiles:insertAttribute name="carousel" ignore="true"/>
+        </c:if>
+
     </div>
     <div class="row">
         <tiles:importAttribute name="menu" scope="page" ignore="true"/>
