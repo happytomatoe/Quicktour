@@ -1,6 +1,7 @@
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
 
 <script type="text/javascript">
     function generate() {
@@ -20,7 +21,7 @@
         <div>
             <fieldset>
                 <div class="form-group">
-                    <form:hidden path="companyId"/>
+                        <form:hidden path="companyId"/>
                     <p><label name="name" path="name" cssClass="form-signin-heading">Name*</label>
                         <form:input name="name" id="name" path="name" size="30" maxlength="30" cssClass="form-control"
                                     placeholder="Company name" required="true"/>
@@ -75,10 +76,10 @@
                     </div>
 
                     <form:label path="information" for="editor1">
-                        Company description
-                    </form:label>
-                    <form:textarea path="information" rows="10" cols="128"/>
-                    <form:errors path="information"/>
+                    Company description
+                </form:label>
+                        <form:textarea path="information" rows="10" cols="128"/>
+                        <form:errors path="information"/>
 
                     <p>
                         <form:select path="type" name="type" class="form-control">
@@ -90,15 +91,38 @@
                         <option value="Police">Police</option>
                         </form:select>
 
-                    <p><label name="avatar">Logo:</label>
-                        <img src="/images/<c:out value='${company.photo.url}'/>" style='width:auto; height:100px'>
-                        <input name="avatar" type="file" value="Upload new"/>
-                    </p>
+                    <div class="form-group ">
+                        <div class="col-md-12">
+                            <h4>Avatar</h4>
+                            <form:hidden path="photo.photoId"/>
+                            <div class="fileinput fileinput-new" data-provides="fileinput">
 
-                    <p> * - required fields.</p>
+                                <c:if test="${company.photo.url!=null}">
+                                    <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
+                                        <img src="${company.photo.url}">
+                                    </div>
+                                </c:if>
+                                <div>
+                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span
+                            class="fileinput-exists">Change</span><input type="file" accept="image/*" name="photo"
+                                                                         tabindex="11"></span>
+                                    <a href="#" class="btn btn-default fileinput-exists"
+                                       data-dismiss="fileinput">Remove</a>
+                                </div>
+                                <div class="fileinput-preview fileinput-exists thumbnail"
+                                     style="max-width: 320px; max-height: 320px;">
 
-                    <p><input name="commit" type="submit" value="Save changes" class="btn btn-success"/></p>
-                </div>
+
+                                </div>
+
+                            </div>
+                            <form:errors path="photo" cssClass="alert-danger"/>
+                        </div>
+
+                        <p> * - required fields.</p>
+
+                        <p><input name="commit" type="submit" value="Save changes" class="btn btn-success"/></p>
+                    </div>
             </fieldset>
         </div>
     </form:form>

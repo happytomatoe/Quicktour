@@ -288,4 +288,8 @@ public class PhotoService {
         uploadImageAndSaveTicket(image, company.getPhoto());
         waitingRecipients.add(company);
     }
+
+    public void delete(Photo photo) {
+        photoRepository.delete(photo);
+    }
 }

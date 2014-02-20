@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.entity.Photo;
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.service.*;
@@ -260,6 +261,11 @@ public class UserController {
         }
         if (!image.isEmpty()) {
             photoService.saveImageAndSet(user, image);
+        }
+        Photo photo = user.getPhoto();
+        if (photo != null) {
+            photoService.delete(photo);
+            user.setPhoto(null);
         }
         usersService.save(user);
         return "redirect:/";

@@ -22,7 +22,7 @@
             <div class="col-md-3">
                 <br>
                 <br>
-                <a href="<c:url value="/editcompany/${company.companyId}"/>" class="btn btn-warning">
+                <a href="<c:url value="/company/edit/${company.companyId}"/>" class="btn btn-warning">
                     Edit
                 </a>
                 <a href="<c:url value="/delete/${company.companyId}"/>" class="btn btn-warning">
