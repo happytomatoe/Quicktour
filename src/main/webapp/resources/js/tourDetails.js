@@ -3,7 +3,7 @@ $(window).on('load', function () {
 });
 var textBoxId = 'new_message';
 var currentPage = 0;
-var login;
+var username;
 var url = window.location.href;
 var cutUrl = url.substring(0, url.lastIndexOf("/"));
 var baseUrl = cutUrl.substring(0, cutUrl.lastIndexOf("/") + 1);
@@ -15,9 +15,9 @@ $(document).ready(function () {
     getData();
     commentBox = $(".comment-box");
     getPage(0);
-    var $login = $("#login");
-    if ($login.length > 0) {
-        login = $login.val();
+    var $username = $("#username");
+    if ($username.length > 0) {
+        username = $username.val();
         CKEDITOR.replace(textBoxId);
         editor = CKEDITOR.instances[textBoxId];
 
@@ -194,10 +194,10 @@ function createComment(comment, parentId) {
     console.log("Create comment .Comment box", commentBox);
     var selector = '<div class="comment row">\
                 <div class="col-md-2">\
-                    <a href="' + baseUrl + 'user/' + comment.user.login + '" class="comment' + comment.id + '">\
+                    <a href="' + baseUrl + 'user/' + comment.user.username + '" class="comment' + comment.id + '">\
                         <img class="img-rounded" width="100px"\
                         src="' + baseUrl + 'images/' + comment.user.photo.url + '"/>\
-                        <h4 class="username">' + comment.user.login + '</h4>\
+                        <h4 class="username">' + comment.user.username + '</h4>\
                     </a>\
                 </div>\
                 <div class="col-md-10">\
@@ -219,17 +219,17 @@ function displayComment(content, commentBox) {
         var date = new Date(comment.commentDate);
         var selector = '<div class="comment row">\
                 <div class="col-md-2">\
-                    <a href="' + baseUrl + 'user/' + comment.user.login + '" class="comment' + comment.id + '">\
+                    <a href="' + baseUrl + 'user/' + comment.user.username + '" class="comment' + comment.id + '">\
                         <img class="img-rounded" width="100px"\
-                        src="' + baseUrl + 'images/' + comment.user.photo.url + '"/>\
-                        <h4 class="username">' + comment.user.login + '</h4>\
+                        src="' + comment.user.photo.url + '"/>\
+                        <h4 class="username">' + comment.user.username + '</h4>\
                     </a>\
                 </div>\
                 <div class="col-md-10">\
                     <div class="comment_content" id="comment' + comment.id + '">\
                     ' + comment.content + '\
                     </div>';
-        if (comment.user.login === login) {
+        if (comment.user.username === username) {
             selector += '<a href="javascript:void(0)" onclick="editComment(' + comment.id + ')"><span class="glyphicon glyphicon-edit"></span> </a>' +
                 '<a href="javascript:void(0)"  onclick="removeComment(' + comment.id + ')" ><span class="glyphicon glyphicon-remove"></span> </a>';
         }

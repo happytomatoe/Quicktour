@@ -162,16 +162,15 @@ public class UserController {
      * Sets randomly generated password to user, whose email was input in the password recovery
      * form and then sends to this email message with new user credentials
      *
-     * @param user          - contains email of the user who wants to recover his password
      * @param bindingResult - contains information about correctness of the email due to entity restrictions
      * @return - redirects user to username page
      */
     @PreAuthorize("isAnonymous()")
     @RequestMapping(value = "/passwordrecovery", method = RequestMethod.POST)
-    public String passwordRecovery(@Valid User user, BindingResult bindingResult, Model model) {
-        User existingUser = usersService.findByEmail(user.getEmail());
+    public String passwordRecovery(@RequestParam String userInfo, BindingResult bindingResult, Model model) {
+        User existingUser = userInfo.contains("@") ? usersService.findByEmail(userInfo) : usersService.findByUsername(userInfo);
         if (existingUser == null || !existingUser.isEnabled()) {
-            bindingResult.rejectValue("email", "user.notexists", "User with such email doesn't exist or is not active");
+            bindingResult.rejectValue("email", "user.notexists", "User  doesn't exist or is not enabled");
         }
         if (bindingResult.hasErrors()) {
             return "passwordRecovery";

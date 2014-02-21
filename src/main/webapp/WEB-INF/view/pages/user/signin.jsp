@@ -23,7 +23,6 @@
                             <c:if test="${not empty activationMessage}">
                                 <div class="form-group text-success text-center">
                                         ${activationMessage}
-                                    dsdsads
                                 </div>
                             </c:if>
                         </c:if>

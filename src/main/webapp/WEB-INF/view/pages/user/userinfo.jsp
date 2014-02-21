@@ -7,7 +7,7 @@
              class="img-rounded img-responsive" style="width: 500px;height: 500px"/>
     </div>
     <div class="col-sm-8 col-md-8">
-        <p>Login:${user.login} </p>
+        <p>Login:${user.username} </p>
 
         <p>${user.name} ${user.surname}</p>
 
@@ -15,8 +15,8 @@
             <br/>
 
         <p>Age:${user.age}</p>
-        <c:if test="${user.sex!=null}">
-            <p>Gender:${user.sex}</p>
+        <c:if test="${user.gender!=null}">
+            <p>Gender:${user.gender}</p>
         </c:if>
     </div>
 

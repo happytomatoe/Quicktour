@@ -41,6 +41,8 @@ public class OrderController {
     private CompanyService companyService;
     @Autowired
     private DiscountPolicyService discountPolicyService;
+    @Autowired
+    private EmailService emailService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
@@ -175,24 +177,10 @@ public class OrderController {
 
     @PreAuthorize("!(hasRole('ROLE_AGENT'))")
     @RequestMapping(value = "/createOrder/{tourId}", method = RequestMethod.POST)
-    public ModelAndView addOrder(@Valid Order order,
-                                 BindingResult bindingResult,
+    public ModelAndView addOrder(Order order,
                                  @PathVariable("tourId") int tourId
     ) {
 
-        User activeUser = userService.getCurrentUser();
-        if (activeUser != null && userService.findByEmail(order.getUser().getEmail()) != null) {
-            bindingResult.rejectValue("email", "email.taken", "User with this email already exists");
-        }
-        if (bindingResult.hasErrors()) {
-            logger.debug("Binding result :{}", bindingResult);
-            return new ModelAndView("createOrder", prepareCreateOrderAttributes(tourId));
-
-        }
-        if (activeUser == null) {
-            order.setUserInfo(ordersService.constructAnonymousUserInfo(order));
-            order.setUser(null);
-        }
         ordersService.add(order, tourId);
 
         return new ModelAndView("orderSuccess");
@@ -208,8 +196,10 @@ public class OrderController {
             return "redirect:/orders";
         }
 
-        TourInfo tour = tourRepository.findOne(order.getTourInfo().getTourInfoId());
-        model.addAttribute("tour", tour);
+        TourInfo tourInfo = tourRepository.findOne(order.getTourInfo().getTourInfoId());
+
+        model.addAttribute("tourInfo", tourInfo);
+        model.addAttribute("tour", tourInfo.getTour());
         model.addAttribute("user", usersService.getCurrentUser());
         model.addAttribute("order", order);
 

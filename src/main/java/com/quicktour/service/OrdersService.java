@@ -286,7 +286,7 @@ public class OrdersService {
                 logger.error("Invalid status [" + order.getStatus() + "] for order [" + order.getOrderId() + "]");
         }
 
-        orderRepository.saveAndFlush(existingOrder);
+        existingOrder = orderRepository.saveAndFlush(existingOrder);
         logger.info("[" + currentTimestamp + "] Order: ID [" + "] was edited by [" + userName + "].");
 
         if (sendEmail) {
@@ -294,7 +294,8 @@ public class OrdersService {
                     + "] to address[" + existingOrder.getUser().getEmail() + "]");
             HttpServletRequest request = ((ServletRequestAttributes) RequestContextHolder.
                     currentRequestAttributes()).getRequest();
-            emailService.sendOrderStatusChanged(existingOrder, userName, request.getRequestURL());
+            emailService.sendOrderStatusChanged(existingOrder, existingOrder.getTourInfo().getTour().getName(),
+                    existingOrder.getTourInfo().getStartDate().toString(), userName, request.getRequestURL().toString());
 
         }
     }
@@ -317,9 +318,10 @@ public class OrdersService {
     }
 
     public void add(Order order, int tourId) {
+
         //Extracting values
-        User activeUser = userService.getCurrentUser();
         TourInfo tourInfo = tourRepository.findOne(tourId);
+        User activeUser = userService.getCurrentUser();
         Tour tour = tourInfo.getTour();
         Company company = tour.getCompany();
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
@@ -335,9 +337,6 @@ public class OrdersService {
         }
         String discountInformation = prepareDiscountInformation(totalDiscount, tourInfoDiscount,
                 discountPoliciesResult, companyDiscount);
-        if (order.getUser() == null) { //if user was not set in controller
-            order.setUser(activeUser);
-        }
         order.setDiscount(totalDiscount);
         order.setOrderDate(currentTimestamp);
         order.setPrice(tour.getPrice().multiply(new BigDecimal(order.getNumberOfAdults().toString())));
@@ -345,6 +344,16 @@ public class OrdersService {
         order.setTourInfo(tourInfo);
         order.setDiscountInformation(discountInformation.toString());
         order.setStatus(Order.Status.RECEIVED);
+        emailService.sendOrderStatusChanged(order, tour.getName(), tourInfo.getStartDate().toString(),
+                order.getUser().getName(),
+                emailService.retrieveBaseUrl() + "orders/");
+        if (activeUser != null) {
+            order.setUser(activeUser);
+        }
+        if (activeUser == null) {
+            order.setUserInfo(constructAnonymousUserInfo(order));
+            order.setUser(null);
+        }
 
         orderRepository.saveAndFlush(order);
     }

@@ -105,7 +105,7 @@ public class EmailService {
         return sub.replace(template);
     }
 
-    private String retrieveBaseUrl() {
+    public String retrieveBaseUrl() {
         HttpServletRequest request =
                 ((ServletRequestAttributes) RequestContextHolder.currentRequestAttributes())
                         .getRequest();
@@ -132,9 +132,9 @@ public class EmailService {
 
     }
 
-    public void sendOrderStatusChanged(Order order, String userName, StringBuffer requestURL) {
+    public void sendOrderStatusChanged(Order order, String tourName, String startDate, String userName, String requestURL) {
         String[] toReplace = {"OrderId", "TourName", "StartDate"};
-        String[] replacement = {String.valueOf(order.getOrderId()), order.getTourInfo().getTour().getName()};
+        String[] replacement = {String.valueOf(order.getOrderId()), tourName, startDate};
         String mailSubject = formatEmailText(ORDER_STATUS_CHANGED_SUBJECT, toReplace, replacement);
 
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());

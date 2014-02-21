@@ -190,13 +190,13 @@
 
 <sec:authorize access="isAuthenticated()">
     <div class="row " id="editor">
-        <input type="hidden" id="login" value="${user.username}">
+        <input type="hidden" id="username" value="${user.username}">
         <input type="hidden" id="parent" value="">
         <input type="hidden" id="commentId" value="">
 
         <div class="row top-buffer">
             <textarea class="col-md-12" id="new_message" name="new_message"
-                      placeholder="Type in your message" rows="5"></textarea>
+                      placeholder="Type in your message" class="ckeditor" rows="5"></textarea>
         </div>
 
         <div class="row top-buffer">

@@ -1,6 +1,12 @@
 var baseUrl;
 var validator;
 $(document).ready(function () {
+    $.validator.addMethod("validatePassfield", function (value, element, param) {
+        return $(element).validatePass();
+    }, "Password must contain letters in upper and lower cases and be at least 8 symbols long");
+    jQuery.validator.addMethod("notEqual", function (value, element, param) {
+        return this.optional(element) || value != $(param).val();
+    }, "Password can't match username");
 
     baseUrl = $(".navbar-brand").attr("href");
     $("select:has(option[value=]:first-child)").on('change',function () {
@@ -20,7 +26,8 @@ $(document).ready(function () {
                 email: true,
                 remote: baseUrl + "email/validate"
             }, password: {
-                minlength: 8
+                validatePassfield: true,
+                notEqual: "#username"
             }, password_confirmation: {
                 equalTo: "#password"
             }, avatar: {
@@ -77,7 +84,7 @@ $(document).ready(function () {
 //        $phone.val(7);
 //    }
     $("#password").passField({
-        pattern: "aB3",
+        pattern: "aB3a33aB",
         minlength: 8,
         allowEmpty: false
     });

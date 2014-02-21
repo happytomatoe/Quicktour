@@ -7,6 +7,8 @@
 <script type="text/javascript" src="<c:url value="/resources/js/jquery.inputmask-multi.js"/> "></script>
 <script type="text/javascript" src="<c:url value="/resources/js/jquery.bind-first-0.2.2.min.js"/> "></script>
 <script type="text/javascript" src="<c:url value="/resources/js/jquery.inputmask.js"/> "></script>
+<script type="text/javascript" src="<c:url value="/resources/js/createOrder.js"/> "></script>
+
 <div class="row">
     <div class="col-sm-12">
         <div class="breadcrumb row">
@@ -122,6 +124,7 @@
 <c:url var="saveUrl" value="/createOrder/${tourInfo.tourInfoId}"/>
 <form:form role="form" method="post" modelAttribute="order" id="createOrderForm" action="${saveUrl}">
     <!-- Panel Enter Registration Information -->
+    <form:hidden path="tourInfo.tourInfoId"/>
     <div class="panel mt">
         <div class="panel-heading">
             <a class="accordion-toggle" data-toggle="collapse" data-parent="#accordion2" href="#collapseTwo">
@@ -134,6 +137,7 @@
 
                     <fieldset>
                         <legend>Required Personal Details</legend>
+                        <form:errors path="*" cssClass="text-danger"/>
                         <div class="form-group">
                             <form:label path="user.name">Name</form:label>
                             <form:input id="firstName" path="user.name" value="${user.name}"
@@ -145,7 +149,6 @@
                             <form:label path="user.surname">Surname</form:label>
                             <form:input id="surname" path="user.surname"
                                         placeholder="Enter your surname" class="form-control" type="text" required=""/>
-                            <form:errors path="user.surname" cssClass="text-error"/>
                         </div>
 
                         <div class="form-group">
@@ -154,7 +157,6 @@
                             <form:input id="email" path="user.email"
                                         placeholder="Enter email address" class="form-control" type="email"
                                         required=""/>
-                            <form:errors path="user.email" cssClass="text-error"/>
 
 
                         </div>
@@ -162,7 +164,6 @@
                             <form:label path="user.phone">Phone</form:label>
                             <form:input id="phone" path="user.phone" size="25"
                                         placeholder="+___(__)___-__-__" class="form-control " type="text" required=""/>
-                            <form:errors path="user.phone" cssClass="text-error"/>
                         </div>
 
                     </fieldset>

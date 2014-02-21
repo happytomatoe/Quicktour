@@ -160,7 +160,6 @@ public class Order {
     }
 
     @Column(name = "status")
-    @NotNull
     @Enumerated(EnumType.STRING)
     public Status getStatus() {
         return status;

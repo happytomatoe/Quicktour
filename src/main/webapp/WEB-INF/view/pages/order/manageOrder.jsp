@@ -5,38 +5,17 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/datepicker.css"/>"/>
 <%@ page import="com.quicktour.entity.Order.Status" %>
 <script src="<c:url value="/resources/js/jquery.expander.min.js"/> "></script>
+<script src="<c:url value="/resources/js/jquery.raty.js"/>"></script>
 
 <!-- Headliner -->
 <div class="row">
     <div class="col-sm-12">
         <div class="breadcrumb row">
 
-            <div class="col-sm-4">
-                Order ID: <b>${order.orderId}</b>&nbsp;&nbsp;&nbsp;|&nbsp;&nbsp;&nbsp;Tour ID:
-                <b>${order.tourInfo.tour.tourId}</b>
 
-                <div id="customerRating" rel="popover">
-                    Rated by customer: <span id="rate_${order.orderId}"></span>
-                </div>
-                <script type="text/javascript">
-                    jQuery('#rate_${order.orderId}').raty({
-                        <c:if test="${user.role != 'ROLE_USER'}">
-                        readOnly: true,
-                        </c:if>
-                        cancel: true,
-                        scoreName: 'entity.score',
-                        score: ${order.vote},
-                        number: 5,
-                        click: function (score, evt) {
-                            jQuery.post('/orders/rate', {score: score, order:${order.orderId} })
-                        }
-                    });
-                </script>
-            </div>
-
-            <div class="col-sm-5 center">
-                <span class="tour-name"><a href="/tour/${order.tourInfo.tour.tourId}"
-                                           target="_blank">${order.tourInfo.tour.name}</a></span>
+            <div class="col-sm-offset-4 col-sm-5 center">
+                <span class="tour-name"><a href="/tour/${tour.tourId}"
+                                           target="_blank">${tour.name}</a></span>
             </div>
 
             <div class="col-sm-3">
@@ -179,7 +158,8 @@
 <!-- /Panel TourInfo Details -->
 
 <!-- Form Manage Order -->
-<form:form role="form" method="post" modelAttribute="order" id="manageOrderForm" action="/manageOrder/${order.orderId}">
+<form:form role="form" method="post" modelAttribute="order" id="manageOrderForm"
+           action="${pageContext.request.contextPath}/manageOrder/${order.orderId}">
 <!-- Panel Customer Information -->
 <div class="panel mt">
     <div class="panel-heading">
