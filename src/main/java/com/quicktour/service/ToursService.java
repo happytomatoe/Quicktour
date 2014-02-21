@@ -155,23 +155,25 @@ public class ToursService {
                                    java.sql.Date minDate, java.sql.Date maxDate,
                                    Integer minPrice, Integer maxPrice,
                                    int pageNumber) {
-        boolean firstQueryParam = true;
-        StringBuilder sql = new StringBuilder("select distinct t from Tour as t inner join t.toursPlaces as p " +
-                "inner join t.tourInfo as ti where");
+        Map<String, Object> conditions = new HashMap<>();
+        conditions.put("p.country=", country);
+        conditions.put("p.name=", place);
+        conditions.put("ti.startDate>", minDate);
+        conditions.put("ti.startDate<", maxDate);
+        //TODO:test
+        conditions.put("t.price>=", minPrice);
+        conditions.put("t.price<=", maxPrice);
+        logger.debug("Condition:{}", conditions);
 
-        firstQueryParam = addElementToQuery(country, firstQueryParam, sql, "p.country='");
-        firstQueryParam = addElementToQuery(place, firstQueryParam, sql, "p.name='");
-        firstQueryParam = addElementToQuery(minDate, firstQueryParam, sql, "ti.startDate>'");
-        firstQueryParam = addElementToQuery(maxDate, firstQueryParam, sql, "ti.startDate<'");
-        firstQueryParam = addElementToQuery(minPrice, firstQueryParam, sql, "t.price>'");
-        addElementToQuery(maxPrice, firstQueryParam, sql, "t.price<'");
+        String sql = createFindTourSQL(conditions);
 
-        if (!firstQueryParam) {
+        if (sql != null) {
             Query query = entityManager.createQuery(sql.toString());
             List<Tour> results = query.getResultList();
             int totalNumberOfResults = results.size();
             if (totalNumberOfResults == 0) {
                 return null;
+
             }
             Page<Tour> tourPage = new PageImpl<Tour>(results,
                     new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE),
@@ -181,24 +183,37 @@ public class ToursService {
         return null;
     }
 
-    private boolean addElementToQuery(Object element, boolean firstQueryParam, StringBuilder strBuilder, String strElement) {
-        if (element != null && !element.toString().isEmpty()) {
-            strBuilder.append((firstQueryParam) ? " " : " and ").
-                    append(strElement).append(element.toString()).append("'");
-            return false;
-        } else {
-            return firstQueryParam;
-        }
+    private String createFindTourSQL(Map<String, Object> conditions) {
+        StringBuilder sql = new StringBuilder("select distinct t from Tour as t inner join t.toursPlaces as p " +
+                "inner join t.tourInfo as ti where ");
+        boolean prevEmpty = true;
+        boolean empty;
+        int emptyCount = 0;
+        for (String conditionKey : conditions.keySet()) {
+            Object value = conditions.get(conditionKey);
+            empty = value == null || value.toString().isEmpty();
+            if (!prevEmpty && !empty) {
+                sql.append(" AND ");
+                prevEmpty = true;
+            }
+            if (empty) {
+                emptyCount++;
+            } else {
+                sql.append(conditionKey + "'" + value + "' ");
+            }
+            if (prevEmpty) {
+                prevEmpty = empty;
+            }
 
+        }
+        return emptyCount == conditions.size() ? null : sql.toString();
     }
 
-
     /**
-     * search min price for tour
-     * min price calculated as minimal value of all tour prices
+     * Finds tour's minimal price based on TourInfo's discount value and discount policies
      *
      * @param tour tour for which price will be calculate
-     * @return minimum price value
+     * @return minimal price value
      */
     public BigDecimal findMinPrice(Tour tour) {
         BigDecimal price = tour.getPrice();
@@ -250,6 +265,11 @@ public class ToursService {
         return tours;
     }
 
+    /**
+     * @param initializeDiscountPolicies
+     * @param tours
+     * @return
+     */
     public List<Tour> prepareTour(boolean initializeDiscountPolicies, List<Tour> tours) {
         List<Tour> toursResult = new ArrayList<>(tours);
         for (Tour tour : toursResult) {
@@ -264,14 +284,13 @@ public class ToursService {
 
     public Tour findTourByIdWithPlaces(int id) {
         Tour tour = findTourById(id);
-        logger.debug("Tour places {}", tour.getToursPlaces().size());
-
+        tour.getToursPlaces().size();
         return tour;
     }
 
 
     /**
-     * Change tour active state to state preset in activeState parameter
+     * Toggles active variable in tour
      */
     public void toogleActive(int tourId) {
         Tour tour = toursRepository.findOne(tourId);
@@ -289,6 +308,11 @@ public class ToursService {
     public void saveCombinedTours(Tour tour, MultipartFile mainPhoto) {
         int price;
         User currentUser = usersService.getCurrentUser();
+
+        if (!mainPhoto.isEmpty()) {
+            tour.setPhoto(null);
+            photoService.saveImageAndSet(tour, mainPhoto);
+        }
         tour.setCompany(companyService.findByCompanyCode(currentUser.getCompanyCode()));
         photoService.saveImageAndSet(tour, mainPhoto);
         logger.debug("Edited tour photo is {}.Empty {}", tour.getPhoto(), mainPhoto.isEmpty());

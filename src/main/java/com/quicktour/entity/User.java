@@ -184,7 +184,7 @@ public class User {
     }
 
 
-    @ManyToOne(cascade = CascadeType.ALL)
+    @ManyToOne
     @LazyCollection(LazyCollectionOption.TRUE)
     @JoinColumn(name = "photos_id")
     public Photo getPhoto() {

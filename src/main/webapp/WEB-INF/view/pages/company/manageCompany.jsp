@@ -21,6 +21,7 @@
         <div>
             <fieldset>
                 <div class="form-group">
+                    <form:hidden path="companyId"/>
                     <p><form:label name="name" path="name" cssClass="form-signin-heading">Name*</form:label>
                         <form:input name="name" id="name" path="name" size="30" maxlength="30" cssClass="form-control"
                                     placeholder="Enter your name" required="true"/>
@@ -91,15 +92,21 @@
                         <option value="Police">Police</option>
                         </form:select>
 
-                    <p><label name="avatar">Logo:</label>
+                    <p><label for="avatar">Logo:</label>
 
                     <div class="fileinput fileinput-new" data-provides="fileinput">
                         <div class="fileinput-preview fileinput-exists thumbnail"
                              style="max-width: 200px; max-height: 150px;"></div>
+                        <c:if test="${company.photo.url!=null}">
+                            <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
+                                <img src="${company.photo.url}">
+                            </div>
+                        </c:if>
+
                         <div>
                     <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span
                             class="fileinput-exists">Change</span><input type="file" accept="image/*"
-                                                                         name="avatar"></span>
+                                                                         name="avatar" id="avatar"></span>
                             <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
                         </div>
                     </div>
@@ -107,7 +114,9 @@
                     </p>
                     <p> * - required fields.</p>
 
-                    <p><input name="commit" type="submit" value="Submit registration" class="btn btn-success"/></p>
+                    <p>
+                        <button name="commit" type="submit" class="btn btn-success">Save</button>
+                    </p>
                 </div>
             </fieldset>
         </div>

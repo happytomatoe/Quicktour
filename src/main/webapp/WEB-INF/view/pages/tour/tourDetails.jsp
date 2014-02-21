@@ -190,7 +190,7 @@
 
 <sec:authorize access="isAuthenticated()">
     <div class="row " id="editor">
-        <input type="hidden" id="login" value="${user.login}">
+        <input type="hidden" id="login" value="${user.username}">
         <input type="hidden" id="parent" value="">
         <input type="hidden" id="commentId" value="">
 

@@ -291,6 +291,7 @@ function addPlace(markerNumber) {
     var closeIconSpan = document.createElement("span");
     closeIconSpan.setAttribute("class", "glyphicon glyphicon-remove ");
     closeIcon.appendChild(closeIconSpan);
+    console.log("Add delete action for ", markerNumber);
     closeIcon.onclick = function () {
         setMarkerAction(markerNumber);
     };
@@ -434,13 +435,18 @@ function setMarkerAction(number) {
     markers[number].setMap(null);
     var id = "place" + number;
     var markerPlace = document.getElementById(id);
-    console.log("Others", "#" + id, $("#" + id), $("#" + id).nextAll().find("input"));
-    $("#" + id).nextAll().find("input").each(function (i, item) {
+    var nextAll = $("div#" + id).nextAll();
+    var nextPlaceInputs = nextAll.add(nextAll.find("input,textarea"));
+    console.log("Others", "#" + id, $("#" + id), nextPlaceInputs);
+    console.log("Size ", nextAll);
+    nextPlaceInputs.each(function (i, item) {
         var p = /(\d+)/;
         var match = parseInt(p.exec(item.id));
-        console.log("Replacing value", match);
+        console.log("Replacing value", match, match - 1);
         item.id = item.id.replace(match, match - 1);
-        item.name = item.name.replace(match, match - 1);
+        if (typeof  item.name != 'undefined') {
+            item.name = item.name.replace(match, match - 1);
+        }
     })
     markerPlace.parentElement.removeChild(markerPlace);
 
@@ -469,8 +475,8 @@ function setPlaceData(locality, country, lat, lng) {
 
 var setRightZoomLevel = function (map, minlat, maxlat, minlng, maxlng, ctrlat, ctrlng) {
     var mapdisplay = 600;
+    var DISTNACE = 57.2958;
     var interval = 0;
-
     if ((maxlat - minlat) > (maxlng - minlng)) {
         interval = (maxlat - minlat) / 2;
         minlng = ctrlng - interval;
@@ -481,13 +487,13 @@ var setRightZoomLevel = function (map, minlat, maxlat, minlng, maxlng, ctrlat, c
         maxlat = ctrlat + interval;
     }
 
-    var dist = (6371 * Math.acos(Math.sin(minlat / 57.2958) * Math.sin(maxlat / 57.2958)
-        + (Math.cos(minlat / 57.2958) * Math.cos(maxlat / 57.2958) * Math.cos((maxlng / 57.2958) - (minlng / 57.2958)))));
+    var dist = (6371 * Math.acos(Math.sin(minlat / DISTNACE) * Math.sin(maxlat / DISTNACE)
+        + (Math.cos(minlat / DISTNACE) * Math.cos(maxlat / DISTNACE) * Math.cos((maxlng / DISTNACE) - (minlng / DISTNACE)))));
 
     var zoom = Math.floor(8 - Math.log(1.6446 * dist / Math.sqrt(2 * (mapdisplay * mapdisplay))) / Math.log(2));
     console.log("Zoom", zoom);
-    if (zoom > 7) {
-        zoom = 7;
+    if (zoom > 6) {
+        zoom = 6;
     }
     map.setZoom(zoom);
 
@@ -539,6 +545,7 @@ function setTourPlaces() {
 
             });
         }
+        console.log("Add delete action for ", length - 1);
         a(length);
         panel.find("a").attr("marker", length - 1);
         google.maps.event.addListener(markers[length - 1], 'click', function () {

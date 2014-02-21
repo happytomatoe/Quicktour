@@ -3,12 +3,12 @@ package com.quicktour.service;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.repository.CompanyRepository;
-import com.quicktour.repository.UserRepository;
 import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.math.BigDecimal;
 import java.util.List;
@@ -22,11 +22,11 @@ import java.util.List;
 public class CompanyService {
     private final Logger logger = org.slf4j.LoggerFactory.getLogger(CompanyService.class);
     @Autowired
-    UserRepository userRepository;
+    private CompanyRepository companyRepository;
     @Autowired
-    CompanyRepository companyRepository;
+    private PhotoService photoService;
     @Autowired
-    EmailService emailService;
+    private EmailService emailService;
 
     public List<Company> findAll() {
         return companyRepository.findAll();
@@ -38,6 +38,15 @@ public class CompanyService {
 
     public void delete(Company company) {
         companyRepository.delete(company);
+    }
+
+    public Company saveAndFlush(Company company, MultipartFile image) {
+        if (image.isEmpty() && company.getPhoto() == null) {
+            company.setPhoto(photoService.getCompanyDefaultAvatar());
+        } else if (!image.isEmpty()) {
+            photoService.saveImageAndSet(company, image);
+        }
+        return companyRepository.saveAndFlush(company);
     }
 
     public Company saveAndFlush(Company company) {

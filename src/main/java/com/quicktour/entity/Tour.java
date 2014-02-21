@@ -207,7 +207,7 @@ public class Tour {
         this.discount = discount;
     }
 
-    @OneToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "photo_id")
     public Photo getPhoto() {
         return photo;

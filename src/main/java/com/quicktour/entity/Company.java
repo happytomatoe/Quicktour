@@ -155,7 +155,7 @@ public class Company {
     }
 
 
-    @ManyToOne(fetch = FetchType.EAGER, cascade = CascadeType.ALL)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "photos_id")
     public Photo getPhoto() {
         return photo;

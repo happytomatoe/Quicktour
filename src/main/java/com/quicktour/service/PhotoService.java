@@ -17,9 +17,10 @@ import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.context.annotation.DependsOn;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.annotation.PostConstruct;
@@ -29,12 +30,9 @@ import java.util.*;
 
 /**
  * Contains all functional logic connected with the images that are used in the system
- *
- * @author Andrew Zarichnyi
- * @version 1.0 12/27/2013
  */
 @Service
-@Transactional
+@DependsOn(value = {"myUserService", "companyService", "toursService"})
 public class PhotoService {
     @Value("${defaultUserPhotoId}")
     private int DEFAULT_USER_PHOTO_ID;
@@ -47,9 +45,9 @@ public class PhotoService {
     @Autowired
     private UsersService usersService;
     @Autowired
-    CompanyService companyService;
+    private CompanyService companyService;
     @Autowired
-    ToursService toursService;
+    private ToursService toursService;
     @Autowired
     private PhotoRepository photoRepository;
 
@@ -138,6 +136,9 @@ public class PhotoService {
 
     }
 
+    /**
+     * Creates {@link com.quicktour.entity.Photo} from flickr photoId
+     */
     private Photo createPhoto(String photoId) {
         try {
             authorize();
@@ -176,6 +177,11 @@ public class PhotoService {
         }
     }
 
+    /**
+     * Replaces existingPhto with newPhoto on flickr asynchronously
+     *
+     * @return ticketId from flickr
+     */
     private String replaceImage(Photo existingPhoto, MultipartFile newPhoto) {
         try {
             authorize();
@@ -252,16 +258,16 @@ public class PhotoService {
     }
 
 
-    public Photo getUserAvatar() {
+    public Photo getDefaultUserAvatar() {
         return photoRepository.findOne(DEFAULT_USER_PHOTO_ID);
     }
 
-    public Photo getCompanyAvatar() {
+    public Photo getCompanyDefaultAvatar() {
         return photoRepository.findOne(DEFAULT_COMPANY_PHOTO_ID);
     }
 
     private void uploadImageAndSaveTicket(MultipartFile image, Photo photo) {
-        String ticketId = null;
+        String ticketId;
         if (photo != null && photo.getFlickrPhotoId() != null && !photo.getFlickrPhotoId().isEmpty()) {
             ticketId = replaceImage(photo, image);
         } else {
@@ -270,6 +276,11 @@ public class PhotoService {
         tickets.add(ticketId);
     }
 
+    /**
+     * Saves or replaces(if it is already exists) image on flickr and injects it into tour.
+     * Also deletes existing photo
+     */
+    @Async
     public void saveImageAndSet(Tour tour, MultipartFile image) {
         logger.debug("saving and setting image to {}", tour);
         Photo photo = tour.getPhoto();
@@ -277,19 +288,38 @@ public class PhotoService {
         waitingRecipients.add(tour);
     }
 
+    /**
+     * Saves or replaces(if it is already exists) image on flickr and injects it into user.
+     * Also deletes existing photo
+     */
+    @Async
     public void saveImageAndSet(User user, MultipartFile image) {
         logger.debug("saving and setting image to {}", user);
         uploadImageAndSaveTicket(image, user.getPhoto());
         waitingRecipients.add(user);
     }
 
+    /**
+     * Saves or replaces(if it is already exists) image on flickr and injects it into company.
+     * Also deletes existing photo
+     */
+    @Async
     public void saveImageAndSet(Company company, MultipartFile image) {
         logger.debug("saving and setting image to {}", company);
         uploadImageAndSaveTicket(image, company.getPhoto());
         waitingRecipients.add(company);
     }
 
+
     public void delete(Photo photo) {
+        String photoId = photo.getFlickrPhotoId();
+        if (photo != null && photoId != null) {
+            try {
+                flickr.getPhotosInterface().delete(photoId);
+            } catch (FlickrException e) {
+                logger.error("Cannot delete photo on flick with photoId {}.{}", photoId, e);
+            }
+        }
         photoRepository.delete(photo);
     }
 }

@@ -1,6 +1,5 @@
 package com.quicktour.controller;
 
-import com.quicktour.entity.Photo;
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.service.*;
@@ -184,11 +183,12 @@ public class UserController {
 
     @PreAuthorize("isAnonymous()")
     @RequestMapping(value = "/changePassword/{link}", method = RequestMethod.GET)
-    public String changePassword(@PathVariable("link") String link) {
+    public String changePassword(@PathVariable("link") String link, Model model) {
         User user = validationService.checkPasswordChangeLink(link);
         if (user == null) {
             return "404";
         }
+        model.addAttribute("username", user.getUsername());
         return "changePassword";
     }
 
@@ -259,15 +259,7 @@ public class UserController {
             model.addAttribute("user", user);
             return "/profile";
         }
-        if (!image.isEmpty()) {
-            photoService.saveImageAndSet(user, image);
-        }
-        Photo photo = user.getPhoto();
-        if (photo != null) {
-            photoService.delete(photo);
-            user.setPhoto(null);
-        }
-        usersService.save(user);
+        usersService.save(user, image);
         return "redirect:/";
 
 

@@ -3,8 +3,11 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
+<link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
+<script src="<c:url value="/resources/js/jasny-bootstrap.min.js"/> "></script>
 
-<form:form name="user" id="myProfileForm" modelAttribute="user" method="POST" cssClass="form-signin"
+<form:form name="user" id="myProfileForm" enctype="multipart/form-data" modelAttribute="user" method="POST"
+           cssClass="form-signin"
            style="width:50%; align:'center';">
     <div>
         <fieldset>
@@ -12,6 +15,7 @@
                 <p>Username:${user.username}
                         <form:hidden path="username"/>
                         <form:hidden path="userId"/>
+                        <form:hidden path="enabled"/>
 
                 <p>
                     <form:label path="name" cssClass="form-signin-heading">Name*</form:label>
@@ -46,8 +50,35 @@
                 <p>
                     <% pageContext.setAttribute("genders", new String[]{"", "Male", "Female"}); %>
                     <form:label path="gender" clas="form-signin-heading">Gender:</form:label>
-                    <form:select path="gender" items="${genders}"/>
+                    <form:select path="gender" items="${genders}" cssClass="form-control input-lg"/>
                 </p>
+
+                <div class="form-group ">
+                    <h4>Avatar</h4>
+                    <form:hidden path="photo.photoId"/>
+                    <div class="fileinput fileinput-new" data-provides="fileinput">
+
+                        <c:if test="${user.photo.url!=null}">
+                            <div class="fileinput-new thumbnail" style="width: 200px; height: 150px;">
+                                <img src="${user.photo.url}">
+                            </div>
+                        </c:if>
+                        <div>
+                    <span class="btn btn-default btn-file"><span class="fileinput-new">Select image</span><span
+                            class="fileinput-exists">Change</span><input type="file" accept="image/*" name="avatar"
+                                                                         tabindex="11"></span>
+                            <a href="#" class="btn btn-default fileinput-exists" data-dismiss="fileinput">Remove</a>
+                        </div>
+                        <div class="fileinput-preview fileinput-exists thumbnail"
+                             style="max-width: 320px; max-height: 320px;">
+
+
+                        </div>
+
+                    </div>
+                    <form:errors path="photo" cssClass="alert-danger"/>
+                </div>
+
                 <form:label path="role" clas="form-signin-heading">Role:</form:label>
                 <div class="form-group">
                     <form:select path="role.roleId" class="form-control input-lg">

@@ -118,15 +118,12 @@
         <put-attribute name="body" value="/WEB-INF/view/pages/company/viewCompanies.jsp"/>
     </definition>
 
-    <definition name="editCompany" extends="classicTile">
-        <put-attribute name="body" value="/WEB-INF/view/pages/company/editCompany.jsp"/>
-    </definition>
 
     <definition name="myCompany" extends="classicTile">
         <put-attribute name="body" value="/WEB-INF/view/pages/company/myCompany.jsp"/>
     </definition>
-    <definition name="registerCompany" extends="classicTile">
-        <put-attribute name="body" value="/WEB-INF/view/pages/company/addCompany.jsp"/>
+    <definition name="manageCompany" extends="classicTile">
+        <put-attribute name="body" value="/WEB-INF/view/pages/company/manageCompany.jsp"/>
     </definition>
     <!---->
     <!--Error pages-->

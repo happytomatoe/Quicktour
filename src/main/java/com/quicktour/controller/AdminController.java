@@ -87,11 +87,11 @@ public class AdminController {
      * to the myrofile page if bindingResult will have errors.
      */
     @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.POST)
-    public String myProfileForm(@Valid User user, BindingResult bindingResult) {
+    public String myProfileForm(@Valid User user, BindingResult bindingResult, @RequestParam("avatar") MultipartFile image) {
         if (bindingResult.hasErrors()) {
             return "editUser";
         }
-        usersService.edit(user);
+        usersService.edit(user, image);
         return "redirect:/users";
     }
 
@@ -119,7 +119,7 @@ public class AdminController {
     public String editCompany(@PathVariable("id") int id, Model model) {
         Company company = companyService.findOne(id);
         model.addAttribute("company", company);
-        return "editCompany";
+        return "manageCompany";
     }
 
 
@@ -137,7 +137,7 @@ public class AdminController {
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
         if (bindingResult.hasErrors()) {
-            return "editCompany";
+            return "manageCompany";
         }
         photoService.saveImageAndSet(company, image);
         companyService.saveAndFlush(company);

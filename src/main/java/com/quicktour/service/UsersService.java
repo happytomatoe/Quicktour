@@ -1,6 +1,9 @@
 package com.quicktour.service;
 
-import com.quicktour.entity.*;
+import com.quicktour.entity.Company;
+import com.quicktour.entity.Role;
+import com.quicktour.entity.User;
+import com.quicktour.entity.ValidationLink;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -10,6 +13,7 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 
 import java.util.List;
 
@@ -37,6 +41,8 @@ public class UsersService {
     private CompanyRepository companyRepository;
     @Autowired
     ValidationService validationService;
+    @Autowired
+    private PhotoService photoService;
     @Autowired
     EmailService emailService;
 
@@ -134,10 +140,19 @@ public class UsersService {
         return userRepository.findAll();
     }
 
-    public User save(User user) {
+    public User save(User user, MultipartFile image) {
+        if (image.isEmpty() && user.getPhoto() == null) {
+            user.setPhoto(photoService.getCompanyDefaultAvatar());
+        } else if (!image.isEmpty()) {
+            user.setPhoto(null);
+            photoService.saveImageAndSet(user, image);
+        }
         return userRepository.saveAndFlush(user);
     }
 
+    public User save(User user) {
+        return userRepository.saveAndFlush(user);
+    }
 
     public void recoverPassword(User user) {
         ValidationLink passwordChangeLink = validationService.createPasswordChangeLink(user);
@@ -149,13 +164,9 @@ public class UsersService {
         userRepository.delete(user);
     }
 
-    public void edit(User user) {
+    public void edit(User user, MultipartFile image) {
         User existingUser = findOne(user.getUserId());
         user.setPassword(existingUser.getPassword());
-        Photo photo = existingUser.getPhoto();
-        if (photo != null) {
-            user.setPhoto(photo);
-        }
-        save(user);
+        save(user, image);
     }
 }

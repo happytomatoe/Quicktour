@@ -2,7 +2,6 @@ package com.quicktour.controller;
 
 import com.quicktour.entity.Company;
 import com.quicktour.service.CompanyService;
-import com.quicktour.service.PhotoService;
 import com.quicktour.service.UsersService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -27,8 +26,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 public class CompanyController {
 
     private final Logger logger = LoggerFactory.getLogger(CompanyController.class);
-    @Autowired
-    private PhotoService photoService;
     @Autowired
     private UsersService usersService;
     @Autowired

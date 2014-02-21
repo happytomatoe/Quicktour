@@ -55,7 +55,7 @@
                 </form:label>
                 <form:textarea path="description" id="editor1" rows="10" cols="10"
                                required="true" cssClass="ckeditor"/>
-                <form:errors path="description"/>
+                <form:errors path="description" cssClass="text-danger"/>
             </div>
             <div class="form-group col-md-6">
                 <form:label path="transportDesc" for="inputTransport">Transport description</form:label>
@@ -64,7 +64,7 @@
                             id="inputTransport"
                             placeholder="Transport description"
                             required="true"/>
-                <form:errors path="transportDesc"/>
+                <form:errors path="transportDesc" cssClass="text-danger"/>
             </div>
             <div class="form-group col-md-6">
                 <form:label path="travelType">Travel type</form:label>
@@ -98,7 +98,7 @@
                         </div>
 
                     </div>
-                    <form:errors path="photo" cssClass="alert-danger"/>
+                    <form:errors path="photo" cssClass="text-danger"/>
                 </div>
             </div>
             <div class="form-group col-sm-12">

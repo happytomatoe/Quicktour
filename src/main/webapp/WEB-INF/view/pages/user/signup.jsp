@@ -4,7 +4,7 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
 <script src="<c:url value="/resources/js/passfield.min.js"/>"></script>
-<script src="<c:url value="/resources/js/register.js"/> "></script>
+<script src="<c:url value="/resources/js/signup.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.inputmask-multi.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.bind-first-0.2.2.min.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.inputmask.js"/> "></script>
@@ -16,6 +16,7 @@
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
 
 <div class="row">
+
     <div class="col-xs-12 col-sm-8 col-md-6 col-sm-offset-2 col-md-offset-3">
         <form:form commandName="user" name="user" id="registrationForm" modelAttribute="user" method="POST"
                    cssClass="form-horizontal" role="form"
@@ -95,7 +96,7 @@
         </div>
         <div class="form-group">
             <select name="gender" class="form-control input-lg" tabindex="10">
-            <option value="" disabled selected>
+                <option value="" disabled selected>
                     Gender
                 </option>
                 <option value="Male">
@@ -119,15 +120,15 @@
             </div>
             <form:errors path="photo" cssClass="alert-danger"/>
         </div>
-            <sec:authorize access="hasRole('ROLE_ADMIN')">
-                <div class="form-group">
-                    <form:select path="role" class="form-control input-lg">
-                        <c:forEach items="${roles}" var="role">
-                            <form:option value="${role.roleId}">${role.name}</form:option>
-                        </c:forEach>
+        <sec:authorize access="hasRole('ROLE_ADMIN')">
+            <div class="form-group">
+                <form:select path="role" class="form-control input-lg">
+                    <c:forEach items="${roles}" var="role">
+                        <form:option value="${role.roleId}">${role.name}</form:option>
+                    </c:forEach>
 
-                    </form:select>
-                </div>
+                </form:select>
+            </div>
         </sec:authorize>
         <hr class="colorgraph">
         <div class="row">

@@ -47,8 +47,8 @@ public class OrdersService {
     @Autowired
     private TourRepository tourRepository;
 
-    public Page<Order> findByUserId(int id, int pageNumber, Sort.Order sortOrder) {
-        return orderRepository.findByUsersId(id, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
+    public Page<Order> findByUser(User user, int pageNumber, Sort.Order sortOrder) {
+        return orderRepository.findByUser(user, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
@@ -125,7 +125,7 @@ public class OrdersService {
     }
 
     public Long countByUserIdAndStatus(User activeUser, Order.Status status) {
-        return orderRepository.countByUserIdAndStatus(activeUser.getUserId(), status);
+        return orderRepository.countByUserAndStatus(activeUser, status);
     }
 
     /*
@@ -158,7 +158,7 @@ public class OrdersService {
                 orders = findByCompanyId(company.getCompanyId(), pageNumber, sortOrder);
                 break;
             case Role.ROLE_USER:
-                orders = findByUserId(activeUser.getUserId(), pageNumber, sortOrder);
+                orders = findByUser(activeUser, pageNumber, sortOrder);
                 break;
         }
 

@@ -5,7 +5,6 @@
 <%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/css/orders.css"/>">
 <script src="<c:url value="/resources/js/orders-list.js"/> "></script>
-<script src="<c:url value="/resources/js/jquery.jec.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.raty.js"/> "></script>
 <div class="container">
     <div class="row">
@@ -88,7 +87,7 @@
             <span id="priceDescIcon" class="glyphicon glyphicon-arrow-down sort-icon"></span>
 
         </th>
-        <sec:authorize access="hasRole('ROLE_AGENT')">
+        <sec:authorize access="hasRole('ROLE_AGENT') or hasRole('ROLE_ADMIN')">
             <th>
                 User
             </th>

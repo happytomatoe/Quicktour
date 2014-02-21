@@ -23,8 +23,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.company.companyId = ?1 AND o.status = ?2")
     long countByCompanyIdAndStatus(int id, Order.Status status);
 
-    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.user.userId = ?1 AND o.status = ?2")
-    long countByUserIdAndStatus(int id, Order.Status status);
+    @Query("SELECT COUNT(o.orderId) FROM Order o WHERE o.user= ?1 AND o.status = ?2")
+    long countByUserAndStatus(User user, Order.Status status);
 
     Page<Order> findAll(Pageable pageable);
 
@@ -34,8 +34,8 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     @Query("SELECT o FROM Order AS o INNER JOIN o.company AS c WHERE c.companyId = ?1 AND o.orderId = ?2")
     Order findByCompanyId(int id, int orderId);
 
-    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1")
-    Page<Order> findByUsersId(int id, Pageable pageable);
+    @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u= ?1")
+    Page<Order> findByUser(User user, Pageable pageable);
 
     @Query("SELECT o FROM Order AS o INNER JOIN o.user AS u WHERE u.userId = ?1 AND o.orderId = ?2")
     Order findByUserId(int id, int orderId);
@@ -58,6 +58,6 @@ public interface OrderRepository extends JpaRepository<Order, Integer> {
     Page<Order> findActiveOrdersByUserId(int id, Pageable pageable);
 
     @Query("SELECT COUNT(o.orderId) FROM Order AS o INNER JOIN o.user " +
-            "AS u WHERE u.userId = ?1 AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
+            "AS u WHERE u = ?1 AND status IN ('RECEIVED', 'ACCEPTED', 'CONFIRMED')")
     Long countByActiveStatusAndUser(User activeUser);
 }

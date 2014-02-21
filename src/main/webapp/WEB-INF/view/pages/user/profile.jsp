@@ -14,6 +14,7 @@
                     <label cssClass="form-signin-heading">Username:</label>
                         ${user.username}
                 </div>
+                <form:hidden path="enabled"/>
                 <div class="row">
                     <div class="col-md-6">
                         <form:label path="name" cssClass="form-signin-heading text-center">Name*</form:label>
