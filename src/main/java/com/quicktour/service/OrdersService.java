@@ -171,21 +171,21 @@ public class OrdersService {
     public Page<Order> listOrdersByStatusPaginated(User activeUser, String status, int pageNumber, Sort.Order sortOrder) {
         Page<Order> orders = null;
         Order.Status orderStatus = null;
-        if (!status.equals(ACTIVE)) {
+        if (!status.contains(ACTIVE)) {
             orderStatus = Order.Status.valueOf(status.toUpperCase());
         }
         switch (activeUser.getRole().getRoleId()) {
             case Role.ROLE_ADMIN:
-                orders = status.equals(ACTIVE) ? findActiveOrders(pageNumber, sortOrder) :
+                orders = status.contains(ACTIVE) ? findActiveOrders(pageNumber, sortOrder) :
                         findByStatus(orderStatus, pageNumber, sortOrder);
                 break;
             case Role.ROLE_AGENT:
                 Company company = companyService.findByCompanyCode(activeUser.getCompanyCode());
-                orders = status.equals(ACTIVE) ? findActiveOrdersByCompanyId(company, pageNumber, sortOrder) :
+                orders = status.contains(ACTIVE) ? findActiveOrdersByCompanyId(company, pageNumber, sortOrder) :
                         findByStatusAndCompanyId(orderStatus, company, pageNumber, sortOrder);
                 break;
             case Role.ROLE_USER:
-                orders = status.equals(ACTIVE) ? findActiveOrdersByUserId(activeUser, pageNumber, sortOrder) :
+                orders = status.contains(ACTIVE) ? findActiveOrdersByUserId(activeUser, pageNumber, sortOrder) :
                         findByStatusAndUserId(orderStatus, activeUser, pageNumber, sortOrder);
                 break;
         }

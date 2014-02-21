@@ -41,8 +41,6 @@ public class OrderController {
     private CompanyService companyService;
     @Autowired
     private DiscountPolicyService discountPolicyService;
-    @Autowired
-    private EmailService emailService;
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {
