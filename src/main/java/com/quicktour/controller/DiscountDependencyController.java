@@ -35,7 +35,7 @@ public class DiscountDependencyController {
     @RequestMapping(value = "/getAllDependencies")
     @ResponseBody
     public JTableResponse getAllDependencies() {
-        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         jTableResponse.setResult(JTableResponse.Results.OK);
         jTableResponse.setRecords(dependenciesService.findAllDependencies());
         return jTableResponse;
@@ -54,7 +54,7 @@ public class DiscountDependencyController {
     @ResponseBody
     public JTableResponse add(@Valid DiscountDependency discountDependency, BindingResult bindingResult) {
         logger.debug("Save discount dependency {}", discountDependency);
-        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         if (bindingResult.hasErrors()) {
             jTableResponse.setResult(JTableResponse.Results.ERROR);
             for (FieldError error : bindingResult.getFieldErrors()) {
@@ -72,7 +72,7 @@ public class DiscountDependencyController {
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
     public JTableResponse delete(DiscountDependency discountDependency) {
-        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<DiscountDependency>(JTableResponse.Results.OK);
+        JTableResponse<DiscountDependency> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         dependenciesService.delete(discountDependency);
         jTableResponse.setResult(JTableResponse.Results.OK);
         return jTableResponse;

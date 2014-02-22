@@ -65,7 +65,7 @@ public class EmailService {
     private String COMMENT_CHANGED_IN_ORDER_TEXT;
 
     @Async
-    public void sendEmail(String to, String subject, String text) {
+    void sendEmail(String to, String subject, String text) {
         SimpleMailMessage message = new SimpleMailMessage();
         message.setFrom(SYSTEM_EMAIL);
         message.setTo(to);
@@ -97,7 +97,7 @@ public class EmailService {
             throw new IllegalArgumentException("Number of elements to " +
                     "replace must match number of elements in replacement");
         }
-        Map<String, String> values = new HashMap<String, String>();
+        Map<String, String> values = new HashMap<>();
         for (int i = 0; i < toReplace.length; i++) {
             values.put(toReplace[i], replacement[i]);
         }
@@ -126,7 +126,7 @@ public class EmailService {
 
     public void sendPasswordSuccessRecoveryEmail(User user) {
         String[] toReplace = {"URL", "Email"};
-        String[] replacement = {retrieveBaseUrl() + "/login", SYSTEM_EMAIL};
+        String[] replacement = {retrieveBaseUrl() + "/signi", SYSTEM_EMAIL};
         String emailText = formatEmailText(PASSWORD_SUCCESSFULY_RECOVERED_TEXT, toReplace, replacement);
         sendEmail(user.getEmail(), PASSWORD_SUCCESSFULY_RECOVERED_SUBJECT, emailText);
 
@@ -140,7 +140,7 @@ public class EmailService {
         Timestamp currentTimestamp = new Timestamp(Calendar.getInstance().getTime().getTime());
         toReplace = new String[]{"OrderId", "OrderStatus", "Timestamp", "Username", "URL"};
         replacement = new String[]{String.valueOf(order.getOrderId()), order.getStatus().toString(),
-                currentTimestamp.toString(), userName, requestURL.toString()};
+                currentTimestamp.toString(), userName, requestURL};
         String mailText = formatEmailText(ORDER_STATUS_CHANGED_TEXT, toReplace, replacement);
 
         sendEmail(order.getUser().getEmail(), mailSubject, mailText);

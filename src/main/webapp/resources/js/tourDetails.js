@@ -140,6 +140,7 @@ function getPhotos(latitude, longitude, tag) {
 
 function addNewComment() {
     var fieldValue = editor.getData();
+    console.log(fieldValue);
     var urlSplitted = window.location.pathname.split("/");
     var tourId = urlSplitted[urlSplitted.length - 1];
     var data = { content: fieldValue};

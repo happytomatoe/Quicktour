@@ -37,7 +37,7 @@ public class ApplyDiscountPolicyController {
     @ResponseBody
     public JTableResponse add(@RequestParam(required = false) Integer[] discount_policies,
                               @RequestParam(required = false) Integer[] tours) {
-        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
+        JTableResponse<Tour> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         if (tours == null || tours.length == 0) {
             jTableResponse.setResult(JTableResponse.Results.ERROR);
             jTableResponse.addMessage("Please select tour");
@@ -60,7 +60,7 @@ public class ApplyDiscountPolicyController {
     @RequestMapping(value = "/delete", method = RequestMethod.POST)
     @ResponseBody
     public JTableResponse delete(@RequestParam(value = "tourId", required = false) Integer id) {
-        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
+        JTableResponse<Tour> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         if (id == null) {
             jTableResponse.setResult(JTableResponse.Results.ERROR);
             jTableResponse.setMessage("Id of element is not found");
@@ -76,7 +76,7 @@ public class ApplyDiscountPolicyController {
     @RequestMapping(value = "/getAllRecords", method = RequestMethod.POST)
     @ResponseBody
     public JTableResponse applyDiscount() {
-        JTableResponse<Tour> jTableResponse = new JTableResponse<Tour>(JTableResponse.Results.OK);
+        JTableResponse<Tour> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         jTableResponse.setResult(JTableResponse.Results.OK);
         jTableResponse.setRecords(toursService.findAgencyToursWithNotEmptyDiscountPolicies());
         return jTableResponse;

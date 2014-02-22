@@ -7,6 +7,8 @@ import com.quicktour.entity.User;
 import com.quicktour.repository.CommentRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import org.kefirsf.bb.BBProcessorFactory;
+import org.kefirsf.bb.TextProcessor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
@@ -27,12 +29,13 @@ public class CommentService {
     private CommentRepository commentRepository;
     @Autowired
     private UsersService usersService;
+    private static final TextProcessor processor = BBProcessorFactory.getInstance().create();
 
     public Page<Comment> findAllComments(int tourId, int pageNumber, int numberOfRecordsPerPage) {
         PageRequest pageRequest = new PageRequest(pageNumber, numberOfRecordsPerPage);
         Tour tour = new Tour();
         tour.setTourId(tourId);
-        return commentRepository.findCommentsByTourAndParentIsNull(tour, pageRequest);
+        return commentRepository.findByTourAndParentIsNull(tour, pageRequest);
     }
 
     /**
@@ -62,18 +65,18 @@ public class CommentService {
         Comment originalComment = null;
         if (commentId != 0) {
             originalComment = findOne(commentId);
-            if (originalComment.getUser().getName() != currentUser.getUsername() &&
+            if (!originalComment.getUser().getName().equals(currentUser.getUsername()) &&
                     currentUser.getRole().getRoleId() != Role.ROLE_ADMIN) {
                 throw new AccessDeniedException("You don't have right to edit this comment");
             }
         }
         String commentText = comment.getContent();
-        String commentUpdated = commentText.replace("\n", "<br/>");
-        String commentTextForSave = Jsoup.clean(commentUpdated, Whitelist.basic());
-        if (commentTextForSave.isEmpty()) {
+        commentText = Jsoup.clean(commentText, Whitelist.basic());
+        commentText = processor.process(commentText);
+        if (commentText.isEmpty()) {
             throw new IllegalArgumentException("Comment is empty when saving comment");
         } else {
-            comment.setContent(commentTextForSave);
+            comment.setContent(commentText);
             if (originalComment != null && currentUser.getRole().getRoleId() == Role.ROLE_ADMIN) {
                 comment.setUser(originalComment.getUser());
             } else {
@@ -96,4 +99,5 @@ public class CommentService {
         commentRepository.delete(comment);
         return "Ok";
     }
+
 }

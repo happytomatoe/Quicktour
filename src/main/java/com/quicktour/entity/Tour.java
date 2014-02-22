@@ -14,7 +14,7 @@ import java.util.List;
 
 @Entity
 @Table(name = "tours")
-public class Tour {
+public class Tour extends PhotoHolder {
     private int tourId;
     private Company company;
     private BigDecimal price;
@@ -219,17 +219,14 @@ public class Tour {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Tour{");
-        sb.append("tourId=").append(tourId);
-        sb.append("places=").append(toursPlaces.size());
-        sb.append("travelType=").append(travelType);
-        sb.append(", company=").append(company);
-        sb.append(", price=").append(price);
-        sb.append(", discountPolicies=").append(discountPolicies);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", description='").append(description).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Tour{" + "tourId=" + tourId +
+                "places=" + toursPlaces.size() +
+                "travelType=" + travelType +
+                ", company=" + company +
+                ", price=" + price +
+                ", discountPolicies=" + discountPolicies +
+                ", name='" + name + '\'' +
+                ", description='" + description + '\'' + '}';
     }
 
 }

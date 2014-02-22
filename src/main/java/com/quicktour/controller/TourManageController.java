@@ -127,7 +127,7 @@ public class TourManageController {
     @RequestMapping(value = "/toggleActive", method = RequestMethod.POST)
     @ResponseBody
     Map<String, Boolean> toggleActiveInTour(@RequestParam("id") int id) {
-        Map<String, Boolean> map = new HashMap<String, Boolean>();
+        Map<String, Boolean> map = new HashMap<>();
         toursService.toogleActive(id);
         map.put("status", true);
         return map;
@@ -136,7 +136,7 @@ public class TourManageController {
     @RequestMapping(value = "/getAgencyToursWithoutDiscounts")
     @ResponseBody
     public Map<String, Object> getAgencyTours() {
-        Map<String, Object> map = new HashMap<String, Object>();
+        Map<String, Object> map = new HashMap<>();
         List<Tour> agencyTours = toursService.findAgencyToursWithEmptyDiscountPolicies();
         for (Tour tour : agencyTours) {
             map.put(String.valueOf(tour.getTourId()), tour.getName());

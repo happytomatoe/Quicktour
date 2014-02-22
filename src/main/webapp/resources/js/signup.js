@@ -57,7 +57,6 @@ $(document).ready(function () {
     $registrationForm.submit(function () {
         return validator.form();
     });
-    console.log("Validate login url", baseUrl + "email/validate");
 
 
     var maskList = $.masksSort($.masksLoad("resources/js/phone-codes.json"), ['#'], /[0-9]|#/, "mask");

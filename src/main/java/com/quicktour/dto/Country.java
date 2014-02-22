@@ -30,6 +30,6 @@ public class Country {
     }
 
     public void setPlaces(String places) {
-        this.places = new HashSet<String>(Arrays.asList(places.split(",")));
+        this.places = new HashSet<>(Arrays.asList(places.split(",")));
     }
 }

@@ -80,8 +80,12 @@ public class UserController {
     @RequestMapping(value = "/signup", method = RequestMethod.POST)
     public String signupForm(@Valid User user, BindingResult bindingResult,
                              @RequestParam(value = "avatar", required = false)
-                             MultipartFile image) {
+                             MultipartFile image, Model model, HttpServletRequest request) {
         String type = image.getContentType().split("/")[0];
+        if (request.isUserInRole("ROLE_ADMIN")) {
+            model.addAttribute("roles", rolesService.findAll());
+        }
+
         logger.debug("Content type {}.Type {}", image.getContentType(), type);
         if (usersService.findByEmail(user.getEmail()) != null) {
             bindingResult.rejectValue("email", "email.invalid", "User with such email already exists");

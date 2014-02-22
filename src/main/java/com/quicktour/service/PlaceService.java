@@ -2,7 +2,6 @@ package com.quicktour.service;
 
 import com.quicktour.dto.Country;
 import com.quicktour.repository.PlaceRepository;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -25,19 +24,18 @@ import java.util.List;
 public class PlaceService {
     @Autowired
     private PlaceRepository placeRepository;
-    private org.slf4j.Logger logger = LoggerFactory.getLogger(PhotoService.class);
 
     public List<Country> findCountriesWithPlaces() {
         List<Object[]> result = placeRepository.findCountriesWithPlaces();
-        ArrayList<Country> countries = new ArrayList<Country>();
+        ArrayList<Country> countries = new ArrayList<>();
         for (Object[] countryWithPlaces : result) {
-            countries.add(new Country((String) countryWithPlaces[0], new HashSet<String>(Arrays.asList(((String) countryWithPlaces[1]).split(",")))));
+            countries.add(new Country((String) countryWithPlaces[0], new HashSet<>(Arrays.asList(((String) countryWithPlaces[1]).split(",")))));
         }
         return countries;
     }
 
     public List<String> extractPlaces(List<Country> countriesWithPlaces) {
-        ArrayList<String> places = new ArrayList<String>();
+        ArrayList<String> places = new ArrayList<>();
         for (Country country : countriesWithPlaces) {
             for (String place : country.getPlaces()) {
                 places.add(place);

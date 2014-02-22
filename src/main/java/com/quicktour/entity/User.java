@@ -12,7 +12,7 @@ import java.util.Collection;
 
 @Entity
 @Table(name = "users")
-public class User {
+public class User extends PhotoHolder {
 
     private int userId;
     private String username;
@@ -43,18 +43,6 @@ public class User {
     private Collection<Order> orders;
     @JsonIgnore
     private Collection<Comment> comments;
-
-
-    public User() {
-    }
-
-    public User(String name, String surname, String email, String phone) {
-        setName(name);
-        setSurname(surname);
-        setEmail(email);
-        setPhone(phone);
-    }
-
 
     @Column(name = "user_id")
     @Id
@@ -227,22 +215,18 @@ public class User {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("User{");
-        sb.append("role=").append(role);
-        sb.append(", id=").append(userId);
-        sb.append(", login='").append(username).append('\'');
-        sb.append(", password='").append(password).append('\'');
-        sb.append(", email='").append(email).append('\'');
-        sb.append(", phone='").append(phone).append('\'');
-        sb.append(", createTime=").append(createTime);
-        sb.append(", name='").append(name).append('\'');
-        sb.append(", surname='").append(surname).append('\'');
-        sb.append(", age=").append(age);
-        sb.append(", sex='").append(gender).append('\'');
-        sb.append(", companyCode='").append(companyCode).append('\'');
-        sb.append(", photosId=").append(photo);
-        sb.append(", active=").append(enabled);
-        sb.append('}');
-        return sb.toString();
+        return "User{" + "role=" + role +
+                ", id=" + userId +
+                ", username='" + username +
+                '\'' + ", password='" + password +
+                '\'' + ", email='" + email +
+                '\'' + ", phone='" + phone +
+                '\'' + ", createTime=" + createTime
+                + ", name='" + name + '\'' +
+                ", surname='" + surname + '\'' +
+                ", age=" + age + ", sex='" + gender
+                + '\'' + ", companyCode='" + companyCode +
+                '\'' + ", photosId=" + photo +
+                ", active=" + enabled + '}';
     }
 }

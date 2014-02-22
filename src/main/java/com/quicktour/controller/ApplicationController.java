@@ -4,8 +4,6 @@ import com.quicktour.dto.Country;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.service.*;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
@@ -19,13 +17,10 @@ import java.util.List;
 
 /**
  * Controller that handles all activity on main page
- *
- * @author Bogdan Shpakovsky
  */
 
 @Controller
 public class ApplicationController {
-    Logger logger = LoggerFactory.getLogger(ApplicationController.class);
     @Autowired
     private CompanyService companyService;
     @Autowired
@@ -129,7 +124,6 @@ public class ApplicationController {
         addSidebarAttributes(map);
         return "index-tile";
     }
-
 
 
     private void addSidebarAttributes(ModelMap map) {

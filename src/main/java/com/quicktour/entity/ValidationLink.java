@@ -47,16 +47,19 @@ public class ValidationLink {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
 
         ValidationLink that = (ValidationLink) o;
 
-        if (validationLinkId != that.validationLinkId) return false;
-        if (createTime != null ? !createTime.equals(that.createTime) : that.createTime != null) return false;
-        if (url != null ? !url.equals(that.url) : that.url != null) return false;
+        return validationLinkId == that.validationLinkId &&
+                !(createTime != null ? !createTime.equals(that.createTime) :
+                        that.createTime != null) && !(url != null ? !url.equals(that.url) : that.url != null);
 
-        return true;
     }
 
     @Override

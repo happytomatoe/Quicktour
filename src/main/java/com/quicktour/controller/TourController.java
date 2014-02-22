@@ -25,7 +25,7 @@ import java.util.Map;
 @Controller
 public class TourController {
 
-    final Logger logger = LoggerFactory.getLogger(TourController.class);
+    private final Logger logger = LoggerFactory.getLogger(TourController.class);
     @Autowired
     private ToursService toursService;
     @Autowired

@@ -7,7 +7,7 @@ CKEDITOR.editorConfig = function (config) {
     // For the complete reference:
     // http://docs.ckeditor.com/#!/api/CKEDITOR.config
     config.autoParagraph = false;
-    config.extraPlugins = 'smiley';
+    config.extraPlugins = 'smiley,bbcode';
     config.skin = 'kama';
     // The toolbar groups arrangement, optimized for two toolbar rows.
     config.toolbarGroups = [

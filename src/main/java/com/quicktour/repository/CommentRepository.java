@@ -9,7 +9,7 @@ import org.springframework.data.jpa.repository.Query;
 
 public interface CommentRepository extends JpaRepository<Comment, Integer> {
 
-    Page<Comment> findCommentsByTourAndParentIsNull(Tour tour, Pageable pageable);
+    Page<Comment> findByTourAndParentIsNull(Tour tour, Pageable pageable);
 
     @Query("SELECT COUNT(c.commentId) FROM Comment c WHERE c.tour.tourId=?1 AND c.parent IS NULL")
     Long findCountByTourId(int tourId);

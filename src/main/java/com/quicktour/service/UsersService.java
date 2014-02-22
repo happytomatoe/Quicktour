@@ -6,6 +6,8 @@ import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.security.core.Authentication;
@@ -65,10 +67,21 @@ public class UsersService {
                     new Role(Role.ROLE_AGENT) : new Role(Role.ROLE_USER);
             user.setRole(newRole);
         }
+        cleanUser(user);
         User savedUser = userRepository.saveAndFlush(user);
-        logger.info("New user saved: {} with role {}", user.getUsername(), user.getRole());
+        logger.info("Registered new user  {} with role {}", user.getUsername(), user.getRole());
         return savedUser;
 
+    }
+
+    private void cleanUser(User user) {
+        user.setCompanyCode(Jsoup.clean(user.getCompanyCode(), Whitelist.simpleText()));
+        user.setEmail(Jsoup.clean(user.getEmail(), Whitelist.simpleText()));
+        user.setUsername(Jsoup.clean(user.getUsername(), Whitelist.simpleText()));
+        user.setName(Jsoup.clean(user.getName(), Whitelist.simpleText()));
+        user.setPhone(Jsoup.clean(user.getPhone(), Whitelist.simpleText()));
+        user.setSurname(Jsoup.clean(user.getSurname(), Whitelist.simpleText()));
+        user.setGender(Jsoup.clean(user.getGender(), Whitelist.simpleText()));
     }
 
     /**
@@ -81,10 +94,7 @@ public class UsersService {
 
     private boolean checkIfAgent(String companyCode) {
         Company company = companyRepository.findByCompanyCode(companyCode);
-        if (companyCode != null && company != null && company.getType().equals(TOUR_AGENCY)) {
-            return true;
-        }
-        return false;
+        return companyCode != null && company != null && company.getType().equals(TOUR_AGENCY);
     }
 
 
@@ -106,7 +116,7 @@ public class UsersService {
      */
     public void updateCompanyCode(String newCompanyCode) {
         User user = getCurrentUser();
-        user.setCompanyCode(newCompanyCode);
+        user.setCompanyCode(Jsoup.clean(newCompanyCode, Whitelist.simpleText()));
         int roleId = user.getRole().getRoleId();
         if (roleId != Role.ROLE_ADMIN && roleId != Role.ROLE_AGENT &&
                 checkIfAgent(user.getCompanyCode())) {
@@ -141,9 +151,7 @@ public class UsersService {
     }
 
     public User save(User user, MultipartFile image) {
-        if (image.isEmpty() && user.getPhoto() == null) {
-            user.setPhoto(photoService.getCompanyDefaultAvatar());
-        } else if (!image.isEmpty()) {
+        if (!image.isEmpty()) {
             user.setPhoto(null);
             photoService.saveImageAndSet(user, image);
         }

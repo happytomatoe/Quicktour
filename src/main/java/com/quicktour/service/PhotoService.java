@@ -7,10 +7,7 @@ import com.flickr4java.flickr.RequestContext;
 import com.flickr4java.flickr.auth.Auth;
 import com.flickr4java.flickr.photos.upload.Ticket;
 import com.flickr4java.flickr.uploader.UploadMetaData;
-import com.quicktour.entity.Company;
-import com.quicktour.entity.Photo;
-import com.quicktour.entity.Tour;
-import com.quicktour.entity.User;
+import com.quicktour.entity.*;
 import com.quicktour.repository.PhotoRepository;
 import org.scribe.model.Token;
 import org.slf4j.Logger;
@@ -60,8 +57,8 @@ public class PhotoService {
     @Value("${accessTokenSecret}")
     private String accessTokenSecret;
     private static Flickr flickr;
-    private Set<String> tickets = new LinkedHashSet<>();
-    private List waitingRecipients = Collections.synchronizedList(new ArrayList());
+    private static final Set<String> tickets = Collections.synchronizedSet(new LinkedHashSet());
+    private static final List<PhotoHolder> waitingRecipients = Collections.synchronizedList(new ArrayList());
 
 
     @Scheduled(cron = "0/15 * * * * *")
@@ -258,14 +255,6 @@ public class PhotoService {
     }
 
 
-    public Photo getDefaultUserAvatar() {
-        return photoRepository.findOne(DEFAULT_USER_PHOTO_ID);
-    }
-
-    public Photo getCompanyDefaultAvatar() {
-        return photoRepository.findOne(DEFAULT_COMPANY_PHOTO_ID);
-    }
-
     private void uploadImageAndSaveTicket(MultipartFile image, Photo photo) {
         String ticketId;
         if (photo != null && photo.getFlickrPhotoId() != null && !photo.getFlickrPhotoId().isEmpty()) {
@@ -311,15 +300,4 @@ public class PhotoService {
     }
 
 
-    public void delete(Photo photo) {
-        String photoId = photo.getFlickrPhotoId();
-        if (photo != null && photoId != null) {
-            try {
-                flickr.getPhotosInterface().delete(photoId);
-            } catch (FlickrException e) {
-                logger.error("Cannot delete photo on flick with photoId {}.{}", photoId, e);
-            }
-        }
-        photoRepository.delete(photo);
-    }
 }

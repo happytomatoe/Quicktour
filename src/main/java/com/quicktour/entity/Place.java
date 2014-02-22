@@ -110,16 +110,14 @@ public class Place {
 
         Place place = (Place) o;
 
-        if (optional != place.optional) return false;
-        if (placeId != place.placeId) return false;
-        if (country != null ? !country.equals(place.country) : place.country != null) return false;
-        if (description != null ? !description.equals(place.description) : place.description != null) return false;
-        if (!geoHeight.equals(place.geoHeight)) return false;
-        if (!geoWidth.equals(place.geoWidth)) return false;
-        if (!name.equals(place.name)) return false;
-        if (price != null ? !price.equals(place.price) : place.price != null) return false;
+        return optional == place.optional &&
+                placeId == place.placeId &&
+                !(country != null ? !country.equals(place.country) :
+                        place.country != null) &&
+                !(description != null ? !description.equals(place.description) : place.description != null)
+                && geoHeight.equals(place.geoHeight) && geoWidth.equals(place.geoWidth)
+                && name.equals(place.name) && !(price != null ? !price.equals(place.price) : place.price != null);
 
-        return true;
     }
 
     @Override

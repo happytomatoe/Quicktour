@@ -4,6 +4,8 @@ import com.quicktour.dto.DiscountPoliciesResult;
 import com.quicktour.entity.*;
 import com.quicktour.repository.OrderRepository;
 import com.quicktour.repository.TourRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,12 +49,12 @@ public class OrdersService {
     @Autowired
     private TourRepository tourRepository;
 
-    public Page<Order> findByUser(User user, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findByUser(User user, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findByUser(user, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
-    public Page<Order> findByCompanyId(int id, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findByCompanyId(int id, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findByCompanyId(id, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
@@ -72,59 +74,59 @@ public class OrdersService {
         return orderRepository.findOne(id);
     }
 
-    public Page<Order> findAll(int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findAll(int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findAll(new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
-    public Page<Order> findByStatus(Order.Status status, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findByStatus(Order.Status status, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findByStatus(status, new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
-    public Page<Order> findActiveOrders(int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findActiveOrders(int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findActiveOrders(new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                 new Sort(sortOrder)));
     }
 
-    public Page<Order> findActiveOrdersByCompanyId(Company company, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findActiveOrdersByCompanyId(Company company, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findActiveOrdersByCompanyId(company.getCompanyId(),
                 new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
-    public Page<Order> findByStatusAndCompanyId(Order.Status status, Company company, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findByStatusAndCompanyId(Order.Status status, Company company, int pageNumber, Sort.Order sortOrder) {
         logger.debug("Find by {}.{}.{}.{}", status, company, pageNumber, sortOrder);
         return orderRepository.findByStatusAndCompany(status, company,
                 new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
-    public Page<Order> findActiveOrdersByUserId(User activeUser, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findActiveOrdersByUserId(User activeUser, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findActiveOrdersByUserId(activeUser.getUserId(),
                 new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
-    public Page<Order> findByStatusAndUserId(Order.Status status, User activeUser, int pageNumber, Sort.Order sortOrder) {
+    Page<Order> findByStatusAndUserId(Order.Status status, User activeUser, int pageNumber, Sort.Order sortOrder) {
         return orderRepository.findByStatusAndUser(status, activeUser,
                 new PageRequest(pageNumber, NUMBER_OF_ORDERS_PER_PAGE,
                         new Sort(sortOrder)));
     }
 
-    public Long countByCompanyId(Company company) {
+    Long countByCompanyId(Company company) {
         return orderRepository.countByCompanyId(company.getCompanyId());
     }
 
-    public Long countByUserId(User activeUser) {
+    Long countByUserId(User activeUser) {
         return orderRepository.countByUserId(activeUser.getUserId());
     }
 
-    public Long countByCompanyIdAndStatus(Company company, Order.Status status) {
+    Long countByCompanyIdAndStatus(Company company, Order.Status status) {
         return orderRepository.countByCompanyIdAndStatus(company.getCompanyId(), status);
     }
 
-    public Long countByUserIdAndStatus(User activeUser, Order.Status status) {
+    Long countByUserIdAndStatus(User activeUser, Order.Status status) {
         return orderRepository.countByUserAndStatus(activeUser, status);
     }
 
@@ -255,7 +257,7 @@ public class OrdersService {
 
         existingOrder.setNumberOfAdults(order.getNumberOfAdults());
         existingOrder.setNumberOfChildren(order.getNumberOfChildren());
-        existingOrder.setUserInfo(order.getUserInfo());
+        existingOrder.setUserInfo(Jsoup.clean(order.getUserInfo(), Whitelist.simpleText()));
         existingOrder.setDiscount(order.getDiscount());
         existingOrder.setNextPaymentDate(order.getNextPaymentDate());
         existingOrder.setStatus(order.getStatus());
@@ -342,7 +344,7 @@ public class OrdersService {
         order.setPrice(tour.getPrice().multiply(new BigDecimal(order.getNumberOfAdults().toString())));
         order.setCompany(company);
         order.setTourInfo(tourInfo);
-        order.setDiscountInformation(discountInformation.toString());
+        order.setDiscountInformation(discountInformation);
         order.setStatus(Order.Status.RECEIVED);
         emailService.sendOrderStatusChanged(order, tour.getName(), tourInfo.getStartDate().toString(),
                 order.getUser().getName(),
@@ -354,7 +356,7 @@ public class OrdersService {
             order.setUserInfo(constructAnonymousUserInfo(order));
             order.setUser(null);
         }
-
+        order.setUserInfo(Jsoup.clean(order.getUserInfo(), Whitelist.simpleText()));
         orderRepository.saveAndFlush(order);
     }
 
@@ -371,7 +373,7 @@ public class OrdersService {
             discountInformation.append("Discount policies <br><table><thead><th>Name</th><th>Discount</th>" +
                     "<th>Condition</th></thead><tbdody>");
             for (DiscountPolicy discountPolicy : discountPoliciesResult.getDiscountPolicies()) {
-                discountInformation.append("<tr><td>" + discountPolicy.getName()).append("</td>")
+                discountInformation.append("<tr><td>").append(discountPolicy.getName()).append("</td>")
                         .append("<td>").append(discountPolicy.getFormula()).append("</td>")
                         .append("<td>").append(discountPolicy.getCondition()).append("</td>")
                         .append("</tr>");
@@ -392,7 +394,7 @@ public class OrdersService {
     }
 
 
-    public String constructAnonymousUserInfo(Order order) {
+    String constructAnonymousUserInfo(Order order) {
         User user = order.getUser();
         return "Email:" + user.getEmail() + "<br>" + user.getName() + " " +
                 user.getSurname() + "<br>" + user.getPhone() + "<br>" +

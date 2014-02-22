@@ -3,6 +3,8 @@ package com.quicktour.service;
 import com.quicktour.dto.DiscountPoliciesResult;
 import com.quicktour.entity.*;
 import com.quicktour.repository.DiscountPolicyRepository;
+import org.jsoup.Jsoup;
+import org.jsoup.safety.Whitelist;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -64,7 +66,8 @@ public class DiscountPolicyService {
         User user = usersService.getCurrentUser();
         discountPolicy.setCompany(companyService.findByCompanyCode(user.getCompanyCode()));
         String convertedFormula = discountDependencyService.convertFormula(discountPolicy.getFormula());
-        discountPolicy.setFormula(convertedFormula);
+        discountPolicy.setCondition(Jsoup.clean(discountPolicy.getCondition(), Whitelist.basic()));
+        discountPolicy.setFormula(Jsoup.clean(convertedFormula, Whitelist.basic()));
         return discountPoliciesRepository.saveAndFlush(discountPolicy);
     }
 
@@ -117,7 +120,7 @@ public class DiscountPolicyService {
             return new DiscountPoliciesResult(discount, null);
         }
         Date currentDate = new Date(System.currentTimeMillis());
-        List<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
+        List<DiscountPolicy> policies = new ArrayList<>(discountPolicies);
         for (DiscountPolicy discountPolicy : policies) {
             String condition = discountPolicy.getCondition();
             String formula = discountPolicy.getFormula();
@@ -179,7 +182,7 @@ public class DiscountPolicyService {
      * Changes discount policy view to user friendly
      */
     private List<DiscountPolicy> changeView(List<DiscountPolicy> discountPolicies) {
-        ArrayList<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
+        ArrayList<DiscountPolicy> policies = new ArrayList<>(discountPolicies);
         for (DiscountPolicy discountPolicy : policies) {
             String condition = discountPolicy.getCondition();
             if (condition != null) {
@@ -204,8 +207,7 @@ public class DiscountPolicyService {
      */
 
     public DiscountPolicy addDiscountPolicy(DiscountPolicy discountPolicy, String[] relations, String[] conditions, String[] signs, String[] params) {
-        String condition = constructCondition(relations, conditions, signs, params);
-        discountPolicy.setCondition(condition);
+        discountPolicy.setCondition(constructCondition(relations, conditions, signs, params));
         return addDiscountPolicy(discountPolicy);
     }
 
@@ -299,7 +301,7 @@ public class DiscountPolicyService {
      * contains {@link com.quicktour.entity.Order}  information
      */
     public List<DiscountPolicy> getActivePolicies(List<DiscountPolicy> policies) {
-        ArrayList<DiscountPolicy> discountPolicies = new ArrayList<DiscountPolicy>(policies);
+        ArrayList<DiscountPolicy> discountPolicies = new ArrayList<>(policies);
         for (ListIterator<DiscountPolicy> iterator = discountPolicies.listIterator(); iterator.hasNext(); ) {
             DiscountPolicy discountPolicy = iterator.next();
             String formula = discountPolicy.getFormula();
@@ -317,7 +319,7 @@ public class DiscountPolicyService {
         if (usersService.getCurrentUser() == null) {
             return new DiscountPoliciesResult(BigDecimal.ZERO, new ArrayList<DiscountPolicy>());
         }
-        ArrayList<DiscountPolicy> policies = new ArrayList<DiscountPolicy>(discountPolicies);
+        ArrayList<DiscountPolicy> policies = new ArrayList<>(discountPolicies);
         for (DiscountPolicy discountPolicy : policies) {
             String replacedFormula = replaceOrderInFormula(discountPolicy.getFormula(), order);
             discountPolicy.setFormula(replacedFormula);

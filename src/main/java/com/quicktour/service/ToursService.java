@@ -7,6 +7,8 @@ import com.quicktour.repository.PriceIncludeRepository;
 import com.quicktour.repository.ToursRepository;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
+import org.kefirsf.bb.BBProcessorFactory;
+import org.kefirsf.bb.TextProcessor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,6 +49,7 @@ public class ToursService {
     private EntityManager entityManager;
     @Autowired
     private ToursRepository toursRepository;
+    private static final TextProcessor processor = BBProcessorFactory.getInstance().create();
 
     @PersistenceContext
     public void setEntityManager(EntityManager entityManager) {
@@ -66,10 +69,11 @@ public class ToursService {
     }
 
     public Tour saveTour(Tour tour) {
+        tour.setDescription(processor.process(Jsoup.clean(tour.getDescription(), Whitelist.basic())));
         return toursRepository.saveAndFlush(tour);
     }
 
-    public List<Tour> findAllTours() {
+    List<Tour> findAllTours() {
         return toursRepository.findAll();
     }
 
@@ -82,11 +86,11 @@ public class ToursService {
         return findAllTours();
     }
 
-    public Page<Tour> findAllTours(int pageNumber) {
+    Page<Tour> findAllTours(int pageNumber) {
         return toursRepository.findByActiveTrue(new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
     }
 
-    public Page<Tour> findAllTours(int pageNumber, int numberOfRecords) {
+    Page<Tour> findAllTours(int pageNumber, int numberOfRecords) {
         long count = toursRepository.count();
         if (pageNumber * numberOfRecords > count) {
             pageNumber = (int) count / numberOfRecords;
@@ -129,16 +133,14 @@ public class ToursService {
      * @return tour page with search results
      */
     public Page<Tour> findToursByCountry(String country, int pageNumber) {
-        Page<Tour> tours = toursRepository.findToursByCountry(country,
+        return toursRepository.findToursByCountry(country,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        return tours;
     }
 
 
     public Page<Tour> findToursByPlaces(String placeName, int pageNumber) {
-        Page<Tour> tours = toursRepository.findToursByPlaceName(placeName,
+        return toursRepository.findToursByPlaceName(placeName,
                 new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE));
-        return tours;
     }
 
 
@@ -168,17 +170,16 @@ public class ToursService {
         String sql = createFindTourSQL(conditions);
 
         if (sql != null) {
-            Query query = entityManager.createQuery(sql.toString());
-            List<Tour> results = query.getResultList();
+            Query query = entityManager.createQuery(sql);
+            List results = query.getResultList();
             int totalNumberOfResults = results.size();
             if (totalNumberOfResults == 0) {
                 return null;
 
             }
-            Page<Tour> tourPage = new PageImpl<Tour>(results,
+            return new PageImpl<Tour>(results,
                     new PageRequest(pageNumber, NUMBER_OF_RECORDS_PER_PAGE),
                     totalNumberOfResults);
-            return tourPage;
         }
         return null;
     }
@@ -199,7 +200,7 @@ public class ToursService {
             if (empty) {
                 emptyCount++;
             } else {
-                sql.append(conditionKey + "'" + value + "' ");
+                sql.append(conditionKey).append("'").append(value).append("' ");
             }
             if (prevEmpty) {
                 prevEmpty = empty;
@@ -222,8 +223,8 @@ public class ToursService {
         return price;
     }
 
-    public double findMaxTourDiscount(Tour tour) {
-        List<TourInfo> tourByDate = (List<TourInfo>) tour.getTourInfo();
+    double findMaxTourDiscount(Tour tour) {
+        List<TourInfo> tourByDate = tour.getTourInfo();
         double maxDiscount = tourByDate.get(0).getDiscount();
         for (TourInfo tourInfo : tourByDate) {
             Double discount = tourInfo.getDiscount().doubleValue();
@@ -265,11 +266,6 @@ public class ToursService {
         return tours;
     }
 
-    /**
-     * @param initializeDiscountPolicies
-     * @param tours
-     * @return
-     */
     public List<Tour> prepareTour(boolean initializeDiscountPolicies, List<Tour> tours) {
         List<Tour> toursResult = new ArrayList<>(tours);
         for (Tour tour : toursResult) {
@@ -357,7 +353,7 @@ public class ToursService {
                 } else {
                     List<Tour> placeTours = place.getTours();
                     if (placeTours == null) {
-                        placeTours = new ArrayList<Tour>();
+                        placeTours = new ArrayList<>();
                     }
                     placeTours.add(tour);
                     place.setTours(placeTours);

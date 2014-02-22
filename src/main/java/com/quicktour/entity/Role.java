@@ -27,10 +27,7 @@ public class Role {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Role{");
-        sb.append("name='").append(name).append('\'');
-        sb.append('}');
-        return sb.toString();
+        return "Role{" + "name='" + name + '\'' + '}';
     }
 
     @Id
@@ -56,15 +53,15 @@ public class Role {
 
     @Override
     public boolean equals(Object o) {
-        if (this == o) return true;
-        if (o == null || getClass() != o.getClass()) return false;
-
+        if (this == o) {
+            return true;
+        }
+        if (o == null || getClass() != o.getClass()) {
+            return false;
+        }
         Role role = (Role) o;
+        return roleId == role.roleId && !(name != null ? !name.equals(role.name) : role.name != null);
 
-        if (roleId != role.roleId) return false;
-        if (name != null ? !name.equals(role.name) : role.name != null) return false;
-
-        return true;
     }
 
     @Override

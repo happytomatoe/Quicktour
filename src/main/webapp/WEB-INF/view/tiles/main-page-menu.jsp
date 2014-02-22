@@ -2,6 +2,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="s" uri="http://www.springframework.org/tags" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <div class="panel-group" id="accordion">
     <div class="panel panel-success">
@@ -29,8 +30,8 @@
                 </li>
 
                 <div id="demo" class="col-md-12">
-                    <c:forEach var="i" begin="3" end="${countriesWithPlaces.size()}">
-                        <c:if test="${countriesWithPlaces[i].name != null}">
+                    <c:forEach var="i" begin="3" end="${fn:length(countriesWithPlaces)}">
+                    <c:if test="${countriesWithPlaces[i].name != null}">
                             <s:url value="/country/{country}/0" var="countryUrl">
                                 <s:param name="country" value="${countriesWithPlaces[i].name}"/>
                             </s:url>
@@ -72,8 +73,8 @@
                 </li>
 
                 <div id="demo1" class="col-md-12">
-                    <c:forEach var="i" begin="3" end="${places.size()}">
-                        <c:if test="${places[i] != null}">
+                    <c:forEach var="i" begin="3" end="${fn:length(places)}">
+                    <c:if test="${places[i] != null}">
                             <s:url value="/place/{place}/0" var="placeUrl">
                                 <s:param name="place" value="${places[i]}"/>
                             </s:url>

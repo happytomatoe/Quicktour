@@ -27,6 +27,7 @@
 
                         <select class="form-control" id="place" name="place">
                             <option selected></option>
+
                             <c:forEach items="${countriesWithPlaces}" var="country">
                             <optgroup label="${country.name}">
                                 <c:forEach items="${country.places}" var="place">

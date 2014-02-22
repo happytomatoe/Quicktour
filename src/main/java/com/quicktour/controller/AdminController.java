@@ -4,7 +4,6 @@ import com.quicktour.entity.Company;
 import com.quicktour.entity.Role;
 import com.quicktour.entity.User;
 import com.quicktour.service.CompanyService;
-import com.quicktour.service.PhotoService;
 import com.quicktour.service.RolesService;
 import com.quicktour.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,11 +21,7 @@ import javax.validation.Valid;
 import java.util.List;
 
 /**
- * Controller that connects all admin's functionality with viewing
- * and editing all users and companies
- *
- * @author Andrew Zarichnyi
- * @version 1.0 12/27/2013
+ * User and company managing functionality
  */
 
 @Controller
@@ -40,8 +35,6 @@ public class AdminController {
     @Autowired
     private CompanyService companyService;
 
-    @Autowired
-    private PhotoService photoService;
 
     @RequestMapping(value = "/users", method = RequestMethod.GET)
     public String viewAllUsers(Model model) {
@@ -59,13 +52,6 @@ public class AdminController {
         return "redirect:/users/";
     }
 
-    /**
-     * Method gets user by id that was set in url and maps him to the edituser-tile model
-     *
-     * @param id    - identificator of the user whose profile admin wants to edit
-     * @param model - model that will be mapped to th edituser tile
-     * @return name of the tile where controller will redirect user after this method will end its work
-     */
     @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.GET)
     public String myProfileForm(@PathVariable("id") int id, Model model) {
         User user = usersService.findOne(id);
@@ -77,17 +63,9 @@ public class AdminController {
         return "editUser";
     }
 
-    /**
-     * Method updates user profile that will come from ui to the database
-     *
-     * @param user          - object of User class which comes from ui
-     * @param bindingResult - contains information of correctness of the user which will come from ui
-     *                      due to entity restrictions
-     * @return - redirects user to the main page if the update was successful and back
-     * to the myrofile page if bindingResult will have errors.
-     */
     @RequestMapping(value = "/users/edit/{id}", method = RequestMethod.POST)
-    public String myProfileForm(@Valid User user, BindingResult bindingResult, @RequestParam("avatar") MultipartFile image) {
+    public String myProfileForm(@Valid User user, BindingResult bindingResult,
+                                @RequestParam("avatar") MultipartFile image) {
         if (bindingResult.hasErrors()) {
             return "editUser";
         }
@@ -95,12 +73,6 @@ public class AdminController {
         return "redirect:/users";
     }
 
-    /**
-     * Method gets the List<Company> with  all companies that exist in the system and
-     * adds it to viewcompanies tile model.
-     *
-     * @param model - Model that will be mapped to the viewcompanies tile
-     */
     @RequestMapping(value = "/company", method = RequestMethod.GET)
     public String viewAllCompanies(Model model) {
         List<Company> companies = companyService.findAll();
@@ -108,13 +80,6 @@ public class AdminController {
         return "viewCompanies";
     }
 
-    /**
-     * Method gets company by id that was set in url and maps him to the editcompany tile model
-     *
-     * @param id    - identificator of the company whose details admin wants to edit
-     * @param model - model that will be mapped to th edituser tile
-     * @return name of the tile where controller will redirect admin after this method will end its work
-     */
     @RequestMapping(value = "/company/edit/{id}", method = RequestMethod.GET)
     public String editCompany(@PathVariable("id") int id, Model model) {
         Company company = companyService.findOne(id);
@@ -122,6 +87,17 @@ public class AdminController {
         return "manageCompany";
     }
 
+    @RequestMapping(value = "/company/add", method = RequestMethod.GET)
+    public String editCompany(Model model) {
+        model.addAttribute("company", new Company());
+        return "manageCompany";
+    }
+
+    @RequestMapping(value = "/company/delete/{id}", method = RequestMethod.GET)
+    public String editCompany(@PathVariable("id") Integer id) {
+        companyService.delete(id);
+        return "viewCompanies";
+    }
 
     /**
      * Method updates company details which will come from ui to database.
@@ -132,15 +108,14 @@ public class AdminController {
      * @param image         - contains file that admin uploads with new company details(optional).
      *                      It will be set as company avatar. If null, avatar change won't happen.
      */
-    @RequestMapping(value = "/company/edit/{id}", method = RequestMethod.POST)
+    @RequestMapping(value = {"/company/edit/{id}", "company/add"}, method = RequestMethod.POST)
     public String editCompany(@Valid Company company, BindingResult bindingResult,
                               @RequestParam(value = "avatar", required = false)
                               MultipartFile image) {
         if (bindingResult.hasErrors()) {
             return "manageCompany";
         }
-        photoService.saveImageAndSet(company, image);
-        companyService.saveAndFlush(company);
+        companyService.saveAndFlush(company, image);
         return "redirect:/company";
     }
 }

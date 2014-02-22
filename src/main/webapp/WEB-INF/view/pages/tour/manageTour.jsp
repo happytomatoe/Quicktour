@@ -1,6 +1,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="form" uri="http://www.springframework.org/tags/form" %>
+<%@ taglib uri="http://java.sun.com/jsp/jstl/functions" prefix="fn" %>
 
 <link rel="stylesheet" href="<c:url value="/resources/css/jasny-bootstrap.min.css"/>"/>
 <link rel="stylesheet" type="text/css" href="<c:url value="/resources/select2-3.4.5/select2-bootstrap.css"/>">
@@ -26,8 +27,8 @@
                 <c:choose>
                     <c:when test="${edit}">
                         <form:hidden path="tourId"/>
-                        <input type="hidden" id="tourInfoCount" value="${tour.tourInfo.size()}"/>
-                        <input type="hidden" id="tourPlacesCount" value="${tour.toursPlaces.size()}"/>
+                        <input type="hidden" id="tourInfoCount" value="${fn:length(tour.tourInfo)}"/>
+                        <input type="hidden" id="tourPlacesCount" value="${fn:length(tour.toursPlaces)}"/>
                     </c:when>
                     <c:otherwise>
                         <input type="hidden" id="tourInfoCount" value="0"/>

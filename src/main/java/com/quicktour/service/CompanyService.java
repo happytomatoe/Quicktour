@@ -3,9 +3,7 @@ package com.quicktour.service;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.repository.CompanyRepository;
-import org.slf4j.Logger;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.mail.MailException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
@@ -20,7 +18,6 @@ import java.util.List;
 @Service
 @Transactional
 public class CompanyService {
-    private final Logger logger = org.slf4j.LoggerFactory.getLogger(CompanyService.class);
     @Autowired
     private CompanyRepository companyRepository;
     @Autowired
@@ -36,16 +33,15 @@ public class CompanyService {
         return companyRepository.findOne(id);
     }
 
-    public void delete(Company company) {
-        companyRepository.delete(company);
+    public void delete(Integer id) {
+        companyRepository.delete(id);
     }
 
     public Company saveAndFlush(Company company, MultipartFile image) {
-        if (image.isEmpty() && company.getPhoto() == null) {
-            company.setPhoto(photoService.getCompanyDefaultAvatar());
-        } else if (!image.isEmpty()) {
+        if (!image.isEmpty()) {
             photoService.saveImageAndSet(company, image);
         }
+        emailService.sendRegistrationEmail(company);
         return companyRepository.saveAndFlush(company);
     }
 
@@ -56,26 +52,6 @@ public class CompanyService {
 
     public Company findByCompanyCode(String code) {
         return companyRepository.findByCompanyCode(code);
-    }
-
-
-    /**
-     * Sends registration message to the email that was input during company registration
-     * and saves company to the database
-     *
-     * @param company - company that has to be registered
-     * @return - true if all is OK. and false if saving fails
-     * TODO:test and check
-     */
-    public boolean addNewCompany(Company company) {
-        try {
-            companyRepository.saveAndFlush(company);
-            emailService.sendRegistrationEmail(company);
-        } catch (MailException me) {
-            logger.warn(me.getMessage());
-            return true;
-        }
-        return false;
     }
 
 

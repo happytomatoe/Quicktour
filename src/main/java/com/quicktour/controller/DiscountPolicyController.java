@@ -5,8 +5,6 @@ import com.quicktour.entity.DiscountPolicy;
 import com.quicktour.service.DiscountDependencyService;
 import com.quicktour.service.DiscountPolicyService;
 import com.quicktour.service.SqlDatePropertyEditor;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
@@ -33,11 +31,10 @@ import java.util.regex.Pattern;
 @RequestMapping("/discount_policy")
 public class DiscountPolicyController {
 
-    static final Logger logger = LoggerFactory.getLogger(DiscountDependencyController.class);
     private static final String ONE = "1";
     private static final String POLICIES = "policies";
     private static final String POLICY = "policy";
-    private static final String DAYOFWEEK = "dayofweek";
+    private static final String DAY_OF_WEEK = "dayofweek";
     private static final String USERS_SEX = "users.sex";
     private static final String USERS_NAME = "users.name";
     @Autowired
@@ -57,16 +54,16 @@ public class DiscountPolicyController {
         return "discountPolicy";
     }
 
-    @RequestMapping(value = "/getAllPolicies", method = RequestMethod.POST)
+    @RequestMapping("/getAllPolicies")
     @ResponseBody
     public JTableResponse getAllPolicies() {
-        return new JTableResponse<DiscountPolicy>(JTableResponse.Results.OK, discountPolicyService.findByCompany());
+        return new JTableResponse<>(JTableResponse.Results.OK, discountPolicyService.findByCompany());
     }
 
     @RequestMapping("/getAllDiscounts")
     @ResponseBody
     public Map<String, String> getAllDiscounts() {
-        Map<String, String> map = new HashMap<String, String>();
+        Map<String, String> map = new HashMap<>();
         List<DiscountPolicy> discountPolicies = discountPolicyService.findByCompany();
         for (DiscountPolicy discountPolicy : discountPolicies) {
             map.put(String.valueOf(discountPolicy.getDiscountPolicyId()), discountPolicy.getName());
@@ -83,7 +80,7 @@ public class DiscountPolicyController {
             @RequestParam(value = "condition", required = false) String[] conditions,
             @RequestParam(value = "sign", required = false) String[] signs,
             @RequestParam(value = "param", required = false) String[] params) {
-        JTableResponse<DiscountPolicy> jTableResponse = new JTableResponse<DiscountPolicy>(JTableResponse.Results.OK);
+        JTableResponse<DiscountPolicy> jTableResponse = new JTableResponse<>(JTableResponse.Results.OK);
         double amount = 0;
         boolean isFormula = false;
         Date startDate = discountPolicy.getStartDate();
@@ -132,7 +129,7 @@ public class DiscountPolicyController {
             for (int i = 0; i < params.length; i++) {
                 if (params[i].trim().length() == 0) {
                     bindingResult.rejectValue("condition", "condition.invalid", "Some condition is empty");
-                } else if (!DAYOFWEEK.equals(conditions[i]) &&
+                } else if (!DAY_OF_WEEK.equals(conditions[i]) &&
                         !USERS_SEX.equals(conditions[i]) && !USERS_SEX.equals(conditions[i]) &&
                         !USERS_NAME.equals(conditions[i]) && !params[i].matches("(\\d+(\\.\\d+)?)")) {
                     bindingResult.rejectValue("condition", "condition.empty", conditions[i].replace("users.", "User's ")

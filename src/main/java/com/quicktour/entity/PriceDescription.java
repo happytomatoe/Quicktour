@@ -47,10 +47,7 @@ public class PriceDescription {
 
         PriceDescription that = (PriceDescription) o;
 
-        if (priceDescriptionId != that.priceDescriptionId) {
-            return false;
-        }
-        return description.equals(that.description);
+        return priceDescriptionId == that.priceDescriptionId && description.equals(that.description);
 
     }
 

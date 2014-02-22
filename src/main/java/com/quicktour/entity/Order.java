@@ -219,12 +219,9 @@ public class Order {
 
     @Override
     public String toString() {
-        final StringBuilder sb = new StringBuilder("Order{");
-        sb.append("id=").append(orderId);
-        sb.append(", numberOfAdults=").append(numberOfAdults);
-        sb.append(", numberOfChildren=").append(numberOfChildren);
-        sb.append('}');
-        return sb.toString();
+        return "Order{" + "id=" + orderId +
+                ", numberOfAdults=" + numberOfAdults +
+                ", numberOfChildren=" + numberOfChildren + '}';
     }
 
 

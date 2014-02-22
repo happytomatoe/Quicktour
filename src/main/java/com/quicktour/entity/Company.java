@@ -12,7 +12,7 @@ import java.util.Collection;
 
 @Entity
 @Table(name = "companies")
-public class Company {
+public class Company extends PhotoHolder {
 
     private int companyId;
     private String name;

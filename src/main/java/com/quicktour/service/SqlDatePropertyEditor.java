@@ -9,7 +9,7 @@ import java.text.SimpleDateFormat;
 
 @Component
 public class SqlDatePropertyEditor extends PropertyEditorSupport {
-    public static final String DEFAULT_BATCH_PATTERN = "yyyy-MM-dd";
+    private static final String DEFAULT_BATCH_PATTERN = "yyyy-MM-dd";
     private final SimpleDateFormat sdf;
 
     public SqlDatePropertyEditor() {

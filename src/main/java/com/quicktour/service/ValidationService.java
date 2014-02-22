@@ -2,7 +2,6 @@ package com.quicktour.service;
 
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
-import com.quicktour.repository.UserRepository;
 import com.quicktour.repository.ValidationLinksRepository;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -37,8 +36,6 @@ public class ValidationService {
     @Autowired
     private ValidationLinksRepository validationLinksRepository;
     private MessageDigest md5;
-    @Autowired
-    private UserRepository userRepository;
 
 
     @PostConstruct
@@ -69,7 +66,7 @@ public class ValidationService {
 
     }
 
-    public ValidationLink save(ValidationLink link) {
+    ValidationLink save(ValidationLink link) {
         return validationLinksRepository.saveAndFlush(link);
     }
 

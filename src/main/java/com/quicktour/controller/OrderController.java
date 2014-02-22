@@ -71,7 +71,7 @@ public class OrderController {
         Sort.Order sortOrder = ordersService.sortByValue(value, direction);
         Page page = ordersService.listOrdersPaginated(activeUser, pageNum, sortOrder);
 
-        List<Order> orders = page.getContent();
+        List orders = page.getContent();
 
         model.addAttribute("allOrdersCount", allOrdersCount);
         model.addAttribute("activeOrdersCount", activeOrdersCount);
@@ -105,7 +105,7 @@ public class OrderController {
         Sort.Order sortOrder = ordersService.sortByValue(value, direction);
         logger.debug("Sort by {}.{}", filterLink, sortByValueLink);
         Page page = ordersService.listOrdersByStatusPaginated(activeUser, orderStatusFilter, pageNum, sortOrder);
-        List<Order> orders = page.getContent();
+        List orders = page.getContent();
 
         model.addAttribute("allOrdersCount", allOrdersCount);
         model.addAttribute("activeOrdersCount", activeOrdersCount);
@@ -146,7 +146,6 @@ public class OrderController {
         BigDecimal companyDiscount = null;
         List<DiscountPolicy> activeDiscountPolicies;
         if (activeUser == null) {
-            activeUser = new User();
             tour.setDiscountPolicies(null);
         } else {
             discountPoliciesResult = discountPolicyService.calculateDiscount(tour.getDiscountPolicies());

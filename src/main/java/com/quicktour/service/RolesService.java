@@ -17,10 +17,6 @@ public class RolesService {
     @Autowired
     RoleRepository roleRepository;
 
-    public Role findOne(Integer id) {
-        return roleRepository.findOne(id);
-    }
-
     public List<Role> findAll() {
         return roleRepository.findAll();
     }
