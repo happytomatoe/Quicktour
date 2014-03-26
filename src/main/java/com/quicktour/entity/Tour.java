@@ -219,16 +219,26 @@ public class Tour extends PhotoHolder {
 
     @Override
     public String toString() {
-        return "Tour{" + "tourId=" + tourId +
-                "places=" + toursPlaces.size() +
-                "travelType=" + travelType +
-                ", company=" + company +
-                ", price=" + price +
-                ", discountPolicies=" + discountPolicies +
-                ", name='" + name + '\'' +
-                ", description='" + description + '\'' + '}';
+        final StringBuilder sb = new StringBuilder("Tour{");
+        sb.append("tourId=").append(tourId);
+        sb.append(", company=").append(company);
+        sb.append(", price=").append(price);
+        sb.append(", tourInfo=").append(tourInfo);
+        sb.append(", toursPlaces=").append(toursPlaces);
+        sb.append(", priceIncludes=").append(priceIncludes);
+        sb.append(", discountPolicies=").append(discountPolicies);
+        sb.append(", name='").append(name).append('\'');
+        sb.append(", description='").append(description).append('\'');
+        sb.append(", transportDesc='").append(transportDesc).append('\'');
+        sb.append(", photo=").append(photo);
+        sb.append(", active=").append(active);
+        sb.append(", discount=").append(discount);
+        sb.append(", travelType='").append(travelType).append('\'');
+        sb.append(", rate=").append(rate);
+        sb.append(", rateCount=").append(rateCount);
+        sb.append('}');
+        return sb.toString();
     }
-
 }
 
 
