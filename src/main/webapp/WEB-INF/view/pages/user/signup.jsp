@@ -3,6 +3,7 @@
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
 <%@ taglib prefix="sec" uri="http://www.springframework.org/security/tags" %>
+<%@ taglib prefix="tiles" uri="http://tiles.apache.org/tags-tiles" %>
 <script src="<c:url value="/resources/js/passfield.min.js"/>"></script>
 <script src="<c:url value="/resources/js/signup.js"/> "></script>
 <script src="<c:url value="/resources/js/jquery.inputmask-multi.js"/> "></script>
@@ -50,10 +51,19 @@
             <form:errors path="username" cssClass="alert-danger"/>
         </div>
         <div class="form-group">
-            <form:input name="email" id="email" path="email" size="30" maxlength="30"
-                        cssClass="form-control input-lg" tabindex="4"
-                        placeholder="Email Address" required="true" type="email"/>
-            <form:errors path="email" cssClass="alert-danger"/>
+            <tiles:importAttribute name="short" scope="page" ignore="true"/>
+            <c:choose>
+                <c:when test="${ pageScope.short==null}">
+                    <form:input name="email" id="email" path="email" size="30" maxlength="30"
+                                cssClass="form-control input-lg" tabindex="4"
+                                placeholder="Email Address" required="true" type="email"/>
+                    <form:errors path="email" cssClass="alert-danger"/>
+                </c:when>
+                <c:otherwise>
+                    <label cssClass="form-signin-heading">Email:</label>
+                    ${user.email}
+                </c:otherwise>
+            </c:choose>
         </div>
         <div class="row">
             <div class="col-xs-6 col-sm-6 col-md-6">

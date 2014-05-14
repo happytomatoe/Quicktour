@@ -1,22 +1,37 @@
 package com.quicktour.service;
 
+import com.quicktour.dto.LoginzaResponse;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.Role;
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.repository.CompanyRepository;
 import com.quicktour.repository.UserRepository;
+import org.apache.commons.io.IOUtils;
 import org.jsoup.Jsoup;
 import org.jsoup.safety.Whitelist;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.scheduling.annotation.Scheduled;
+import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.crypto.password.StandardPasswordEncoder;
+import org.springframework.security.provisioning.UserDetailsManager;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import javax.annotation.PostConstruct;
+import java.io.IOException;
+import java.io.InputStream;
+import java.io.UnsupportedEncodingException;
+import java.math.BigInteger;
+import java.net.URL;
+import java.net.URLConnection;
+import java.security.MessageDigest;
+import java.security.NoSuchAlgorithmException;
 import java.util.List;
 
 /**
@@ -47,6 +62,23 @@ public class UsersService {
     private PhotoService photoService;
     @Autowired
     EmailService emailService;
+    @Autowired
+    private UserDetailsManager manager;
+    private MessageDigest md5;
+    @Value("${loginzaID}")
+    private String loginzaID;
+    @Value("${loginzaSecretKey}")
+    private String loginzaKey;
+
+    @PostConstruct
+    public void init() {
+        try {
+            md5 = MessageDigest.getInstance("MD5");
+        } catch (NoSuchAlgorithmException e) {
+            logger.error("Cannot find md5 algorithm.{}", e);
+        }
+
+    }
 
 
     /**
@@ -176,5 +208,32 @@ public class UsersService {
         User existingUser = findOne(user.getUserId());
         user.setPassword(existingUser.getPassword());
         save(user, image);
+    }
+
+    public void automatedLogin(User user) {
+        UserDetails userDetails = manager.loadUserByUsername(user.getUsername());
+        Authentication authentication = new UsernamePasswordAuthenticationToken(userDetails, userDetails.getPassword(), userDetails.getAuthorities());
+        SecurityContextHolder.getContext().setAuthentication(authentication);
+
+    }
+
+    public LoginzaResponse getResponseFromLoginza(String token) throws IOException {
+        String sig = token + "" + loginzaKey;
+        try {
+            md5.update(sig.getBytes("utf-8"), 0, sig.length());
+        } catch (UnsupportedEncodingException e) {
+            logger.error("Unsuported encoding while generating md5 . {}", e);
+        }
+        sig = new BigInteger(1, md5.digest()).toString(16);
+        String url1 = "http://loginza.ru/api/authinfo?token=" + token + "&id=" + loginzaID + "&sig=" + sig;
+        logger.debug("URL :  {}", url1);
+        URL url = new URL(url1);
+        URLConnection con = url.openConnection();
+        InputStream in = con.getInputStream();
+        String encoding = con.getContentEncoding();
+        encoding = encoding == null ? "UTF-8" : encoding;
+        String body = IOUtils.toString(in, encoding);
+        logger.debug("URL for loginza response :{}", body);
+        return null; //mapper.readValue(body, LoginzaResponse.class);
     }
 }

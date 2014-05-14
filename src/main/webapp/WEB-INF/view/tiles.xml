@@ -65,6 +65,11 @@
     </definition>
     <!---->
     <!--User pages-->
+    <definition name="signupShort" extends="classicTile">
+        <put-attribute name="title" value="Change password"/>
+        <put-attribute name="short" value="true"/>
+        <put-attribute name="body" value="/WEB-INF/view/pages/user/signup.jsp"/>
+    </definition>
     <definition name="changePassword" extends="classicTile">
         <put-attribute name="title" value="Change password"/>
         <put-attribute name="body" value="/WEB-INF/view/pages/user/changePassword.jsp"/>

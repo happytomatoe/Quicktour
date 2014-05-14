@@ -19,6 +19,7 @@ import java.sql.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.Properties;
 import java.util.regex.Pattern;
 
 /**
@@ -41,6 +42,19 @@ public class DiscountPolicyController {
     DiscountPolicyService discountPolicyService;
     @Autowired
     DiscountDependencyService discountDependencyService;
+
+    public static void main(String[] args) {
+        Properties properties = System.getProperties();
+//        System.list(System.out);
+//        System.setProperty("DATABASE_URL_QUICKTOUR", "jdbc:mysql://localhost:3306/quicktour");
+//        System.setProperty("DATABASE_USERNAME_QUICKTOUR", "root");
+//            System.setProperty("DATABASE_PASSWORD_QUICKTOUR", "root");
+//        Properties properties = System.getProperties();
+
+        // display new properties
+        System.out.println("my.key: " + System.getProperty("DATABASE_USERNAME_QUICKTOUR", "Sorry no property"));
+//        properties.list(System.out);
+    }
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {

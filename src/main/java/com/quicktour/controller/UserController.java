@@ -1,5 +1,6 @@
 package com.quicktour.controller;
 
+import com.quicktour.dto.LoginzaResponse;
 import com.quicktour.entity.User;
 import com.quicktour.entity.ValidationLink;
 import com.quicktour.service.*;
@@ -10,12 +11,14 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
+import org.springframework.validation.BeanPropertyBindingResult;
 import org.springframework.validation.BindingResult;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
 import javax.servlet.http.HttpServletRequest;
 import javax.validation.Valid;
+import java.io.IOException;
 
 /**
  * @author Roman Lukash
@@ -41,9 +44,37 @@ public class UserController {
     int maxImageSize;
 
     @PreAuthorize("isAnonymous()")
-    @RequestMapping(value = "/signin")
+    @RequestMapping(value = "/signin", method = RequestMethod.GET)
     public String signin() {
         return "signin";
+    }
+
+    @PreAuthorize("isAnonymous()")
+    @RequestMapping(value = "/signin", method = RequestMethod.POST)
+    public String loginzaPost(@RequestParam String token, Model model) {//@RequestBody LoginzaResponse loginzaResponse, Model model) {
+
+        logger.debug("Token from loginza {}", token);
+        LoginzaResponse loginzaResponse = null;
+        try {
+            loginzaResponse = usersService.getResponseFromLoginza(token);
+        } catch (IOException e) {
+            logger.error("Cannot read response from loginza.{}", e);
+        }
+        if (loginzaResponse == null || loginzaResponse.getErrorMessage().length() > 0) {
+            return "signin";
+        }
+        User user = usersService.findByEmail(loginzaResponse.getEmail());
+        if (user != null) {
+            usersService.automatedLogin(user);
+            return "redirect:/";
+        }
+        user = new User();
+        user.setEmail(loginzaResponse.getEmail());
+        user.setName(loginzaResponse.getName().getFullname());
+        user.setGender(loginzaResponse.getGender());
+        user.setUsername(loginzaResponse.getNickname());
+        model.addAttribute("user", user);
+        return "signupShort";
     }
 
     /**
@@ -162,17 +193,11 @@ public class UserController {
         return "passwordRecovery";
     }
 
-    /**
-     * Sets randomly generated password to user, whose email was input in the password recovery
-     * form and then sends to this email message with new user credentials
-     *
-     * @param bindingResult - contains information about correctness of the email due to entity restrictions
-     * @return - redirects user to username page
-     */
     @PreAuthorize("isAnonymous()")
     @RequestMapping(value = "/passwordrecovery", method = RequestMethod.POST)
-    public String passwordRecovery(@RequestParam String userInfo, BindingResult bindingResult, Model model) {
+    public String passwordRecovery(@RequestParam String userInfo, Model model) {
         User existingUser = userInfo.contains("@") ? usersService.findByEmail(userInfo) : usersService.findByUsername(userInfo);
+        BindingResult bindingResult = new BeanPropertyBindingResult(existingUser, "user");
         if (existingUser == null || !existingUser.isEnabled()) {
             bindingResult.rejectValue("email", "user.notexists", "User  doesn't exist or is not enabled");
         }

@@ -5,7 +5,6 @@ import org.junit.runner.RunWith;
 import org.mockito.Mock;
 import org.mockito.runners.MockitoJUnitRunner;
 
-import java.util.HashMap;
 import java.util.Map;
 
 import static org.junit.Assert.assertEquals;
@@ -17,7 +16,7 @@ import static org.mockito.Mockito.*;
 @RunWith(MockitoJUnitRunner.class)
 public class MockitoExamples {
     @Mock
-    Map<String, String> map = new HashMap<String, String>(30);
+    Map<String, String> map;
 
     @Test
     public void testBasicMockitoBehavior() {

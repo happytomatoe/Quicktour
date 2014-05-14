@@ -22,9 +22,9 @@
 
     <bean id="dataSource" class="com.mchange.v2.c3p0.ComboPooledDataSource">
         <property name="driverClass" value="${driverClass}"/>
-        <property name="jdbcUrl" value="jdbc:mysql://${host}:${port}/${dbname}?characterEncoding=UTF-8"/>
-        <property name="user" value="${user}"/>
-        <property name="password" value="${password}"/>
+        <property name="jdbcUrl" value="jdbc:${DATABASE_URL_QUICKTOUR}"/>
+        <property name="user" value="${DATABASE_USERNAME_QUICKTOUR}"/>
+        <property name="password" value="${DATABASE_PASSWORD_QUICKTOUR}"/>
         <property name="minPoolSize" value="${minPoolSize}"/>
         <property name="maxPoolSize" value="${maxPoolSize}"/>
         <property name="numHelperThreads" value="${numHelperThreads}"/>
@@ -51,8 +51,11 @@
         <property name="packagesToScan" value="com.quicktour.entity"/>
     </bean>
 
-    <bean id="hibernateVendor" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter">
-        <property name="showSql" value="false"/>
+    <bean id="hibernateVendor" class="org.springframework.orm.jpa.vendor.HibernateJpaVendorAdapter"
+          p:database="MYSQL"
+          p:databasePlatform="org.hibernate.dialect.MySQL5Dialect"
+          p:showSql="false"
+            >
     </bean>
     <bean id="mailSender" class="org.springframework.mail.javamail.JavaMailSenderImpl">
         <property name="host" value="${smtp.host}"/>
@@ -70,8 +73,5 @@
     </bean>
 
     <bean id="multipartResolver" class="org.springframework.web.multipart.commons.CommonsMultipartResolver"/>
-
-    <bean class="org.springframework.web.servlet.view.json.MappingJacksonJsonView"
-          p:extractValueFromSingleKeyModel="true"/>
 
 </beans>

@@ -10,7 +10,7 @@ $(document).ready(function () {
     }, "Password can't match username");
 
     $('#password').passField({
-        pattern: "aB3",
+        pattern: "aB3aB3aB",
         minlength: 8,
         allowEmpty: false
 

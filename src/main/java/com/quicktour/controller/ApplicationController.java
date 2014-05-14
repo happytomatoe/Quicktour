@@ -4,6 +4,8 @@ import com.quicktour.dto.Country;
 import com.quicktour.entity.Company;
 import com.quicktour.entity.User;
 import com.quicktour.service.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.propertyeditors.CustomNumberEditor;
 import org.springframework.data.domain.Page;
@@ -29,6 +31,8 @@ public class ApplicationController {
     private ToursService toursService;
     @Autowired
     private PlaceService placeService;
+
+    private final Logger logger = LoggerFactory.getLogger(ApplicationController.class);
 
     @InitBinder
     public void initBinder(WebDataBinder binder) {

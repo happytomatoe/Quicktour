@@ -1,13 +1,22 @@
 <%@ taglib prefix="c" uri="http://java.sun.com/jsp/jstl/core" %>
+<%@ taglib prefix="spring" uri="http://www.springframework.org/tags" %>
+<%@ taglib prefix="fn" uri="http://java.sun.com/jsp/jstl/functions" %>
 <%@ page contentType="text/html;charset=UTF-8" language="java" %>
 <script src="<c:url value="/resources/js/signin.js"/> "></script>
+<c:set var="baseURL"
+       value="${fn:replace(pageContext.request.requestURL, pageContext.request.requestURI, pageContext.request.contextPath)}"/>
 
 <div class="row">
-    <div class="col-md-4 col-md-offset-4">
+    <div class="col-md-5 col-md-offset-1" style="padding-right:20px; border-right: 1px solid #ccc;">
+        <h3 class="text-center">Sign in:</h3>
+        <script src="http://loginza.ru/js/widget.js" type="text/javascript"></script>
+        <iframe src="http://loginza.ru/api/widget?overlay=loginza&token_url=${baseURL}/signin/"
+                style="width:359px;height:300px;" scrolling="no" frameborder="no"></iframe>
+    </div>
+    <div class="col-md-5">
+        <h3 class="text-center">Use your account:</h3>
+
         <div class="panel panel-default">
-            <div class="panel-heading">
-                <h3 class="panel-title">Signin via site</h3>
-            </div>
             <div class="panel-body">
                 ${activationMessage}
                 <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
@@ -47,4 +56,5 @@
             </div>
         </div>
     </div>
+
 </div>

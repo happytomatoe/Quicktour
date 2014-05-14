@@ -1,5 +1,6 @@
 package com.quicktour.dto;
 
+
 import org.codehaus.jackson.annotate.JsonProperty;
 
 import java.util.List;
@@ -47,7 +48,9 @@ public class JTableResponse<E> {
     public void addMessage(String message) {
         if (this.message != null && this.message.length() > 0) {
             this.message += "<br>" + message;
-        } else setMessage(message);
+        } else {
+            setMessage(message);
+        }
     }
 
     public void setMessage(String message) {
