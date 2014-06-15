@@ -3,7 +3,7 @@
 <%@ taglib uri="http://java.sun.com/jsp/jstl/core" prefix="c" %>
 <div class="navbar navbar-inverse navbar-fixed-top">
     <div class="container">
-        <a href="<c:url value="/"/>" class="navbar-brand">TourServe</a>
+        <a href="<c:url value="/"/>" class="navbar-brand">Quicktour</a>
         <button class="navbar-toggle" data-toggle="collapse" data-target=".navHeaderCollapse">
             Expand
         </button>

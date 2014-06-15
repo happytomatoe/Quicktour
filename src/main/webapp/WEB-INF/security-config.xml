@@ -13,7 +13,6 @@
                                      secured-annotations="enabled"/>
 
     <security:http use-expressions="true" disable-url-rewriting="true">
-        <security:intercept-url pattern="/discount_policy/*" access="hasRole('agent')"/>
         <security:intercept-url pattern="/signin" access="isAnonymous()"/>
         <security:intercept-url pattern="/**" access="permitAll"/>
         <security:form-login

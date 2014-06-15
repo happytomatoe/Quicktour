@@ -7,21 +7,16 @@
        value="${fn:replace(pageContext.request.requestURL, pageContext.request.requestURI, pageContext.request.contextPath)}"/>
 
 <div class="row">
-    <div class="col-md-5 col-md-offset-1" style="padding-right:20px; border-right: 1px solid #ccc;">
-        <h3 class="text-center">Sign in:</h3>
-        <script src="http://loginza.ru/js/widget.js" type="text/javascript"></script>
-        <iframe src="http://loginza.ru/api/widget?overlay=loginza&token_url=${baseURL}/signin/"
-                style="width:359px;height:300px;" scrolling="no" frameborder="no"></iframe>
-    </div>
-    <div class="col-md-5">
+
+    <div class="col-md-offset-3 col-md-5">
         <h3 class="text-center">Use your account:</h3>
 
-        <div class="panel panel-default">
+        <div class="panel panel-default ">
             <div class="panel-body">
                 ${activationMessage}
                 <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
                       method="post">
-                    <fieldset>
+                <fieldset>
 
                         <c:if test="${param.fail eq true}">
                             <div class="form-group text-danger text-center">

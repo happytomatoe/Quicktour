@@ -15,9 +15,6 @@ import org.springframework.web.bind.annotation.RequestParam;
  * Connects all functionality connected with creating new users and companies,
  * such as user registration, company registration, activating users profile,
  * and password recovering to the views.
- *
- * @author Andrew Zarichnyi
- * @version 1.0 12/27/2013
  */
 @Controller
 @PreAuthorize("hasRole('ROLE_ADMIN')")
