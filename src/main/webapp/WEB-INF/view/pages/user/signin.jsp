@@ -16,8 +16,7 @@
                 ${activationMessage}
                 <form accept-charset="UTF-8" role="form" action="<c:url value="/j_spring_security_check"/>"
                       method="post">
-                <fieldset>
-
+                    <fieldset>
                         <c:if test="${param.fail eq true}">
                             <div class="form-group text-danger text-center">
                                 <h5> Your signin attempt was not successful, try again</h5>
