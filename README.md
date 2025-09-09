@@ -1,5 +1,7 @@
+My diploma project
+
 Quicktour
-=========
+---
 
 Web based project about touragencies.
 Technologies used:Spring,Hibernate,
